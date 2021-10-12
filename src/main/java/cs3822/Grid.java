@@ -53,26 +53,6 @@ class Grid {
     // Make a back-up 
     history.add(cloneNodes());
   }
-
-  private int index(Position pos) {
-    return (pos.getY() * rowSize) + pos.getX();
-  }
-
-  private int indexUp(Position pos) {
-    return ((pos.getY()-1) * rowSize) + pos.getX();
-  }
-
-  private int indexRight(Position pos) {
-    return (pos.getY() * rowSize) + (pos.getX()+1);
-  }
-
-  private int indexDown(Position pos) {
-    return ((pos.getY()+1) * rowSize) + pos.getX();
-  }
-
-  private int indexLeft(Position pos) {
-    return (pos.getY() * rowSize) + (pos.getX()-1);
-  }
  
   private Node createNode(char symbol, Position pos) throws InvalidMapSymbolException {
     switch (symbol) {
@@ -309,12 +289,41 @@ class Grid {
     }
   }
 
+  public int index(Position pos) {
+    return (pos.getY() * rowSize) + pos.getX();
+  }
+
+  public int indexUp(Position pos) {
+    return ((pos.getY()-1) * rowSize) + pos.getX();
+  }
+
+  public int indexRight(Position pos) {
+    return (pos.getY() * rowSize) + (pos.getX()+1);
+  }
+
+  public int indexDown(Position pos) {
+    return ((pos.getY()+1) * rowSize) + pos.getX();
+  }
+
+  public int indexLeft(Position pos) {
+    return (pos.getY() * rowSize) + (pos.getX()-1);
+  }
+ 
+
   public List<Node> getNodes() {
     return nodes;
   }
 
   public GridHistory getHistory() {
     return history;
+  }
+
+  public int getRows() {
+    return rowSize;
+  }
+
+  public int getCols() {
+    return columnSize;
   }
 
   public boolean lost() {

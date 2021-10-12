@@ -1,8 +1,10 @@
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/NodeType.java
+/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/StdoutView.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/InvalidMapSymbolException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Grid.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/UnknownNodeTypeException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/GridHistory.java
+/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/View.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/MovingOutOfBoundsException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/BrickNode.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Position.java

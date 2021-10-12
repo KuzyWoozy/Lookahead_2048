@@ -5,13 +5,15 @@ import java.util.List;
 
 public class Controller {
 
+  private View view;
   private Grid grid;
 
   private String map;
   float fourProb;
   float twoProb;
   
-  public Controller(String map, float fourProb, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public Controller(View view, String map, float fourProb, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+    this.view = view;
     this.map = map;
     this.fourProb = fourProb;
     this.twoProb = twoProb;
@@ -66,15 +68,14 @@ public class Controller {
   public void reset() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     grid = new Grid(map, fourProb, twoProb);
   }
-
-  /*
-  public void play() {
-    String input;
+  
+  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     while(!grid.lost()) {
-      process(view.getInput());
+      //process(view.getInput());
       view.display(grid);
+      break;
     }
   }
-  */
+  
 
 }
