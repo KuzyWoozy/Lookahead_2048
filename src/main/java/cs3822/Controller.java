@@ -12,20 +12,14 @@ public class Controller {
   float fourProb;
   float twoProb;
   
-  public Controller(View view, String map, float fourProb, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public Controller(View view, String map, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     this.view = view;
     this.map = map;
-    this.fourProb = fourProb;
     this.twoProb = twoProb;
 
-    grid = new Grid(map, fourProb, twoProb);
+    grid = new Grid(map, twoProb);
   }
 
-  //private View view;
-
-  //public Controller(View view) {
-  //  this.view = view;
-  //}
 
   //public void runAlgorithm(Algorithm algo) {
 
@@ -66,14 +60,13 @@ public class Controller {
   }
 
   public void reset() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
-    grid = new Grid(map, fourProb, twoProb);
+    grid = new Grid(map, twoProb);
   }
   
-  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException {
     while(!grid.lost()) {
-      //process(view.getInput());
       view.display(grid);
-      break;
+      process(view.getInput()); 
     }
   }
   

@@ -78,7 +78,7 @@ class Position {
   }
 
   public void moveLeft() throws MovingOutOfBoundsException {
-    if (canMoveDown()) {
+    if (canMoveLeft()) {
       this.x -= 1;
     } else {
       throw new MovingOutOfBoundsException();

@@ -8,7 +8,15 @@ public class App
 {
     public static void main( String[] args ) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, NoValueException, MovingOutOfBoundsException, InvalidActionException, UnknownNodeTypeException 
     {
-      Controller control = new Controller(new StdoutView(), "4#4#\n2~##\n2#4#\n####", 0.1f, 0.9f);
+
+      String map1 = "####\n####\n####\n####";
+      String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
+      String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
+
+
+      String map4 = "~###\n#~##\n##~#\n###~";
+
+      Controller control = new Controller(new StdoutView(), map4, 0.9f);
 
       control.play(); 
   }

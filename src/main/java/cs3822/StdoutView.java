@@ -1,8 +1,8 @@
 package cs3822;
 
 import java.util.LinkedList;
-
-
+import java.util.List;
+import java.util.Scanner;
 
 
 /*
@@ -14,16 +14,47 @@ import java.util.LinkedList;
   -------------------
 */
 class StdoutView implements View {
+ 
+  private Scanner scan = new Scanner(System.in);
   
-  /*
-  private List<Actions> process(String) {
+  private List<Actions> convertStringToActions(String actionString) throws UnknownNodeTypeException {
+    actionString = actionString.toLowerCase();
+    LinkedList<Actions> list = new LinkedList<Actions>();
+    for (char x : actionString.toCharArray()) {
+      switch(Actions.getAction(x)) {
+        case SWIPE_UP:
+          list.add(Actions.SWIPE_UP) ; 
+          break;
+        case SWIPE_RIGHT:
+          list.add(Actions.SWIPE_RIGHT);  
+          break;
+        case SWIPE_DOWN:
+          list.add(Actions.SWIPE_DOWN); 
+          break;
+        case SWIPE_LEFT:
+          list.add(Actions.SWIPE_LEFT); 
+          break;
+        case UNDO:
+          list.add(Actions.UNDO); 
+          break;
+        case REDO:
+          list.add(Actions.REDO); 
+          break;
+        case RESET:
+          list.add(Actions.RESET); 
+          break;
+        default:
 
+      }
+    }
+    return list;
   }
 
-  public String getInput() {
-
+  public List<Actions> getInput() throws UnknownNodeTypeException {
+    System.out.print("\nEnter command: ");
+    return convertStringToActions(scan.nextLine()); 
   }
-  */
+  
 
   private String clear() {
     LinkedList<String> list = new LinkedList<String>();
