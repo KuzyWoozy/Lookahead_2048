@@ -29,7 +29,7 @@ public class Controller {
     return grid;
   }
 
-  public void process(List<Actions> actions) throws NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException {
+  public void process(List<Actions> actions) throws NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoMoveFlagException {
     for (Actions action : actions) {
       switch(action) {
         case SWIPE_UP:
@@ -63,11 +63,13 @@ public class Controller {
     grid = new Grid(map, twoProb);
   }
   
-  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException {
+  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException {
     while(!grid.lost()) {
+
       view.display(grid);
       process(view.getInput()); 
     }
+    view.display(grid);
   }
   
 

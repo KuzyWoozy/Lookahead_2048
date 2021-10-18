@@ -15,16 +15,34 @@ class EmptyNode extends Node {
     super(node);
   }
 
+  @Override
   public NodeType getType() {
     return NodeType.EMPTY;
   }
 
+  @Override
   public int getValue() throws NoValueException {
     throw new NoValueException();
   }
 
+  @Override
   public void setValue(int value) {
     
+  }
+
+  @Override
+  public boolean getMoveFlag() throws NoMoveFlagException {
+    throw new NoMoveFlagException();
+  }
+
+  @Override
+  public void onMoveFlag() {
+
+  }
+
+  @Override
+  public void offMoveFlag() {
+
   }
 
   @Override

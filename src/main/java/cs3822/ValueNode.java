@@ -4,6 +4,7 @@ package cs3822;
 class ValueNode extends Node {
   
   private int value;
+  private boolean moveFlag = false;
 
   public ValueNode() {
     super();
@@ -27,13 +28,31 @@ class ValueNode extends Node {
     return NodeType.VALUE;
   }
 
+  @Override
   public int getValue() {
     return value;
   }
 
+  @Override
   public void setValue(int value) {
     this.value = value;
   }
+
+  @Override
+  public boolean getMoveFlag() {
+    return moveFlag;
+  }
+
+  @Override
+  public void onMoveFlag() {
+    moveFlag = true;
+  }
+
+  @Override
+  public void offMoveFlag() {
+    moveFlag = false;
+  }
+
 
   @Override
   public String toString() {

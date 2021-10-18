@@ -17,6 +17,7 @@
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Controller.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/EmptyGridHistoryException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Actions.java
+/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/NoMoveFlagException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/MaxPosNotInitializedException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/InvalidMapSizeException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/NoValueException.java

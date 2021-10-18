@@ -49,7 +49,8 @@ class StdoutView implements View {
     }
     return list;
   }
-
+  
+  @Override
   public List<Actions> getInput() throws UnknownNodeTypeException {
     System.out.print("\nEnter command: ");
     return convertStringToActions(scan.nextLine()); 
@@ -76,7 +77,8 @@ class StdoutView implements View {
         throw new UnknownNodeTypeException(); 
     }
   }
-
+  
+  @Override
   public void display(Grid grid) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
 
     LinkedList<String> output = new LinkedList<String>();
