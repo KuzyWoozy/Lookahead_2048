@@ -17,31 +17,31 @@ class StdoutView implements View {
  
   private Scanner scan = new Scanner(System.in);
   
-  private List<Actions> convertStringToActions(String actionString) throws UnknownNodeTypeException {
+  private List<Action> convertStringToAction(String actionString) throws UnknownNodeTypeException {
     actionString = actionString.toLowerCase();
-    LinkedList<Actions> list = new LinkedList<Actions>();
+    LinkedList<Action> list = new LinkedList<Action>();
     for (char x : actionString.toCharArray()) {
-      switch(Actions.getAction(x)) {
+      switch(Action.getAction(x)) {
         case SWIPE_UP:
-          list.add(Actions.SWIPE_UP) ; 
+          list.add(Action.SWIPE_UP) ; 
           break;
         case SWIPE_RIGHT:
-          list.add(Actions.SWIPE_RIGHT);  
+          list.add(Action.SWIPE_RIGHT);  
           break;
         case SWIPE_DOWN:
-          list.add(Actions.SWIPE_DOWN); 
+          list.add(Action.SWIPE_DOWN); 
           break;
         case SWIPE_LEFT:
-          list.add(Actions.SWIPE_LEFT); 
+          list.add(Action.SWIPE_LEFT); 
           break;
         case UNDO:
-          list.add(Actions.UNDO); 
+          list.add(Action.UNDO); 
           break;
         case REDO:
-          list.add(Actions.REDO); 
+          list.add(Action.REDO); 
           break;
         case RESET:
-          list.add(Actions.RESET); 
+          list.add(Action.RESET); 
           break;
         default:
 
@@ -51,9 +51,9 @@ class StdoutView implements View {
   }
   
   @Override
-  public List<Actions> getInput() throws UnknownNodeTypeException {
+  public List<Action> getInput() throws UnknownNodeTypeException {
     System.out.print("\nEnter command: ");
-    return convertStringToActions(scan.nextLine()); 
+    return convertStringToAction(scan.nextLine()); 
   }
   
 
@@ -65,53 +65,11 @@ class StdoutView implements View {
     return String.join("", list);
   }
 
-  private String nodeStringify(Node node) throws UnknownNodeTypeException, NoValueException {
-    switch(node.getType()) {
-      case BRICK:
-        return "XXXX";
-      case EMPTY:
-        return "    ";
-      case VALUE:
-        return String.format("%4d", node.getValue());
-      default:
-        throw new UnknownNodeTypeException(); 
-    }
-  }
+  
   
   @Override
   public void display(Grid grid) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
-
-    LinkedList<String> output = new LinkedList<String>();
-    LinkedList<String> innerStringBuffer = new LinkedList<String>();
-    String str;
-
-
-    for (int y = 0; y < grid.getRows()-1; y++) {
-      innerStringBuffer.clear();
-      for (int x = 0; x < grid.getCols(); x++) {
-        innerStringBuffer.add(nodeStringify(grid.getNodes().get(grid.index(new Position(x, y)))));
-      }
-
-      str = String.join("|", innerStringBuffer);
-      output.add(str);
-      innerStringBuffer.clear();
-
-      for (int i = 0; i < str.length(); i++) {
-        innerStringBuffer.add("-");
-      }
-      output.add(String.join("", innerStringBuffer));
-    }
-
-    innerStringBuffer.clear();
-    for (int x = 0; x < grid.getCols(); x++) {
-      innerStringBuffer.add(nodeStringify(grid.getNodes().get(grid.index(new Position(x, grid.getRows()-1)))));
-      }
-
-    str = String.join("|", innerStringBuffer);
-    output.add(str);
-    
-    
-    System.out.println(clear() + String.join("\n", output) + "\n\n\n");
+    System.out.println(clear() + grid.stringify() + "\n\n\n");
   }
   
   

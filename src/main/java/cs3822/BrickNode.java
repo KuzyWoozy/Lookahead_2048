@@ -15,6 +15,10 @@ class BrickNode extends Node {
     super(node);
   }
 
+  public BrickNode(Node node) {
+    super(node);
+  }
+
   @Override
   public NodeType getType() {
     return NodeType.BRICK;

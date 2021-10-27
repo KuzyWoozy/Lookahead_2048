@@ -15,6 +15,10 @@ class EmptyNode extends Node {
     super(node);
   }
 
+  public EmptyNode(Node node) {
+    super(node);
+  }
+
   @Override
   public NodeType getType() {
     return NodeType.EMPTY;

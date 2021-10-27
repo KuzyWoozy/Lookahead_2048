@@ -90,4 +90,8 @@ class Position {
     return String.format("(%d, %d)", x, y);
   }
 
+  public boolean equals(Position pos) {
+    return x == pos.x && y == pos.y;
+  }
+
 }

@@ -3,7 +3,21 @@ package cs3822;
 
 abstract class Node {
   
-  protected Position pos;
+
+  public static Node copyNode(Node node) throws UnknownNodeTypeException, NoValueException {
+    switch(node.getType()) {
+      case BRICK:
+        return new BrickNode(node);
+      case EMPTY:
+        return new EmptyNode(node);
+      case VALUE:
+        return new ValueNode(node);
+      default:
+        throw new UnknownNodeTypeException();
+    } 
+  }
+
+  protected Position pos; 
 
   public Node() {
     try {
@@ -58,7 +72,7 @@ abstract class Node {
           throw new UnknownNodeTypeException();
       }
     }
-    
+     
     if (pos.canMoveRight()) {
       Node node = grid.getNodes().get(grid.indexRight(pos));
       switch (node.getType()) {
@@ -118,11 +132,28 @@ abstract class Node {
           throw new UnknownNodeTypeException();
       }
     }
-
+   
     return false;
   }
 
   
+  public boolean equals(Node node) throws NoValueException {
+    return pos.equals(node.getPos()) && getType() == node.getType() && getValue() == node.getValue();
+  }
+
+  public String stringify() throws UnknownNodeTypeException, NoValueException {
+    switch(this.getType()) {
+      case BRICK:
+        return "XXXX";
+      case EMPTY:
+        return "    ";
+      case VALUE:
+        return String.format("%4d", this.getValue());
+      default:
+        throw new UnknownNodeTypeException(); 
+    }
+  }
+
 
 } 
 

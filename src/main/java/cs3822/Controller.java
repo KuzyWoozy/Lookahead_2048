@@ -9,15 +9,17 @@ public class Controller {
   private Grid grid;
 
   private String map;
-  float fourProb;
   float twoProb;
+  int winCondition;
+
   
-  public Controller(View view, String map, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public Controller(View view, String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     this.view = view;
     this.map = map;
     this.twoProb = twoProb;
+    this.winCondition = win_condition;
 
-    grid = new Grid(map, twoProb);
+    grid = new Grid(map, win_condition, twoProb);
   }
 
 
@@ -29,8 +31,8 @@ public class Controller {
     return grid;
   }
 
-  public void process(List<Actions> actions) throws NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoMoveFlagException {
-    for (Actions action : actions) {
+  public void process(List<Action> actions) throws NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoMoveFlagException {
+    for (Action action : actions) {
       switch(action) {
         case SWIPE_UP:
           grid.slideUp();
@@ -60,7 +62,7 @@ public class Controller {
   }
 
   public void reset() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
-    grid = new Grid(map, twoProb);
+    grid = new Grid(map, winCondition, twoProb);
   }
   
   public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException {

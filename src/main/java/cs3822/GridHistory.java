@@ -16,6 +16,30 @@ class GridHistory {
     temp = new Stack<Node[]>();
   }
 
+  public GridHistory(GridHistory history) throws UnknownNodeTypeException, NoValueException {
+    instances = new Stack<Node[]>();
+    Node[] list;
+    Node[] new_list;
+    for (int i = 0; i < history.instances.size(); i++) {
+      list = history.instances.get(i);
+      new_list = new Node[list.length];
+      for (int x = 0; x < list.length; x++) {
+        new_list[x] = Node.copyNode(list[x]);
+      }
+      instances.push(new_list);
+    }
+
+    temp = new Stack<Node[]>();
+    for (int i = 0; i < history.temp.size(); i++) {
+      list = history.temp.get(i);
+      new_list = new Node[list.length];
+      for (int x = 0; x < list.length; x++) {
+        new_list[x] = Node.copyNode(list[x]);
+      }
+      temp.push(new_list);
+    }
+  }
+
   private void clearBuffer() {
     while(!temp.empty()) {
       temp.pop();

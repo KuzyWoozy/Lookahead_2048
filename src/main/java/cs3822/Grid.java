@@ -12,14 +12,16 @@ class Grid {
   private GridHistory history;
 
   private float twoProb;
+  private int winCondition;
 
   private int columnSize;
   private int rowSize;
 
   private Random rand = new Random();
 
+  
 
-  public Grid(String map, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
+  public Grid(String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
     /*
     # = empty
     ~ = brick
@@ -27,9 +29,8 @@ class Grid {
     4 = four
     */
 
-   
     this.twoProb = twoProb;
-
+    this.winCondition = win_condition;
     // DON'T FORGET TO HANDLE ALL ERRORS
     List<String> rows = Arrays.asList(map.split("\n"));
 
@@ -51,11 +52,26 @@ class Grid {
         nodes.set(index(pos), createNode(rows.get(y).charAt(x), pos)); 
       } 
     } 
-
+    
     generateNewNode();
     generateNewNode();
-
+    
     this.history = new GridHistory(cloneNodes());
+  }
+
+
+  public Grid(Grid grid) throws UnknownNodeTypeException, NoValueException {
+
+    this.twoProb = grid.twoProb;
+    this.winCondition = grid.winCondition;
+    this.history = new GridHistory(grid.history);
+    this.nodes = Arrays.asList(new Node[grid.rowSize * grid.columnSize]);
+    for (int i = 0; i < grid.nodes.size(); i++) {
+      this.nodes.set(i, Node.copyNode(grid.nodes.get(i)));
+    }
+    this.rowSize = grid.rowSize;
+    this.columnSize = grid.columnSize;
+    this.rand = new Random();
   }
  
   private Node createNode(char symbol, Position pos) throws InvalidMapSymbolException {
@@ -133,8 +149,11 @@ class Grid {
     }
   }
 
-
   public void slideUp() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
+    slideUp(true);
+  }
+
+  public void slideUp(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
     for (int y = 0; y < rowSize; y++) {
@@ -179,12 +198,18 @@ class Grid {
     }
     
     clearMoveFlags();
-    generateNewNode();
+    if (genNewNode) {
+      generateNewNode();
+    }
     // Make a back-up 
     history.add(cloneNodes());
   }
 
   public void slideRight() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
+    slideRight(true);
+  }
+
+  public void slideRight(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
     
     for (int y = 0; y < rowSize; y++) {
@@ -229,14 +254,18 @@ class Grid {
     }
 
     clearMoveFlags();
-    generateNewNode();
+    if (genNewNode) {
+      generateNewNode();
+    }
     // Make a back-up 
     history.add(cloneNodes());
   }
 
-
-
   public void slideDown() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
+    slideDown(true);
+  }
+
+  public void slideDown(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
     
@@ -284,12 +313,18 @@ class Grid {
     }
 
     clearMoveFlags();
-    generateNewNode();
+    if (genNewNode) {
+      generateNewNode();
+    }
     // Make a back-up 
     history.add(cloneNodes());
   }
 
   public void slideLeft() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
+    slideLeft(true);
+  }
+
+  public void slideLeft(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
     for (int y = 0; y < rowSize; y++) {
@@ -335,7 +370,9 @@ class Grid {
     }
     
     clearMoveFlags();
-    generateNewNode();
+    if (genNewNode) {
+      generateNewNode();
+    }
     // Make a back-up 
     history.add(cloneNodes());
   } 
@@ -395,13 +432,89 @@ class Grid {
 
   public boolean lost() throws NoValueException, UnknownNodeTypeException {
     for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
+      if (node.getType() == NodeType.EMPTY) {
+        return false;
+      } else if (node.getType() == NodeType.VALUE) {
         if (node.canMove(this)) {
           return false;
         }
       }
     } 
     return true;
+  }
+
+  public boolean won() throws NoValueException {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.VALUE) {
+        if (node.getValue() >= winCondition) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  
+  public boolean equals(Grid grid) throws NoValueException {
+
+    if (this.rowSize != grid.rowSize || this.columnSize != grid.columnSize) {
+      return false;
+    }
+
+    for (int i = 0; i < grid.nodes.size(); i++) {
+      if (!this.nodes.get(i).equals(grid.nodes.get(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public List<EmptyNode> getEmptyNodes() {
+    LinkedList<EmptyNode> list = new LinkedList<EmptyNode>();
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        list.add(new EmptyNode(node));
+      }
+    }
+    return list;
+
+  }
+
+  public void setValueNode(Position pos, int value) {
+    nodes.set(index(pos), new ValueNode(pos, value));
+  }
+
+  public String stringify() throws UnknownNodeTypeException, MaxPosNotInitializedException, NoValueException {
+
+    LinkedList<String> output = new LinkedList<String>();
+    LinkedList<String> innerStringBuffer = new LinkedList<String>();
+    String str;
+
+    for (int y = 0; y < this.getRows()-1; y++) {
+      innerStringBuffer.clear();
+      for (int x = 0; x < this.getCols(); x++) {
+        innerStringBuffer.add(this.getNodes().get(this.index(new Position(x, y))).stringify());
+      }
+
+      str = String.join("|", innerStringBuffer);
+      output.add(str);
+      innerStringBuffer.clear();
+
+      for (int i = 0; i < str.length(); i++) {
+        innerStringBuffer.add("-");
+      }
+      output.add(String.join("", innerStringBuffer));
+    }
+
+    innerStringBuffer.clear();
+    for (int x = 0; x < this.getCols(); x++) {
+      innerStringBuffer.add(this.getNodes().get(this.index(new Position(x, this.getRows()-1))).stringify());
+    }
+
+    str = String.join("|", innerStringBuffer);
+    output.add(str);
+    
+    return String.join("\n", output);
   }
 
 }
