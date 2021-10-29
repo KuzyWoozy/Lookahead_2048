@@ -10,6 +10,7 @@ class TreeNodeMDP {
   Terminal status;
 
   int totalNodesNum;
+  int inProgressNum;
   int wonNodesNum;
   int lostNodesNum;
 
@@ -37,6 +38,7 @@ class TreeNodeMDP {
     }
   
     totalNodesNum = findTotalNodes();
+    inProgressNum = findNumInProgress();
     wonNodesNum = findNumWon();
     lostNodesNum = findNumLost();
   }
@@ -96,6 +98,32 @@ class TreeNodeMDP {
       copy = new Grid(grid);
       copy.setValueNode(node.getPos(), 2);
       left.add(new TreeNodeMDP(copy, 1 / emptyList.size()));
+    }
+  }
+
+    private int findNumInProgress() throws UnknownStateException {
+    if (status == Terminal.IN_PROGRESS) {
+      int sum = 1;
+      for (TreeNodeMDP node : up) {
+        sum += node.findNumInProgress();
+      }
+      for (TreeNodeMDP node : right) {
+        sum += node.findNumInProgress();
+      }
+      for (TreeNodeMDP node : down) {
+        sum += node.findNumInProgress();
+      }
+      for (TreeNodeMDP node : left) {
+        sum += node.findNumInProgress();
+      }
+      return sum;
+
+    } else if (status == Terminal.WON) {
+      return 0;
+    } else if (status == Terminal.LOST) {
+      return 0;
+    } else {
+      throw new UnknownStateException();
     }
   }
 
@@ -169,6 +197,10 @@ class TreeNodeMDP {
       sum += node.findTotalNodes();
     }
     return sum;
+  }
+
+  public int getNumInProgress() {
+    return inProgressNum;
   }
 
   public int getNumWon() {

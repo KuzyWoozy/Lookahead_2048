@@ -1,5 +1,7 @@
 package cs3822;
 
+import java.util.Objects;
+
 
 class Position {
   
@@ -93,5 +95,11 @@ class Position {
   public boolean equals(Position pos) {
     return x == pos.x && y == pos.y;
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(x, y);
+  }
+
 
 }

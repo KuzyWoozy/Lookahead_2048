@@ -42,6 +42,7 @@ abstract class Node {
   public abstract boolean getMoveFlag() throws NoMoveFlagException;
   public abstract void onMoveFlag();
   public abstract void offMoveFlag();
+  public abstract int hashCode();
 
   public Position getPos() {
     return pos;
@@ -153,7 +154,6 @@ abstract class Node {
         throw new UnknownNodeTypeException(); 
     }
   }
-
 
 } 
 

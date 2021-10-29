@@ -13,6 +13,10 @@ class TreeGeneratorMDP {
     return initial_node.getNode(grid);
   }
 
+  public int getInProgress() throws UnknownStateException {
+    return initial_node.getNumInProgress();
+  }
+
   public int getWon() throws UnknownStateException {
     return initial_node.getNumWon();
   }

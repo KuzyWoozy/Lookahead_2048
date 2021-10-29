@@ -1,5 +1,7 @@
 package cs3822;
 
+import java.util.Objects;
+
 
 class BrickNode extends Node {
 
@@ -48,6 +50,11 @@ class BrickNode extends Node {
   @Override
   public void offMoveFlag() {
 
+  }
+
+  @Override 
+  public int hashCode() {
+    return Objects.hash(pos, NodeType.BRICK);
   }
 
   @Override

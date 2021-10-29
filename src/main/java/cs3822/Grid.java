@@ -516,6 +516,12 @@ class Grid {
     
     return String.join("\n", output);
   }
+  
+  @Override
+  public int hashCode() {
+    return nodes.hashCode();
+  }
+
 
 }
 

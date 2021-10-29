@@ -1,5 +1,7 @@
 package cs3822;
 
+import java.util.Objects;
+
 
 class ValueNode extends Node {
   
@@ -58,6 +60,10 @@ class ValueNode extends Node {
     moveFlag = false;
   }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(pos, NodeType.VALUE, value);
+  }
 
   @Override
   public String toString() {

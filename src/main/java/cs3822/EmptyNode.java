@@ -1,5 +1,7 @@
 package cs3822;
 
+import java.util.Objects;
+
 
 class EmptyNode extends Node {
 
@@ -47,6 +49,11 @@ class EmptyNode extends Node {
   @Override
   public void offMoveFlag() {
 
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(pos, NodeType.EMPTY);
   }
 
   @Override
