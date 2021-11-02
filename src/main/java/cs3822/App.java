@@ -13,34 +13,10 @@ public class App
     String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
     String map4 = "~###\n#~##\n##~#\n###~";
 
-    Controller control1 = new Controller(new StdoutView(), map0, 16, 1f);
-    Controller control2 = new Controller(new StdoutView(), map1, 16, 1f);
-    Controller control3 = new Controller(new StdoutView(), map4, 54, 0.9f);
+    Controller control = new Controller(new StdoutView(), map0, 16, 1f);
 
-   
-    
-    System.out.println(String.valueOf(control1.getGrid().hashCode()));
-    System.out.println(String.valueOf(control2.getGrid().hashCode()));
-    System.out.println(String.valueOf(control3.getGrid().hashCode()));
-    
-
-
-
-
-
-    //control.play();
-    
-    /* 
-    System.out.println(control.getGrid().stringify());
-    System.out.println();
-    TreeGeneratorMDP tree = new TreeGeneratorMDP(control.getGrid());
-
-    System.out.println("Won nodes: " + String.valueOf(tree.getWon()));
-    System.out.println("Lost nodes: " + String.valueOf(tree.getLost()));
-    System.out.println("In progress nodes: " + String.valueOf(tree.getInProgress()));
-    System.out.println("Total nodes: " + String.valueOf(tree.getTotal()));
-    */
-
+    //control.play(); 
+    System.out.println(String.valueOf(TreeGeneratorMDP.generateOptimalMap(control.getGrid()).size()));
     
   }
 }

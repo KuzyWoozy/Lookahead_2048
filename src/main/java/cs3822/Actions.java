@@ -8,7 +8,8 @@ enum Actions {
   SWIPE_LEFT,
   UNDO,
   REDO,
-  RESET;
+  RESET,
+  NONE;
 
   public static Actions getAction(char chr) throws UnknownNodeTypeException {
     switch(chr) {
@@ -26,6 +27,8 @@ enum Actions {
         return REDO;
       case 'x':
         return RESET;
+      case '~':
+        return NONE;
       default:
         throw new UnknownNodeTypeException();
     }

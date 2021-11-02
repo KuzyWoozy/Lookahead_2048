@@ -469,7 +469,7 @@ class Grid {
     return true;
   }
 
-  public List<EmptyNode> getEmptyNodes() {
+  public List<EmptyNode> getEmptyNodesCopy() {
     LinkedList<EmptyNode> list = new LinkedList<EmptyNode>();
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -477,11 +477,23 @@ class Grid {
       }
     }
     return list;
-
   }
 
   public void setValueNode(Position pos, int value) {
     nodes.set(index(pos), new ValueNode(pos, value));
+  }
+
+  public void setValueNode(Position pos, int value, boolean flag) throws UnknownNodeTypeException, NoValueException {
+    if (flag) {
+      nodes.set(index(pos), new ValueNode(pos, value));
+      history.add(cloneNodes());
+    } else {
+      nodes.set(index(pos), new ValueNode(pos, value));
+    }
+  }
+
+  public void setEmptyNode(Position pos) {
+    nodes.set(index(pos), new EmptyNode(pos));
   }
 
   public String stringify() throws UnknownNodeTypeException, MaxPosNotInitializedException, NoValueException {
