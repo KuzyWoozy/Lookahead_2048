@@ -443,6 +443,58 @@ class Grid {
     return true;
   }
 
+  public boolean canMoveUp() throws UnknownNodeTypeException, NoValueException {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        return true;
+      } else if (node.getType() == NodeType.VALUE) {
+        if (node.canMoveUp(this)) {
+          return true;
+        }
+      }
+    } 
+    return false;
+  }
+
+  public boolean canMoveRight() throws UnknownNodeTypeException, NoValueException {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        return true;
+      } else if (node.getType() == NodeType.VALUE) {
+        if (node.canMoveRight(this)) {
+          return true;
+        }
+      }
+    } 
+    return false;
+  }
+
+  public boolean canMoveDown() throws UnknownNodeTypeException, NoValueException {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        return true;
+      } else if (node.getType() == NodeType.VALUE) {
+        if (node.canMoveDown(this)) {
+          return true;
+        }
+      }
+    } 
+    return false;
+  }
+
+  public boolean canMoveLeft() throws UnknownNodeTypeException, NoValueException {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        return true;
+      } else if (node.getType() == NodeType.VALUE) {
+        if (node.canMoveRight(this)) {
+          return true;
+        }
+      }
+    } 
+    return false;
+  }
+
   public boolean won() throws NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.VALUE) {

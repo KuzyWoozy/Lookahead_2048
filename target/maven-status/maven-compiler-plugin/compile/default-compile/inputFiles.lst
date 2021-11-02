@@ -4,7 +4,6 @@
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/MovingOutOfBoundsException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/ValueNode.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/App.java
-/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Terminal.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Actions.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/NoMoveFlagException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/InvalidMapSizeException.java
@@ -15,7 +14,6 @@
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/InvalidMapSymbolException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/UnknownNodeTypeException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/View.java
-/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/TreeNodeMDP.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/BrickNode.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Position.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Node.java
@@ -24,6 +22,5 @@
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/EmptyNode.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/Controller.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/EmptyGridHistoryException.java
-/home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/TreeNodeNotFoundException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/MaxPosNotInitializedException.java
 /home/kuzy/uni/year3/Individual_Project/2048/src/main/java/cs3822/TreeGeneratorMDP.java

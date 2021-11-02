@@ -22,7 +22,8 @@ class TreeGeneratorMDP {
     float rew;
     
     // Perform the initial dive
-    dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward); 
+    dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
+    
     while (grid.hashCode() != startGrid_hash) {
       loop:
         while(true) {
@@ -33,6 +34,11 @@ class TreeGeneratorMDP {
           switch(action) {
             // If the previous action was UP, do a right
             case SWIPE_UP:
+              slideHistory.push(Actions.SWIPE_RIGHT);
+              if (!grid.canMoveRight()) {
+                sumOfRewards.push(0f);
+                break loop;
+              }
               grid.slideRight(false);
 
               if (grid.won()) {
@@ -44,10 +50,15 @@ class TreeGeneratorMDP {
               }
 
               addPossibilities(grid, possibleStates, possibleStatesNum);
-              slideHistory.push(Actions.SWIPE_RIGHT);
+              
               break;
 
             case SWIPE_RIGHT:
+              slideHistory.push(Actions.SWIPE_DOWN);
+              if (!grid.canMoveDown()) {
+                sumOfRewards.push(0f);
+                break loop;
+              }
               grid.slideDown(false);
 
               if (grid.won()) {
@@ -59,10 +70,15 @@ class TreeGeneratorMDP {
               }
 
               addPossibilities(grid, possibleStates, possibleStatesNum);
-              slideHistory.push(Actions.SWIPE_DOWN);
+              
               break;
 
             case SWIPE_DOWN:
+              slideHistory.push(Actions.SWIPE_LEFT);
+              if (!grid.canMoveLeft()) {
+                sumOfRewards.push(0f);
+                break loop;
+              }
               grid.slideLeft(false);
 
               if (grid.won()) {
@@ -74,7 +90,6 @@ class TreeGeneratorMDP {
               }
 
               addPossibilities(grid, possibleStates, possibleStatesNum);
-              slideHistory.push(Actions.SWIPE_LEFT);
               break;
               
             case SWIPE_LEFT:
@@ -84,6 +99,11 @@ class TreeGeneratorMDP {
             
             default:
               throw new InvalidActionException();
+        }
+        System.out.println(slideHistory.peek().toString());
+        try {
+          System.out.println(grid.stringify());
+        } catch(Exception e) {
         }
          
         rew = (1 / possibleStatesNum.peek()) *  sumOfRewards.pop();
@@ -109,10 +129,18 @@ class TreeGeneratorMDP {
   }
 
   private void dive(Grid grid, Stack<List<EmptyNode>> possibleStates, Stack<Actions> slideHistory, Stack<Integer> possibleStatesNum, Stack<Float> sumOfRewards, Stack<Float> bestReward) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
-    while(true) {
+    while(grid.canMoveUp()) {
       grid.slideUp(false);
-      slideHistory.push(Actions.SWIPE_UP);  
-      
+      slideHistory.push(Actions.SWIPE_UP); 
+
+      try {
+        System.out.println("");
+        System.out.println(grid.stringify());
+      } catch(Exception e) {
+
+      }
+
+
       if (grid.won()) {
         sumOfRewards.push(1f);
         return;
@@ -124,7 +152,9 @@ class TreeGeneratorMDP {
       addPossibilities(grid, possibleStates, possibleStatesNum);
       sumOfRewards.push(0f);
       bestReward.push(0f);
+
     }
+    sumOfRewards.push(0f);
   }
 
   private void updateBetterReward(float newReward, Grid grid, Stack<Float> bestReward, Stack<Actions> slideHistory, Stack<Float> sumOfRewards, HashMap<Integer, Actions> map) {
@@ -143,10 +173,15 @@ class TreeGeneratorMDP {
 
   private void addPossibilities(Grid grid, Stack<List<EmptyNode>> possibleStates, Stack<Integer> possibleStatesNum) throws NoValueException, UnknownNodeTypeException {
 
-      List<EmptyNode> possibilities = grid.getEmptyNodesCopy();
+    List<EmptyNode> possibilities = grid.getEmptyNodesCopy();
+    if (possibilities.isEmpty()) {
+      possibleStatesNum.push(1);
+      possibleStates.push(possibilities);
+    } else {
       possibleStatesNum.push(possibilities.size());
       grid.setValueNode(possibilities.remove(0).getPos(), 2, true);
       possibleStates.push(possibilities);
+    }
   }
 
   public HashMap<Integer, Actions> getMapRef() {

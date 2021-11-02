@@ -1,7 +1,6 @@
 package cs3822;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
 
 
 public class App 
@@ -16,7 +15,8 @@ public class App
     Controller control = new Controller(new StdoutView(), map0, 16, 1f);
 
     //control.play(); 
-    System.out.println(String.valueOf(TreeGeneratorMDP.generateOptimalMap(control.getGrid()).size()));
     
+    HashMap<Integer, Actions> hashMap = new TreeGeneratorMDP(control.getGrid()).getMapRef();
+
   }
 }
