@@ -59,7 +59,7 @@ class StdoutView implements View {
 
   private String clear() {
     LinkedList<String> list = new LinkedList<String>();
-    for (int i = 0; i<200; i++) {
+    for (int i = 0; i<2; i++) {
       list.push("\n");
     }
     return String.join("", list);

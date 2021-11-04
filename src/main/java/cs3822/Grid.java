@@ -88,6 +88,10 @@ class Grid {
       case '4':
         return new ValueNode(pos, 4);
 
+      case '8':
+        return new ValueNode(pos, 8);
+
+
       default:
         throw new InvalidMapSymbolException();
     }
@@ -377,19 +381,19 @@ class Grid {
     history.add(cloneNodes());
   } 
 
-  public void undo() {
-    try {
-      this.nodes = history.undo();
-    } catch(EmptyGridHistoryException e) {
-      // Do nothing if we have no history
-    }
+  public void undo() throws UnknownNodeTypeException, NoValueException {
+    this.nodes = history.undo();
   }
 
-  public void redo() {
+  public void redo() throws UnknownNodeTypeException, NoValueException { 
+    List<Node> list = null;
     try {
-      this.nodes = history.redo();
+      list = history.redo();
     } catch(NoFutureGridException e) {
       // Do nothing if we have no future
+    }
+    if (list != null) {
+      this.nodes = list;
     }
   }
 

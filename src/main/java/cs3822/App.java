@@ -17,6 +17,7 @@ public class App
     //control.play(); 
     
     HashMap<Integer, Actions> hashMap = new TreeGeneratorMDP(control.getGrid()).getMapRef();
+    System.out.println(String.valueOf(hashMap.size()));
 
   }
 }

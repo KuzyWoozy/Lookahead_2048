@@ -46,29 +46,46 @@ class GridHistory {
     }
   }
 
-  public List<Node> undo() throws EmptyGridHistoryException {
+  public List<Node> undo() throws UnknownNodeTypeException, NoValueException {
     // Do not take initial state into account for instances size
-    if (instances.size() <= 1) {
-      throw new EmptyGridHistoryException();
+    if (instances.size() == 1) {
+
+      Node[] items = instances.peek();
+      Node[] items_copy = new Node[items.length];
+      for (int i = 0; i < items.length; i++) {
+        items_copy[i] = Node.copyNode(items[i]);
+      }
+
+      return new ArrayList<Node>(Arrays.asList(items_copy));
     }
-    Node[] item = instances.pop();
-    temp.push(item);
-   
-    return new ArrayList<Node>(Arrays.asList(instances.peek()));
+
+    temp.push(instances.pop());
+  
+    Node[] items = instances.peek();
+    Node[] items_copy = new Node[items.length];
+    for (int i = 0; i < items.length; i++) {
+      items_copy[i] = Node.copyNode(items[i]);
+    }
+
+    return new ArrayList<Node>(Arrays.asList(items_copy));
   }
 
-  public List<Node> redo() throws NoFutureGridException {
+  public List<Node> redo() throws NoFutureGridException, UnknownNodeTypeException, NoValueException {
     if (temp.empty()) {
       throw new NoFutureGridException();
     }
-    Node[] item = temp.pop();
-    instances.push(item);
+    Node[] items = temp.pop();
+    instances.push(items);
 
-    return new ArrayList<Node>(Arrays.asList(item));
+    Node[] items_copy = new Node[items.length];
+    for (int i = 0; i < items.length; i++) {
+      items_copy[i] = Node.copyNode(items[i]); 
+    }
+
+    return new ArrayList<Node>(Arrays.asList(items_copy));
   }
 
   public void add(List<Node> instance) {
-    
     instances.push(instance.toArray(new Node[instance.size()]));
     clearBuffer();
   }
