@@ -5,12 +5,17 @@ import java.util.Stack;
 import java.util.List;
 import java.util.LinkedList;
 
+
 class TreeGeneratorMDP {
   private HashMap<Integer, Actions> map;
 
   public TreeGeneratorMDP(Grid grid) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException {
     this.map = new HashMap<Integer, Actions>();
-    
+   
+    //Stack<TreeNode> history = new Stack<TreeNode>();
+    //history.push();
+
+
     // Stack to manage which action we have taken
     Stack<Actions> slideHistory = new Stack<Actions>();
     // Stack to manage possible states at each layer
@@ -49,6 +54,7 @@ class TreeGeneratorMDP {
               slideHistory.push(Actions.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break;
               }
               
@@ -60,6 +66,7 @@ class TreeGeneratorMDP {
                 break;
               } else if (grid.lost()) {
                 grid.undo();
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break;
               }
 
@@ -76,6 +83,7 @@ class TreeGeneratorMDP {
               slideHistory.push(Actions.SWIPE_DOWN);
  
               if (!grid.canMoveDown()) {
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break; 
               }
 
@@ -87,6 +95,7 @@ class TreeGeneratorMDP {
                 break;
               } else if (grid.lost()) {
                 grid.undo();
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break;
               }
 
@@ -103,6 +112,7 @@ class TreeGeneratorMDP {
               slideHistory.push(Actions.SWIPE_LEFT);
  
               if (!grid.canMoveLeft()) {
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break;
               }
 
@@ -114,6 +124,7 @@ class TreeGeneratorMDP {
                 break;
               } else if (grid.lost()) {
                 grid.undo();
+                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
                 break;
               }
               addPossibilities(grid, possibleStates, possibleStatesNum);
@@ -182,15 +193,12 @@ class TreeGeneratorMDP {
   }
 
   private void updateRewards(float newReward, Grid grid, Stack<Float> bestReward, Stack<Actions> slideHistory, Stack<Float> sumOfRewards, HashMap<Integer, Actions> map) {
-    //System.out.println("");
-    //System.out.println(sumOfRewards.size());
-    //System.out.println(bestReward.size());
     float rewMax = bestReward.pop(); 
 
     float temp = sumOfRewards.pop();
     sumOfRewards.push(newReward + temp);
 
-    if (newReward > rewMax) {
+    if (newReward >= rewMax) {
       map.put(grid.hashCode(), slideHistory.peek());
       bestReward.push(newReward);
     } else {
