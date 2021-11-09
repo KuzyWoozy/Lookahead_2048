@@ -2,225 +2,195 @@ package cs3822;
 
 import java.util.HashMap;
 import java.util.Stack;
-import java.util.List;
-import java.util.LinkedList;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 
 
 class TreeGeneratorMDP {
-  private HashMap<Integer, Actions> map;
+  private HashMap<Integer, SolTableItem> map;
 
   public TreeGeneratorMDP(Grid grid) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException {
-    this.map = new HashMap<Integer, Actions>();
+    this.map = new HashMap<Integer, SolTableItem>();
    
-    //Stack<TreeNode> history = new Stack<TreeNode>();
-    //history.push();
-
-
-    // Stack to manage which action we have taken
-    Stack<Actions> slideHistory = new Stack<Actions>();
-    // Stack to manage possible states at each layer
-    Stack<List<EmptyNode>> possibleStates = new Stack<List<EmptyNode>>();
-    possibleStates.push(new LinkedList<EmptyNode>());
-    // Stack to manage the original number of states at each layer
-    Stack<Integer> possibleStatesNum = new Stack<Integer>();
-    possibleStatesNum.push(1);
-
-    // Stack to manage the best reward from each action
-    Stack<Float> bestReward = new Stack<Float>();
-    // Initialize
-    bestReward.push(0f);
-    // Stack to manage the sum of reward at each layer
-    Stack<Float> sumOfRewards = new Stack<Float>();
-    // Initialize
-    sumOfRewards.push(0f);
-
-    int startGrid_hash = grid.hashCode(); 
+    // Initialize the Tree DFS stack
+    Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
+    history.push(new TreeDFSNode());
     
-    // Perform the initial dive
-    dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
-    updateRewards(sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
+    // Obtain hash of the start node
+    int startGrid_hash = grid.hashCode();  
+   
+    // Initial dive
+    dive(grid, history, map);
     // Keep going until we traversed the entire tree
-    while (grid.hashCode() != startGrid_hash) {
+    while(true) {
       loop:
         while(true) {
-           
-          // pop off next possible state, if it exists
-          Actions action = slideHistory.pop();
-          
-          switch(action) {
+              
+          switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
             case SWIPE_UP:
               
-              slideHistory.push(Actions.SWIPE_RIGHT); 
+              history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                history.peek().addReward(0f);
+                continue;
               }
               
               grid.slideRight(false);
-
+              
               if (grid.won()) {
+                history.peek().addReward(1f);
                 grid.undo();
-                updateRewards(1f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               } else if (grid.lost()) {
+                history.peek().addReward(0f);
                 grid.undo();
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               }
 
-              addPossibilities(grid, possibleStates, possibleStatesNum);
-              sumOfRewards.push(0f);
-              bestReward.push(0f);
-
-              dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
-              updateRewards(sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
-              continue;
+              history.push(new TreeDFSNode(grid));
+              break;
 
             case SWIPE_RIGHT:
+              
+              history.peek().setAction(Action.SWIPE_DOWN);
 
-              slideHistory.push(Actions.SWIPE_DOWN);
- 
               if (!grid.canMoveDown()) {
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break; 
+                history.peek().addReward(0f);
+                continue; 
               }
 
               grid.slideDown(false);
 
               if (grid.won()) {
+                history.peek().addReward(1f);
                 grid.undo();
-                updateRewards(1f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               } else if (grid.lost()) {
+                history.peek().addReward(0f);
                 grid.undo();
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               }
 
-              addPossibilities(grid, possibleStates, possibleStatesNum); 
-              sumOfRewards.push(0f);
-              bestReward.push(0f);
-
-              dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
-              updateRewards(sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
-              continue;
+              history.push(new TreeDFSNode(grid));
+              break;
 
             case SWIPE_DOWN:
                             
-              slideHistory.push(Actions.SWIPE_LEFT);
+              history.peek().setAction(Action.SWIPE_LEFT);
  
-              if (!grid.canMoveLeft()) {
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+              if (!grid.canMoveLeft()) { 
+                history.peek().addReward(0f);
+                continue;
               }
 
               grid.slideLeft(false);
 
               if (grid.won()) {
+                history.peek().addReward(1f);
                 grid.undo();
-                updateRewards(1f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               } else if (grid.lost()) {
+                history.peek().addReward(0f);
                 grid.undo();
-                updateRewards(0f, grid, bestReward, slideHistory, sumOfRewards, map);
-                break;
+                continue;
               }
-              addPossibilities(grid, possibleStates, possibleStatesNum);
-              sumOfRewards.push(0f);
-              bestReward.push(0f);
-
-              dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
-              updateRewards(sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
-              continue;
+              
+              history.push(new TreeDFSNode(grid));
+              break;
              
-
             case SWIPE_LEFT:
-              bestReward.pop();
+              TreeDFSNode node = history.peek();
+              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getSumRewardLocal()));
+              history.peek().setNextPosi(grid);
+              break loop;
+
+            // Part of caching optimization
+            case NONE:
+              history.peek().setNextPosi(grid);
               break loop;
             
             default:
               throw new InvalidActionException();
         }
+        
+        dive(grid, history, map);
       }
-      
-      grid.undo();
 
-      if (possibleStates.peek().isEmpty()) {
-        // time to go up a level in the tree
-        grid.undo();
-        possibleStates.pop();
-        updateRewards((1 / possibleStatesNum.pop()) * sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
-        continue;
-      }
       
-      EmptyNode nextEmptyNode = possibleStates.peek().remove(0);
-      grid.setValueNode(nextEmptyNode.getPos(), 2, true); 
-      bestReward.push(0f);
- 
-      dive(grid, possibleStates, slideHistory, possibleStatesNum, sumOfRewards, bestReward);
-      updateRewards(sumOfRewards.pop(), grid, bestReward, slideHistory, sumOfRewards, map);
-    }
+      if (history.peek().isPosiEmpty()) {
+        TreeDFSNode node = history.pop();
+        if (history.isEmpty()) {
+          break;
+        }
+        // Time to go up a level in the tree
+        grid.undo(); 
+  
+        history.peek().addReward((1f / node.getPosiNum()) * node.getSumReward());
+      }
+            
+    };
   }
 
-  private void dive(Grid grid, Stack<List<EmptyNode>> possibleStates, Stack<Actions> slideHistory, Stack<Integer> possibleStatesNum, Stack<Float> sumOfRewards, Stack<Float> bestReward) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
+  private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
     while(true) {
-       
-      slideHistory.push(Actions.SWIPE_UP); 
- 
+      
+      int hash = grid.hashCode();
+      if (map.containsKey(hash)) {
+        SolTableItem item = map.get(hash);
+        TreeDFSNode node = history.peek();
+
+        node.addSumOfReward(item.getReward());
+        node.setAction(Action.NONE);
+        return;
+      }
+
       if (!grid.canMoveUp()) {
-        sumOfRewards.push(0f);
+        history.peek().addReward(0f);
         return;
       } 
 
       grid.slideUp(false);
       
       if (grid.won()) {
-        sumOfRewards.push(1f);
+        history.peek().addReward(1f);
         grid.undo();
         return;
       } else if (grid.lost()) {
-        sumOfRewards.push(0f);
+        history.peek().addReward(0f);
         grid.undo();
         return;
       }
 
-      addPossibilities(grid, possibleStates, possibleStatesNum);
-      sumOfRewards.push(0f);
-      bestReward.push(0f);
+      history.push(new TreeDFSNode(grid));
     }
   }
 
-  private void updateRewards(float newReward, Grid grid, Stack<Float> bestReward, Stack<Actions> slideHistory, Stack<Float> sumOfRewards, HashMap<Integer, Actions> map) {
-    float rewMax = bestReward.pop(); 
-
-    float temp = sumOfRewards.pop();
-    sumOfRewards.push(newReward + temp);
-
-    if (newReward >= rewMax) {
-      map.put(grid.hashCode(), slideHistory.peek());
-      bestReward.push(newReward);
-    } else {
-      bestReward.push(rewMax);
-    }
-  }
-
-  private void addPossibilities(Grid grid, Stack<List<EmptyNode>> possibleStates, Stack<Integer> possibleStatesNum) throws NoValueException, UnknownNodeTypeException {
-
-    List<EmptyNode> possibilities = grid.getEmptyNodesCopy();
-    if (possibilities.isEmpty()) {
-      possibleStatesNum.push(1);
-      possibleStates.push(possibilities);
-    } else {
-      possibleStatesNum.push(possibilities.size());
-      grid.setValueNode(possibilities.remove(0).getPos(), 2, true);
-      possibleStates.push(possibilities);
-    }
-  }
-
-  public HashMap<Integer, Actions> getMapRef() {
+  public HashMap<Integer, SolTableItem> getMapRef() {
     return map;
+  }
+
+  public void save(String fileName) throws IOException {
+    FileOutputStream file = null;
+    ObjectOutputStream out = null;
+    try {
+    
+      file = new FileOutputStream(fileName);
+      out = new ObjectOutputStream(file);
+  
+      out.writeObject(map);
+
+    } finally {
+      if (file != null) {
+        file.close();
+      }
+      if (out != null) {
+        out.close();
+      }
+    }
   }
 
 }
