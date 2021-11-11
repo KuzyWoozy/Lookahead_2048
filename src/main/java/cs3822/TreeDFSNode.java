@@ -9,7 +9,6 @@ class TreeDFSNode {
   // Per possibility attr
   private Action bestAction;
   private float bestReward;
-  private float sumOfRewardLocal;
   private Action action;
   
   // Per collection of possibility attr
@@ -20,35 +19,33 @@ class TreeDFSNode {
 
   public TreeDFSNode() {
     bestReward = 0;
-    sumOfRewardLocal = 0;
-    bestAction = null;
     action = Action.SWIPE_UP;
-
+    bestAction = Action.SWIPE_UP;
+    
     this.posi = new LinkedList<EmptyNode>();
     this.posiNum = 0;
   }
 
   public TreeDFSNode(Grid grid) throws UnknownNodeTypeException, NoValueException {
     this.posi = grid.getEmptyNodesCopy();
+    // We can do this because we have not yet 'generated' the new node on the grid after an action
     this.posiNum = posi.size();
-    
+
+    // Update grid with the given possibility
+    grid.setValueNode(posi.get(0).getPos(), 2, true);
+
     bestReward = 0;
-    sumOfRewardLocal = 0;
     bestAction = null;
     action = Action.SWIPE_UP;
-    // Update grid with the given possibility
-    if (posiNum > 0) {
-      grid.setValueNode(posi.get(0).getPos(), 2, true);
-    }
   }
 
-  public void addReward(float reward) {
-    sumOfReward += reward;
-    sumOfRewardLocal += reward;
-    if (bestReward <= reward) {
+  public void setMaxReward(float reward) {
+    sumOfReward -= bestReward;
+    if (bestReward < reward) {
       bestReward = reward;
       bestAction = action;
     }
+    sumOfReward += bestReward;
   }
 
   public void addSumOfReward(float reward) {
@@ -59,7 +56,6 @@ class TreeDFSNode {
     
     // Init for next possibility
     bestReward = 0;
-    sumOfRewardLocal = 0;
     bestAction = null;
     action = Action.SWIPE_UP;
     // Update grid with the given possibility 
@@ -79,6 +75,10 @@ class TreeDFSNode {
   public Action getBestAction() {
     return bestAction;
   }
+  
+  public float getBestReward() {
+    return bestReward;
+  }
 
   public void setAction(Action action) {
     this.action = action;
@@ -90,10 +90,6 @@ class TreeDFSNode {
   
   public float getSumReward() {
     return sumOfReward;
-  }
-
-  public float getSumRewardLocal() {
-    return sumOfRewardLocal;
   }
 
   public boolean isPosiEmpty() {

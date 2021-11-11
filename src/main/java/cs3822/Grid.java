@@ -22,12 +22,6 @@ class Grid {
   
 
   public Grid(String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
-    /*
-    # = empty
-    ~ = brick
-    2 = two
-    4 = four
-    */
 
     this.twoProb = twoProb;
     this.winCondition = win_condition;

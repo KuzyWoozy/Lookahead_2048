@@ -27,6 +27,13 @@ class TreeGeneratorMDP {
     while(true) {
       loop:
         while(true) {
+
+          // Statement to view progress, can be safely discarded
+          if (grid.hashCode() == startGrid_hash) {
+            try {
+              System.out.println("Checkpoint: " + history.peek().getAction().toString());
+            } catch(Exception e) {}
+          }
               
           switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
@@ -35,18 +42,19 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 continue;
               }
               
               grid.slideRight(false);
               
               if (grid.won()) {
-                history.peek().addReward(1f);
+                history.peek().setMaxReward(1f);
                 grid.undo();
+                history.peek().setAction(Action.SWIPE_LEFT);
                 continue;
               } else if (grid.lost()) {
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 grid.undo();
                 continue;
               }
@@ -59,18 +67,19 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_DOWN);
 
               if (!grid.canMoveDown()) {
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 continue; 
               }
 
               grid.slideDown(false);
 
               if (grid.won()) {
-                history.peek().addReward(1f);
+                history.peek().setMaxReward(1f);
                 grid.undo();
+                history.peek().setAction(Action.SWIPE_LEFT);
                 continue;
               } else if (grid.lost()) {
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 grid.undo();
                 continue;
               }
@@ -83,18 +92,19 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_LEFT);
  
               if (!grid.canMoveLeft()) { 
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 continue;
               }
 
               grid.slideLeft(false);
 
               if (grid.won()) {
-                history.peek().addReward(1f);
+                history.peek().setMaxReward(1f);
                 grid.undo();
+                history.peek().setAction(Action.SWIPE_LEFT);
                 continue;
               } else if (grid.lost()) {
-                history.peek().addReward(0f);
+                history.peek().setMaxReward(0f);
                 grid.undo();
                 continue;
               }
@@ -103,8 +113,10 @@ class TreeGeneratorMDP {
               break;
              
             case SWIPE_LEFT:
+              
               TreeDFSNode node = history.peek();
-              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getSumRewardLocal()));
+              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
+
               history.peek().setNextPosi(grid);
               break loop;
 
@@ -127,9 +139,9 @@ class TreeGeneratorMDP {
           break;
         }
         // Time to go up a level in the tree
-        grid.undo(); 
-  
-        history.peek().addReward((1f / node.getPosiNum()) * node.getSumReward());
+        grid.undo();
+
+        history.peek().setMaxReward((1f / node.getPosiNum()) * node.getSumReward());
       }
             
     };
@@ -149,18 +161,20 @@ class TreeGeneratorMDP {
       }
 
       if (!grid.canMoveUp()) {
-        history.peek().addReward(0f);
+        history.peek().setMaxReward(0f);
         return;
       } 
 
       grid.slideUp(false);
       
       if (grid.won()) {
-        history.peek().addReward(1f);
+        history.peek().setMaxReward(1f);
         grid.undo();
+        // Can skip other alternatives if we won
+        history.peek().setAction(Action.SWIPE_LEFT);
         return;
       } else if (grid.lost()) {
-        history.peek().addReward(0f);
+        history.peek().setMaxReward(0f);
         grid.undo();
         return;
       }
