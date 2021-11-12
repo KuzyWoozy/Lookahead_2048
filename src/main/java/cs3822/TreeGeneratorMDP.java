@@ -116,7 +116,6 @@ class TreeGeneratorMDP {
               
               TreeDFSNode node = history.peek();
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
-
               history.peek().setNextPosi(grid);
               break loop;
 
