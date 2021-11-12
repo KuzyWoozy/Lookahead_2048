@@ -108,9 +108,9 @@ class TreeGeneratorMDP {
               if (map.size() % 10000 == 0) {
                 System.out.println(map.size());
               }
-
-              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
               
+              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
+
               history.peek().setNextPosi(grid);
               break loop;
 
