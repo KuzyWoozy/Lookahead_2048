@@ -103,21 +103,14 @@ class TreeGeneratorMDP {
             case SWIPE_LEFT:
                
               TreeDFSNode node = history.peek();
-              
-              if (map.containsKey(grid.hashCode())) {
-                try {
-                  System.out.println(grid.stringify());
-                } catch(Exception e) {}
-                System.out.println(grid.hashCode());
-                System.exit(0);
+             
+              // Debug info
+              if (map.size() % 10000 == 0) {
+                System.out.println(map.size());
               }
+
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
-              try {
-                System.out.println(grid.stringify());
-              } catch(Exception e) {}
-              System.out.println(grid.hashCode());
-
-
+              
               history.peek().setNextPosi(grid);
               break loop;
 
@@ -154,6 +147,7 @@ class TreeGeneratorMDP {
     while(true) {
       
       int hash = grid.hashCode(); 
+      
       if (map.containsKey(hash)) {
         TreeDFSNode node = history.peek();
 
@@ -161,12 +155,12 @@ class TreeGeneratorMDP {
         node.setAction(Action.NONE);
         return;
       }
+      
 
       if (!grid.canMoveUp()) {
         history.peek().setMaxReward(0f);
         return;
       }
-
 
       grid.slideUp(false);
       

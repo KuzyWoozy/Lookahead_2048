@@ -600,6 +600,7 @@ class Grid {
     } else {
       return hash;
     }
+    
   }
 
 
