@@ -17,28 +17,16 @@ class TreeGeneratorMDP {
     // Initialize the Tree DFS stack
     Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
     history.push(new TreeDFSNode());
-    
-    // Obtain hash of the start node
-    int startGrid_hash = grid.hashCode();  
-   
     // Initial dive
     dive(grid, history, map);
-    // Keep going until we traversed the entire tree
     while(true) {
-      loop:
-        while(true) {
+      loop: 
+        while(true)  { 
 
-          // Statement to view progress, can be safely discarded
-          if (grid.hashCode() == startGrid_hash) {
-            try {
-              System.out.println("Checkpoint: " + history.peek().getAction().toString());
-            } catch(Exception e) {}
-          }
-              
           switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
             case SWIPE_UP:
-              
+               
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
@@ -101,7 +89,7 @@ class TreeGeneratorMDP {
               if (grid.won()) {
                 history.peek().setMaxReward(1f);
                 grid.undo();
-                history.peek().setAction(Action.SWIPE_LEFT);
+                // history.peek().setAction(Action.SWIPE_LEFT); micro optimization
                 continue;
               } else if (grid.lost()) {
                 history.peek().setMaxReward(0f);
@@ -113,8 +101,14 @@ class TreeGeneratorMDP {
               break;
              
             case SWIPE_LEFT:
-              
+               
               TreeDFSNode node = history.peek();
+             
+              // Debug info
+              if (map.size() % 10000 == 0) {
+                System.out.println(map.size());
+              }
+              
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
               history.peek().setNextPosi(grid);
               break loop;
@@ -130,8 +124,7 @@ class TreeGeneratorMDP {
         
         dive(grid, history, map);
       }
-
-      
+  
       if (history.peek().isPosiEmpty()) {
         TreeDFSNode node = history.pop();
         if (history.isEmpty()) {
@@ -141,6 +134,9 @@ class TreeGeneratorMDP {
         grid.undo();
 
         history.peek().setMaxReward((1f / node.getPosiNum()) * node.getSumReward());
+      } else {
+        // Need to dive if we have a new possibility
+        dive(grid, history, map);
       }
             
     };
@@ -149,20 +145,21 @@ class TreeGeneratorMDP {
   private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
     while(true) {
       
-      int hash = grid.hashCode();
+      int hash = grid.hashCode(); 
+      
       if (map.containsKey(hash)) {
-        SolTableItem item = map.get(hash);
         TreeDFSNode node = history.peek();
 
-        node.addSumOfReward(item.getReward());
+        node.addSumOfReward(map.get(hash).getReward());
         node.setAction(Action.NONE);
         return;
       }
+      
 
       if (!grid.canMoveUp()) {
         history.peek().setMaxReward(0f);
         return;
-      } 
+      }
 
       grid.slideUp(false);
       
