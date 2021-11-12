@@ -17,6 +17,9 @@ class Grid {
   private int columnSize;
   private int rowSize;
 
+  private int hash;
+  private boolean toHash = true;
+
   private Random rand = new Random();
 
   
@@ -128,6 +131,7 @@ class Grid {
     Node newNode = new ValueNode(availablePos.get(rand.nextInt(availablePos.size())), rand.nextFloat() <= twoProb ? 2 : 4);
 
     nodes.set(index(newNode.getPos()), newNode);
+    toHash = true;
   }
 
   private void swap(Node node1, Node node2) {
@@ -137,6 +141,7 @@ class Grid {
 
     nodes.set(index(node1.getPos()), node1);
     nodes.set(index(node2.getPos()), node2);
+    toHash = true;
   }
 
   private void clearMoveFlags() {
@@ -186,6 +191,7 @@ class Grid {
               replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
               nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
+              toHash = true;
 
             } else {
               swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
@@ -243,6 +249,7 @@ class Grid {
               replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
               nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
+              toHash = true;
             } else {
               swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
             }
@@ -301,7 +308,7 @@ class Grid {
               replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
               nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
-
+              toHash = true;
             } else {
               swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
             }
@@ -358,7 +365,7 @@ class Grid {
               replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
               nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos()))); 
-   
+              toHash = true;
             } else {
               swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
             }
@@ -377,6 +384,7 @@ class Grid {
 
   public void undo() throws UnknownNodeTypeException, NoValueException {
     this.nodes = history.undo();
+    toHash = true;
   }
 
   public void redo() throws UnknownNodeTypeException, NoValueException { 
@@ -388,6 +396,7 @@ class Grid {
     }
     if (list != null) {
       this.nodes = list;
+      toHash = true;
     }
   }
 
@@ -531,6 +540,7 @@ class Grid {
 
   public void setValueNode(Position pos, int value) {
     nodes.set(index(pos), new ValueNode(pos, value));
+    toHash = true;
   }
 
   public void setValueNode(Position pos, int value, boolean flag) throws UnknownNodeTypeException, NoValueException {
@@ -540,10 +550,12 @@ class Grid {
     } else {
       nodes.set(index(pos), new ValueNode(pos, value));
     }
+    toHash = true;
   }
 
   public void setEmptyNode(Position pos) {
     nodes.set(index(pos), new EmptyNode(pos));
+    toHash = true;
   }
 
   public String stringify() throws UnknownNodeTypeException, MaxPosNotInitializedException, NoValueException {
@@ -581,7 +593,13 @@ class Grid {
   
   @Override
   public int hashCode() {
-    return nodes.hashCode();
+    if (toHash) {
+      toHash = false;
+      hash = nodes.hashCode();
+      return hash;   
+    } else {
+      return hash;
+    }
   }
 
 

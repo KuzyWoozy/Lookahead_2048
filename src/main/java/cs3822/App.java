@@ -20,5 +20,6 @@ public class App
     HashMap<Integer, SolTableItem> hashMap = gen.getMapRef();   
     System.out.println(String.valueOf(hashMap.size()));
     gen.save("saved-map-1.serial");
+    
   }
 }
