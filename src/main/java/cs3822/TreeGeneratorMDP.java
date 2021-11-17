@@ -5,7 +5,6 @@ import java.util.Stack;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 
 
 class TreeGeneratorMDP {
@@ -38,20 +37,6 @@ class TreeGeneratorMDP {
               
               grid.slideRight(false);
               
-              if (grid.won()) {
-                history.peek().updateMaxReward(1f);
-                grid.undo();
-                history.peek().setAction(Action.SWIPE_LEFT);
-                continue;
-              } 
-
-              history.push(new TreeDFSNode(grid, twoProb));
-              
-              if (grid.lost()) {
-                history.peek().updateMaxReward(0f);
-                history.peek().setAction(Action.NONE);
-                continue;
-              }
               break;
 
             case SWIPE_RIGHT:
@@ -65,20 +50,6 @@ class TreeGeneratorMDP {
 
               grid.slideDown(false);
 
-              if (grid.won()) {
-                history.peek().updateMaxReward(1f);
-                grid.undo();
-                history.peek().setAction(Action.SWIPE_LEFT);
-                continue;
-              } else 
-
-              history.push(new TreeDFSNode(grid, twoProb));
-
-              if (grid.lost()) { 
-                history.peek().updateMaxReward(0f);
-                history.peek().setAction(Action.NONE);
-                continue;
-              }
               break;
 
             case SWIPE_DOWN:
@@ -92,26 +63,9 @@ class TreeGeneratorMDP {
 
               grid.slideLeft(false);
 
-              if (grid.won()) {
-                history.peek().updateMaxReward(1f);
-                grid.undo();
-                // history.peek().setAction(Action.SWIPE_LEFT); micro optimization
-                continue;
-              }
-              
-              history.push(new TreeDFSNode(grid, twoProb));
-
-              if (grid.lost()) { 
-                history.peek().updateMaxReward(0f);
-                history.peek().setAction(Action.NONE);
-                continue;
-              }
               break;
              
             case SWIPE_LEFT: 
-              try {
-                System.out.println(grid.stringify());
-              } catch(Exception e) {}
 
               TreeDFSNode node = history.peek();
 
@@ -120,32 +74,39 @@ class TreeGeneratorMDP {
               //  System.out.println(map.size());
               //}
               
-              System.out.println("End");
               
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
-              node.setNextPosi(grid);
-              
 
               break loop;
 
             // Part of caching optimization
             case NONE:
-              try {
-                System.out.println(grid.stringify());
-              } catch(Exception e) {}
-              System.out.println("None");
-              history.peek().setNextPosi(grid);
-              
-
               break loop;
             
             default:
               throw new InvalidActionException();
         }
         
+        if (grid.won()) {
+          history.peek().updateMaxReward(1f);
+          grid.undo();
+          history.peek().setAction(Action.SWIPE_LEFT);
+          continue;
+        } 
+
+        history.push(new TreeDFSNode(grid, twoProb));
+              
+        if (grid.lost()) {
+          history.peek().updateMaxReward(0f);
+          history.peek().setAction(Action.NONE);
+          continue;
+        }
+
         dive(grid, history, map);
       }
   
+
+      history.peek().setNextPosi(grid);
       if (history.peek().isPosiEmpty()) {
         TreeDFSNode node = history.pop();
         if (history.isEmpty()) {
