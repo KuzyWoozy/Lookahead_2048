@@ -10,13 +10,15 @@ import java.io.FileNotFoundException;
 
 class TreeGeneratorMDP {
   private HashMap<Integer, SolTableItem> map;
+  private float twoProb;
 
-  public TreeGeneratorMDP(Grid grid) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException {
+  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, EarlyExpReturnException {
     this.map = new HashMap<Integer, SolTableItem>();
+    this.twoProb = twoProb;
    
     // Initialize the Tree DFS stack
     Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
-    history.push(new TreeDFSNode());
+    history.push(new TreeDFSNode(twoProb));
     // Initial dive
     dive(grid, history, map);
     while(true) {
@@ -47,7 +49,7 @@ class TreeGeneratorMDP {
                 continue;
               }
 
-              history.push(new TreeDFSNode(grid));
+              history.push(new TreeDFSNode(grid, twoProb));
               break;
 
             case SWIPE_RIGHT:
@@ -72,7 +74,7 @@ class TreeGeneratorMDP {
                 continue;
               }
 
-              history.push(new TreeDFSNode(grid));
+              history.push(new TreeDFSNode(grid, twoProb));
               break;
 
             case SWIPE_DOWN:
@@ -97,7 +99,7 @@ class TreeGeneratorMDP {
                 continue;
               }
               
-              history.push(new TreeDFSNode(grid));
+              history.push(new TreeDFSNode(grid, twoProb));
               break;
              
             case SWIPE_LEFT:
@@ -133,7 +135,7 @@ class TreeGeneratorMDP {
         // Time to go up a level in the tree
         grid.undo();
 
-        history.peek().setMaxReward((1f / node.getPosiNum()) * node.getSumReward());
+        history.peek().setMaxReward(node.getExpectedReward());
       } else {
         // Need to dive if we have a new possibility
         dive(grid, history, map);
@@ -150,7 +152,7 @@ class TreeGeneratorMDP {
       if (map.containsKey(hash)) {
         TreeDFSNode node = history.peek();
 
-        node.addSumOfReward(map.get(hash).getReward());
+        node.addExpSumOfReward(map.get(hash).getReward());
         node.setAction(Action.NONE);
         return;
       }
@@ -175,7 +177,7 @@ class TreeGeneratorMDP {
         return;
       }
 
-      history.push(new TreeDFSNode(grid));
+      history.push(new TreeDFSNode(grid, twoProb));
     }
   }
 

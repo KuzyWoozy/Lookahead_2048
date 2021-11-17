@@ -26,6 +26,11 @@ class ValueNode extends Node {
     this.value = node.getValue();
   }
 
+  public ValueNode(EmptyNode node, int value) {
+    super(node.getPos());
+    this.value = value;
+  }
+
   public ValueNode(Position pos, int value) {
     super(pos);
     this.value = value;

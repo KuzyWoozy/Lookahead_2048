@@ -2,7 +2,6 @@ package cs3822;
 
 import java.util.List;
 import java.util.LinkedList;
-import java.util.HashMap;
 
 
 class TreeDFSNode {
@@ -12,58 +11,72 @@ class TreeDFSNode {
   private Action action;
   
   // Per collection of possibility attr
-  private float sumOfReward = 0;
-  private List<EmptyNode> posi = null;
-  private int posiNum;
+  private float expSumReward = 0;
+  private LinkedList<ValueNode> posi = new LinkedList<ValueNode>();
+  private int posiNum = 0;
+
+  private float twoProb;
+  private float fourProb;
 
 
-  public TreeDFSNode() {
-    bestReward = 0;
-    action = Action.SWIPE_UP;
-    bestAction = Action.SWIPE_UP;
-    
-    this.posi = new LinkedList<EmptyNode>();
-    this.posiNum = 0;
+  public TreeDFSNode(float twoProb) {
+    this.bestReward = 0;
+    this.action = Action.SWIPE_UP;
+    this.bestAction = Action.SWIPE_UP;
+
+    this.twoProb = twoProb;
+    this.fourProb = 1 - twoProb;
   }
 
-  public TreeDFSNode(Grid grid) throws UnknownNodeTypeException, NoValueException {
-    this.posi = grid.getEmptyNodesCopy();
-    // We can do this because we have not yet 'generated' the new node on the grid after an action
-    this.posiNum = posi.size();
+  public TreeDFSNode(Grid grid, float twoProb) throws UnknownNodeTypeException, NoValueException {
+    this(twoProb);
 
+    List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
+    
     // Update grid with the given possibility
-    grid.setValueNode(posi.get(0).getPos(), 2, true);
+    if (emptyNodes.size() > 0) {
+      for (EmptyNode node : emptyNodes) { 
+        this.posi.add(new ValueNode(node, 2));
+        this.posi.add(new ValueNode(node, 4));
+      }
 
-    bestReward = 0;
-    bestAction = null;
-    action = Action.SWIPE_UP;
+      this.posiNum = this.posi.size();
+      grid.setValueNode(this.posi.get(0), true);
+    }
   }
 
   public void setMaxReward(float reward) {
-    sumOfReward -= bestReward;
     if (bestReward < reward) {
       bestReward = reward;
       bestAction = action;
     }
-    sumOfReward += bestReward;
   }
 
-  public void addSumOfReward(float reward) {
-    sumOfReward += reward;
+  public void addExpSumOfReward(float reward) {
+    expSumReward += reward;
   }
 
-  public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException {
-    
-    // Init for next possibility
-    bestReward = 0;
-    bestAction = null;
-    action = Action.SWIPE_UP;
-    // Update grid with the given possibility 
+  public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException, InvalidValueException { 
+
     if (posi.size() > 0) {
       grid.undo();
-      posi.remove(0);
+
+      int val = posi.remove(0).getValue();
+      if (val == 2) {
+        this.expSumReward += this.twoProb * this.bestReward; 
+      } else if (val == 4) {
+        this.expSumReward += this.fourProb * this.bestReward; 
+      } else {
+        throw new InvalidValueException();
+      }
+
       if (posi.size() > 0) {
-        grid.setValueNode(posi.get(0).getPos(), 2, true);
+        // Init for next possibility
+        this.bestReward = 0;
+        this.action = Action.SWIPE_UP;
+        this.bestAction = Action.SWIPE_UP;
+
+        grid.setValueNode(posi.get(0), true);
       }
     } 
   }
@@ -84,20 +97,20 @@ class TreeDFSNode {
     this.action = action;
   }
 
-  public int getPosiNum() {
-    return posiNum;
+  public float getExpSumReward() {
+    return expSumReward;
   }
-  
-  public float getSumReward() {
-    return sumOfReward;
+
+  public float getExpectedReward() throws EarlyExpReturnException {
+    if (posi.size() == 0) {
+      return (1f / this.posiNum) * expSumReward;
+    } else {
+      throw new EarlyExpReturnException();
+    }
   }
 
   public boolean isPosiEmpty() {
     return posi.isEmpty();
-  }
-
-  public List<EmptyNode> getPosi() {
-    return posi;
   }
 
 } 

@@ -50,8 +50,8 @@ class Grid {
       } 
     } 
     
-    generateNewNode();
-    generateNewNode();
+    //generateNewNode();
+    //generateNewNode();
     
     this.history = new GridHistory(cloneNodes());
   }
@@ -543,12 +543,27 @@ class Grid {
     toHash = true;
   }
 
+  public void setValueNode(ValueNode node) {
+    nodes.set(index(node.getPos()), new ValueNode(node));
+    toHash = true;
+  }
+
   public void setValueNode(Position pos, int value, boolean flag) throws UnknownNodeTypeException, NoValueException {
     if (flag) {
       nodes.set(index(pos), new ValueNode(pos, value));
       history.add(cloneNodes());
     } else {
       nodes.set(index(pos), new ValueNode(pos, value));
+    }
+    toHash = true;
+  }
+
+  public void setValueNode(ValueNode node, boolean flag) throws UnknownNodeTypeException, NoValueException {
+    if (flag) {
+      nodes.set(index(node.getPos()), new ValueNode(node));
+      history.add(cloneNodes());
+    } else {
+      nodes.set(index(node.getPos()), new ValueNode(node));
     }
     toHash = true;
   }
