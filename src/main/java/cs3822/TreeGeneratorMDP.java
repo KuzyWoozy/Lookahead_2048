@@ -22,7 +22,7 @@ class TreeGeneratorMDP {
     // Initial dive
     dive(grid, history, map);
     while(true) {
-      loop: 
+      loop:  
         while(true)  { 
 
           switch(history.peek().getAction()) {
@@ -32,24 +32,26 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
-                history.peek().setMaxReward(0f);
+                history.peek().updateMaxReward(0f);
                 continue;
               }
               
               grid.slideRight(false);
               
               if (grid.won()) {
-                history.peek().setMaxReward(1f);
+                history.peek().updateMaxReward(1f);
                 grid.undo();
                 history.peek().setAction(Action.SWIPE_LEFT);
                 continue;
-              } else if (grid.lost()) {
-                history.peek().setMaxReward(0f);
-                grid.undo();
-                continue;
-              }
+              } 
 
               history.push(new TreeDFSNode(grid, twoProb));
+              
+              if (grid.lost()) {
+                history.peek().updateMaxReward(0f);
+                history.peek().setAction(Action.NONE);
+                continue;
+              }
               break;
 
             case SWIPE_RIGHT:
@@ -57,24 +59,26 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_DOWN);
 
               if (!grid.canMoveDown()) {
-                history.peek().setMaxReward(0f);
+                history.peek().updateMaxReward(0f);
                 continue; 
               }
 
               grid.slideDown(false);
 
               if (grid.won()) {
-                history.peek().setMaxReward(1f);
+                history.peek().updateMaxReward(1f);
                 grid.undo();
                 history.peek().setAction(Action.SWIPE_LEFT);
                 continue;
-              } else if (grid.lost()) {
-                history.peek().setMaxReward(0f);
-                grid.undo();
-                continue;
-              }
+              } else 
 
               history.push(new TreeDFSNode(grid, twoProb));
+
+              if (grid.lost()) { 
+                history.peek().updateMaxReward(0f);
+                history.peek().setAction(Action.NONE);
+                continue;
+              }
               break;
 
             case SWIPE_DOWN:
@@ -82,42 +86,57 @@ class TreeGeneratorMDP {
               history.peek().setAction(Action.SWIPE_LEFT);
  
               if (!grid.canMoveLeft()) { 
-                history.peek().setMaxReward(0f);
+                history.peek().updateMaxReward(0f);
                 continue;
               }
 
               grid.slideLeft(false);
 
               if (grid.won()) {
-                history.peek().setMaxReward(1f);
+                history.peek().updateMaxReward(1f);
                 grid.undo();
                 // history.peek().setAction(Action.SWIPE_LEFT); micro optimization
-                continue;
-              } else if (grid.lost()) {
-                history.peek().setMaxReward(0f);
-                grid.undo();
                 continue;
               }
               
               history.push(new TreeDFSNode(grid, twoProb));
+
+              if (grid.lost()) { 
+                history.peek().updateMaxReward(0f);
+                history.peek().setAction(Action.NONE);
+                continue;
+              }
               break;
              
-            case SWIPE_LEFT:
-               
+            case SWIPE_LEFT: 
+              try {
+                System.out.println(grid.stringify());
+              } catch(Exception e) {}
+
               TreeDFSNode node = history.peek();
-             
+
               // Debug info
-              if (map.size() % 10000 == 0) {
-                System.out.println(map.size());
-              }
+              // if (map.size() % 10000 == 0) {
+              //  System.out.println(map.size());
+              //}
+              
+              System.out.println("End");
               
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
-              history.peek().setNextPosi(grid);
+              node.setNextPosi(grid);
+              
+
               break loop;
 
             // Part of caching optimization
             case NONE:
+              try {
+                System.out.println(grid.stringify());
+              } catch(Exception e) {}
+              System.out.println("None");
               history.peek().setNextPosi(grid);
+              
+
               break loop;
             
             default:
@@ -135,49 +154,55 @@ class TreeGeneratorMDP {
         // Time to go up a level in the tree
         grid.undo();
 
-        history.peek().setMaxReward(node.getExpectedReward());
+        history.peek().updateMaxReward(node.getExpectedReward());
       } else {
-        // Need to dive if we have a new possibility
-        dive(grid, history, map);
+        if (grid.lost()) { 
+          history.peek().updateMaxReward(0f);
+          history.peek().setAction(Action.NONE);
+        } else {
+          // Need to dive if we have a new possibility
+          dive(grid, history, map);
+        }
       }
             
     };
   }
 
   private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
+
     while(true) {
-      
       int hash = grid.hashCode(); 
       
       if (map.containsKey(hash)) {
         TreeDFSNode node = history.peek();
 
-        node.addExpSumOfReward(map.get(hash).getReward());
+        node.setMaxReward(map.get(hash).getReward());
         node.setAction(Action.NONE);
         return;
       }
       
-
       if (!grid.canMoveUp()) {
-        history.peek().setMaxReward(0f);
+        history.peek().updateMaxReward(0f);
         return;
       }
 
       grid.slideUp(false);
       
       if (grid.won()) {
-        history.peek().setMaxReward(1f);
+        history.peek().updateMaxReward(1f);
         grid.undo();
         // Can skip other alternatives if we won
         history.peek().setAction(Action.SWIPE_LEFT);
         return;
-      } else if (grid.lost()) {
-        history.peek().setMaxReward(0f);
-        grid.undo();
-        return;
-      }
+      } 
 
       history.push(new TreeDFSNode(grid, twoProb));
+      // Need to check if we lost AFTER instantiating
+      if (grid.lost()) {
+        history.peek().updateMaxReward(0f);
+        history.peek().setAction(Action.NONE);
+        return;
+      }
     }
   }
 

@@ -39,21 +39,21 @@ class TreeDFSNode {
         this.posi.add(new ValueNode(node, 2));
         this.posi.add(new ValueNode(node, 4));
       }
-
-      this.posiNum = this.posi.size();
+      
+      this.posiNum = this.posi.size() / 2;
       grid.setValueNode(this.posi.get(0), true);
     }
   }
 
   public void setMaxReward(float reward) {
+    bestReward = reward;
+  }
+
+  public void updateMaxReward(float reward) {
     if (bestReward < reward) {
       bestReward = reward;
       bestAction = action;
     }
-  }
-
-  public void addExpSumOfReward(float reward) {
-    expSumReward += reward;
   }
 
   public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException, InvalidValueException { 
@@ -62,6 +62,7 @@ class TreeDFSNode {
       grid.undo();
 
       int val = posi.remove(0).getValue();
+      
       if (val == 2) {
         this.expSumReward += this.twoProb * this.bestReward; 
       } else if (val == 4) {
@@ -77,6 +78,7 @@ class TreeDFSNode {
         this.bestAction = Action.SWIPE_UP;
 
         grid.setValueNode(posi.get(0), true);
+
       }
     } 
   }
@@ -95,10 +97,6 @@ class TreeDFSNode {
 
   public void setAction(Action action) {
     this.action = action;
-  }
-
-  public float getExpSumReward() {
-    return expSumReward;
   }
 
   public float getExpectedReward() throws EarlyExpReturnException {

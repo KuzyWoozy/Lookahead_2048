@@ -7,7 +7,7 @@ public class App
 {
     public static void main( String[] args ) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, NoValueException, MovingOutOfBoundsException, InvalidActionException, UnknownNodeTypeException, NoMoveFlagException, IOException, InvalidValueException, EarlyExpReturnException {
     
-    String map0 = "84\n4#";
+    String map0 = "8~\n4#";
     String map1 = "###\n###\n###";
     String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
     String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
