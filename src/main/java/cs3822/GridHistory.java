@@ -5,11 +5,16 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
+/**
+ * History of a Grid instance, going back to its initial state
+ * 
+ * @author Daniil Kuznetsov
+ */
 class GridHistory {
   private Stack<Node[]> instances;
   private Stack<Node[]> temp;
 
+  
   public GridHistory(List<Node> initialState) {
     instances = new Stack<Node[]>();
     instances.push(initialState.toArray(new Node[initialState.size()]));

@@ -3,9 +3,11 @@ package cs3822;
 import java.util.HashMap;
 import java.io.IOException;
 
+
+/** Class with the main method, contains all the setup. */
 public class App 
 {
-    public static void main( String[] args ) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, NoValueException, MovingOutOfBoundsException, InvalidActionException, UnknownNodeTypeException, NoMoveFlagException, IOException, InvalidValueException, EarlyExpReturnException {
+    public static void main( String[] args ) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, NoValueException, MovingOutOfBoundsException, InvalidActionException, UnknownNodeTypeException, NoMoveFlagException, IOException, InvalidValueException {
     
     String map0 = "##\n##";
     String map1 = "###\n###\n###";

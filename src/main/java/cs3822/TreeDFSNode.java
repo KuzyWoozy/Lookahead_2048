@@ -99,12 +99,8 @@ class TreeDFSNode {
     this.action = action;
   }
 
-  public float getExpectedReward() throws EarlyExpReturnException {
-    if (posi.size() == 0) {
-      return (1f / this.posiNum) * expSumReward;
-    } else {
-      throw new EarlyExpReturnException();
-    }
+  public float getExpectedReward() {
+    return (1f / this.posiNum) * expSumReward;
   }
 
   public boolean isPosiEmpty() {
