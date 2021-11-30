@@ -50,8 +50,8 @@ class Grid {
       } 
     } 
     
-    generateNewNode();
-    generateNewNode();
+    //generateNewNode();
+    //generateNewNode();
     
     this.history = new GridHistory(cloneNodes());
   }

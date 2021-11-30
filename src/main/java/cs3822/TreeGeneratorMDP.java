@@ -11,7 +11,7 @@ class TreeGeneratorMDP {
   private HashMap<Integer, SolTableItem> map;
   private float twoProb;
 
-  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, EarlyExpReturnException {
+  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException {
     this.map = new HashMap<Integer, SolTableItem>();
     this.twoProb = twoProb;
    
