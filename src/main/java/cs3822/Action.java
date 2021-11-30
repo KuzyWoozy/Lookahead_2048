@@ -20,7 +20,7 @@ enum Action {
    * Convert a character into an Action enum.
    *
    * @param chr Character to be converted into an Action
-   * @returns Action corresponding to the provided character
+   * @return Action corresponding to the provided character
    * @throws UnknownNodeTypeException Character has no translation into an Action
    */
   public static Action getAction(char chr) throws UnknownNodeTypeException {

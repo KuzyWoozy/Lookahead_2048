@@ -6,6 +6,11 @@ import java.util.LinkedList;
 import java.util.Arrays;
 
 
+/**
+ * Representation of the 2048 grid, in which nodes reside.
+ *
+ * @author Daniil Kuznetsov
+ */
 class Grid {
 
   private List<Node> nodes;
@@ -18,24 +23,29 @@ class Grid {
   private int rowSize;
 
   private int hash;
-  private boolean toHash = true;
+  private boolean toHash = true; // Part of hash optimization
 
   private Random rand = new Random();
 
-  
-
+  /**
+   * Grid constructor.
+   *
+   * @param map Grid map string representation
+   * @param win_condition Target value to be reached to win the game
+   * @param twoProb Probability of generating a node with the value 2
+   */
   public Grid(String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
 
     this.twoProb = twoProb;
     this.winCondition = win_condition;
-    // DON'T FORGET TO HANDLE ALL ERRORS
     List<String> rows = Arrays.asList(map.split("\n"));
 
     this.columnSize = rows.get(0).length();
     this.rowSize = rows.size();
     // Set the boundaries for Position
     Position.setMax(columnSize, rowSize);
-
+    
+    // Quick verification for shape of map correctness
     for (String row : rows.subList(1, rowSize)) {
       if (row.length() != columnSize) throw new InvalidMapSizeException();
     }
@@ -49,14 +59,15 @@ class Grid {
         nodes.set(index(pos), createNode(rows.get(y).charAt(x), pos)); 
       } 
     } 
+    // Generate the initial nodes
+    generateNewNode();
+    generateNewNode();
     
-    //generateNewNode();
-    //generateNewNode();
-    
+    // Start keeping track of history
     this.history = new GridHistory(cloneNodes());
   }
 
-
+  /** Grid copy constructor. */
   public Grid(Grid grid) throws UnknownNodeTypeException, NoValueException {
 
     this.twoProb = grid.twoProb;
@@ -70,7 +81,15 @@ class Grid {
     this.columnSize = grid.columnSize;
     this.rand = new Random();
   }
- 
+  
+  /** 
+   * Computes the node represented by the specified symbol and position
+   *
+   * @param symbol Type of node to be created
+   * @param pos Position of the node within the grid
+   * @return Node created with the specified symbol and position
+   * @throws InvalidMapSymbolException char symbol has no known convertion into a node.
+   */
   private Node createNode(char symbol, Position pos) throws InvalidMapSymbolException {
     switch (symbol) {
       case '#': 
@@ -88,12 +107,17 @@ class Grid {
       case '8':
         return new ValueNode(pos, 8);
 
-
       default:
         throw new InvalidMapSymbolException();
     }
   }
 
+  /** 
+   * Copies and returns the Grid representation.
+   *
+   * @return Copy of the grid state
+   * @throws UnknownNodeTypeException Discovered node with no lnown corresponding type
+   */
   private List<Node> cloneNodes() throws UnknownNodeTypeException, UnknownNodeTypeException, NoValueException {
     List<Node> nodeCopy = Arrays.asList(new Node[nodes.size()]);
     for (int i = 0; i < nodes.size(); i++) {
@@ -115,25 +139,33 @@ class Grid {
     return nodeCopy;
   }
 
+  /** Generates a new node within the grid. */
   public void generateNewNode() {
     LinkedList<Position> availablePos = new LinkedList<Position>();
-
+    // Find the available slots in the grid
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
         availablePos.add(node.getPos()); 
       }
     }
-
+    
+    // Abort if there is no available space
     if (availablePos.size() == 0) {
       return;
     }
 
     Node newNode = new ValueNode(availablePos.get(rand.nextInt(availablePos.size())), rand.nextFloat() <= twoProb ? 2 : 4);
-
+    // Insert the new node into the grid
     nodes.set(index(newNode.getPos()), newNode);
     toHash = true;
   }
 
+  /** 
+   * Swaps the position of the two specified nodes.
+   *
+   * @param node1 Node to be swapped
+   * @param node2 Node to be swapped with
+   */
   private void swap(Node node1, Node node2) {
     Position tempPos = new Position(node1.getPos());
     node1.setPos(node2.getPos());
@@ -143,7 +175,8 @@ class Grid {
     nodes.set(index(node2.getPos()), node2);
     toHash = true;
   }
-
+  
+  /** Resets the movement flags for each approxpriate node. */
   private void clearMoveFlags() {
     for (Node node : nodes) {
       if (node.getType() == NodeType.VALUE) {
@@ -152,10 +185,12 @@ class Grid {
     }
   }
 
+  /** Slide every node upwards. */
   public void slideUp() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     slideUp(true);
   }
 
+  /** Slide every node upwards, specifying whenever to generate a new node. */
   public void slideUp(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
@@ -202,6 +237,7 @@ class Grid {
     }
     
     clearMoveFlags();
+    // Generate a new node if specified
     if (genNewNode) {
       generateNewNode();
     }
@@ -209,10 +245,12 @@ class Grid {
     history.add(cloneNodes());
   }
 
+  /** Slide every node rightwards. */
   public void slideRight() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     slideRight(true);
   }
 
+  /** Slide every node rightwards, specifying if a new node should be generated. */
   public void slideRight(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
     
@@ -266,10 +304,12 @@ class Grid {
     history.add(cloneNodes());
   }
 
+  /** Slide every node downwards. */
   public void slideDown() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     slideDown(true);
   }
 
+  /** Slide every node downwards, specifying if a new node should be generated. */
   public void slideDown(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
@@ -325,10 +365,12 @@ class Grid {
     history.add(cloneNodes());
   }
 
+  /** Slide every node leftwards. */
   public void slideLeft() throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     slideLeft(true);
   }
 
+  /** Slide every node leftwards, specifying if a new node should be generated. */
   public void slideLeft(boolean genNewNode) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException {
     List<Node> nodesCopy = cloneNodes();
 
@@ -382,11 +424,13 @@ class Grid {
     history.add(cloneNodes());
   } 
 
+  /** Undo the most recent action. */
   public void undo() throws UnknownNodeTypeException, NoValueException {
     this.nodes = history.undo();
     toHash = true;
   }
 
+  /** Redo the last undone action. */
   public void redo() throws UnknownNodeTypeException, NoValueException { 
     List<Node> list = null;
     try {
@@ -399,44 +443,53 @@ class Grid {
       toHash = true;
     }
   }
-
+  
+  /** Return array index of position. */
   public int index(Position pos) {
     return (pos.getY() * rowSize) + pos.getX();
   }
 
+  /** Return array index of position, above the specified position. */
   public int indexUp(Position pos) {
     return ((pos.getY()-1) * rowSize) + pos.getX();
   }
 
+  /** Return array index of position, to the right of the specified position. */
   public int indexRight(Position pos) {
     return (pos.getY() * rowSize) + (pos.getX()+1);
   }
 
+  /** Return array index of position, below the specified position. */
   public int indexDown(Position pos) {
     return ((pos.getY()+1) * rowSize) + pos.getX();
   }
 
+  /** Return array index of position, to the left of the specified position. */
   public int indexLeft(Position pos) {
     return (pos.getY() * rowSize) + (pos.getX()-1);
   }
  
-
+  /** Return grid state. */
   public List<Node> getNodes() {
     return nodes;
   }
 
+  /** Return history object. */
   public GridHistory getHistory() {
     return history;
   }
-
+  
+  /** Return number of rows in the grid. */
   public int getRows() {
     return rowSize;
   }
 
+  /** Return number of columns in the grid. */
   public int getCols() {
     return columnSize;
   }
 
+  /** Return true if the game is lost. */
   public boolean lost() throws NoValueException, UnknownNodeTypeException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -449,7 +502,8 @@ class Grid {
     } 
     return true;
   }
-
+  
+  /** Return true if swiping up is a possible action. */
   public boolean canMoveUp() throws UnknownNodeTypeException, NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -463,6 +517,7 @@ class Grid {
     return false;
   }
 
+  /** Return true if swiping right is a possible action. */
   public boolean canMoveRight() throws UnknownNodeTypeException, NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -476,6 +531,7 @@ class Grid {
     return false;
   }
 
+  /** Return true if swiping down is a possible action. */
   public boolean canMoveDown() throws UnknownNodeTypeException, NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -489,6 +545,7 @@ class Grid {
     return false;
   }
 
+  /** Return true if swiping left is a possible action. */
   public boolean canMoveLeft() throws UnknownNodeTypeException, NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.EMPTY) {
@@ -502,6 +559,7 @@ class Grid {
     return false;
   }
 
+  /** Return true if the win condition is satisfied. */
   public boolean won() throws NoValueException {
     for (Node node : nodes) {
       if (node.getType() == NodeType.VALUE) {
@@ -513,7 +571,7 @@ class Grid {
     return false;
   }
   
-  
+  /** Return true if grids are equal. */
   public boolean equals(Grid grid) throws NoValueException {
 
     if (this.rowSize != grid.rowSize || this.columnSize != grid.columnSize) {
@@ -528,6 +586,7 @@ class Grid {
     return true;
   }
 
+  /** Return list of empty nodes within the grid. */
   public List<EmptyNode> getEmptyNodesCopy() {
     LinkedList<EmptyNode> list = new LinkedList<EmptyNode>();
     for (Node node : nodes) {
@@ -538,16 +597,30 @@ class Grid {
     return list;
   }
 
+  /** 
+   * Create a value node within the grid.
+   *
+   * @param pos Position of the node
+   * @param value Value for the node to have
+   */
   public void setValueNode(Position pos, int value) {
     nodes.set(index(pos), new ValueNode(pos, value));
     toHash = true;
   }
 
+  /** Set a value node within the grid. */
   public void setValueNode(ValueNode node) {
     nodes.set(index(node.getPos()), new ValueNode(node));
     toHash = true;
   }
 
+  /** 
+   * Create a value node within the grid.
+   *
+   * @param pos Position of the node
+   * @param value Value for the node to have
+   * @param flag Will add this change to history if true
+   */
   public void setValueNode(Position pos, int value, boolean flag) throws UnknownNodeTypeException, NoValueException {
     if (flag) {
       nodes.set(index(pos), new ValueNode(pos, value));
@@ -557,7 +630,13 @@ class Grid {
     }
     toHash = true;
   }
-
+  
+  /** 
+   * Create a value node within the grid.
+   *
+   * @param node Value node to set
+   * @param flag Will add this change to history if true
+   */
   public void setValueNode(ValueNode node, boolean flag) throws UnknownNodeTypeException, NoValueException {
     if (flag) {
       nodes.set(index(node.getPos()), new ValueNode(node));
@@ -567,12 +646,14 @@ class Grid {
     }
     toHash = true;
   }
-
+  
+  /** Transform the node at the speicified position into an empty one. */
   public void setEmptyNode(Position pos) {
     nodes.set(index(pos), new EmptyNode(pos));
     toHash = true;
   }
 
+  /** Return the string representation of the grid. */
   public String stringify() throws UnknownNodeTypeException, MaxPosNotInitializedException, NoValueException {
 
     LinkedList<String> output = new LinkedList<String>();
@@ -606,6 +687,7 @@ class Grid {
     return String.join("\n", output);
   }
   
+  /** Return hash code for the grid. */
   @Override
   public int hashCode() {
     if (toHash) {
