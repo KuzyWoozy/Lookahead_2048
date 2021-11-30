@@ -15,9 +15,9 @@ class BrickNode extends Node {
   }
 
   /**
-   Instantiates the node with the specified position.
-
-   @param pos Location of the node on the grid
+   * Instantiates the node with the specified position.
+   *
+   * @param pos Location of the node on the grid
    */
   public BrickNode(Position pos) {
     super(pos);

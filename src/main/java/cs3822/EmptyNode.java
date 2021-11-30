@@ -15,9 +15,9 @@ class EmptyNode extends Node {
   }
 
   /**
-   Instantiates the node with the specified position.
-
-   @param pos Location of the node on the grid
+   * Instantiates the node with the specified position.
+   *
+   * @param pos Location of the node on the grid
    */
   public EmptyNode(Position pos) {
     super(pos);
