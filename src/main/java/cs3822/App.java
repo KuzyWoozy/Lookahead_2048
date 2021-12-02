@@ -16,15 +16,14 @@ public class App
     String map4 = "~###\n#~##\n##~#\n###~";
     String map5 = "####\n####\n####\n####";
 
-    Controller control = new Controller(new StdoutView(), map5, 2048, 0.9f);
+    Controller control = new Controller(new StdoutView(), map1, 256, 0.9f);
 
-    control.play(); 
-    //TreeGeneratorMDP gen = new TreeGeneratorMDP(control.getGrid(), 0.9f);
-    //HashMap<Integer, SolTableItem> hashMap = gen.getMapRef();   
-    //System.out.println(String.valueOf(hashMap.size()));
-    //System.out.println(control.getGrid().stringify());
-    //System.out.println(hashMap.get(control.getGrid().hashCode()).getReward());
-    //gen.save("saved-map-1.serial");
+    //control.play(); 
+    TreeGeneratorMDP gen = new TreeGeneratorMDP(control.getGrid(), 0.9f);
+    HashMap<Integer, SolTableItem> hashMap = gen.getMapRef();   
+    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(hashMap.size()) + "\nInitial state:\n" + control.getGrid().stringify() + "\nExpected reward/success: " + String.valueOf(hashMap.get(control.getGrid().hashCode()).getReward()));
+    // Save the model
+    gen.save("saved-map-1.serial");
    
   }
 }
