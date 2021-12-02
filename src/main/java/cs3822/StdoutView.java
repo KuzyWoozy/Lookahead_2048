@@ -17,7 +17,7 @@ class StdoutView implements View {
  
   private Scanner scan = new Scanner(System.in);
   
-  private List<Action> convertStringToAction(String actionString) throws UnknownNodeTypeException {
+  private List<Action> convertStringToAction(String actionString) {
     actionString = actionString.toLowerCase();
     LinkedList<Action> list = new LinkedList<Action>();
     for (char x : actionString.toCharArray()) {
@@ -50,6 +50,8 @@ class StdoutView implements View {
         case RESET:
           list.add(Action.RESET); 
           break;
+        case EXIT:
+          System.exit(0);
         default:
       }
     }

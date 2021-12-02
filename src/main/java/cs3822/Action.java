@@ -14,7 +14,8 @@ enum Action {
   UNDO,
   REDO,
   RESET,
-  NONE;
+  NONE,
+  EXIT;
   
   /**
    * Convert a character into an Action enum.
@@ -41,6 +42,8 @@ enum Action {
         return RESET;
       case '~':
         return NONE;
+      case 'q':
+        return EXIT;
       default:
         throw new UnknownNodeTypeException();
     }
