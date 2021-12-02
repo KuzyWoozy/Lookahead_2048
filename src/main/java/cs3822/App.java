@@ -21,7 +21,7 @@ public class App
     //control.play(); 
     TreeGeneratorMDP gen = new TreeGeneratorMDP(control.getGrid(), 0.9f);
     HashMap<Integer, SolTableItem> hashMap = gen.getMapRef();   
-    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(hashMap.size()) + "\nInitial state:\n" + control.getGrid().stringify() + "\nExpected reward/success: " + String.valueOf(hashMap.get(control.getGrid().hashCode()).getReward()));
+    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(hashMap.size()) + "\nInitial state:\n" + control.getGrid().stringify() + "\nExpected win rate (%): " + String.valueOf(hashMap.get(control.getGrid().hashCode()).getReward() * 100));
     // Save the model
     gen.save("saved-map-1.serial");
    

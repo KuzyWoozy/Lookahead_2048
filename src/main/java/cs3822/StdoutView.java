@@ -60,7 +60,7 @@ class StdoutView implements View {
   
   @Override
   public List<Action> getInput() throws UnknownNodeTypeException {
-    System.out.print("\nEnter command: ");
+    System.out.print("\nEnter command(s): ");
     return convertStringToAction(scan.nextLine()); 
   }
   
