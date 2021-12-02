@@ -21,7 +21,14 @@ class StdoutView implements View {
     actionString = actionString.toLowerCase();
     LinkedList<Action> list = new LinkedList<Action>();
     for (char x : actionString.toCharArray()) {
-      switch(Action.getAction(x)) {
+      Action ac = null;
+      try {
+        ac = Action.getAction(x);
+      } catch(UnknownNodeTypeException e) {
+        continue;
+      }
+
+      switch(ac) {
         case SWIPE_UP:
           list.add(Action.SWIPE_UP) ; 
           break;
@@ -44,7 +51,6 @@ class StdoutView implements View {
           list.add(Action.RESET); 
           break;
         default:
-
       }
     }
     return list;

@@ -14,10 +14,11 @@ public class App
     String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
     String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
     String map4 = "~###\n#~##\n##~#\n###~";
+    String map5 = "####\n####\n####\n####";
 
-    Controller control = new Controller(new StdoutView(), map0, 32, 0.9f);
+    Controller control = new Controller(new StdoutView(), map5, 2048, 0.9f);
 
-    //control.play(); 
+    control.play(); 
     //TreeGeneratorMDP gen = new TreeGeneratorMDP(control.getGrid(), 0.9f);
     //HashMap<Integer, SolTableItem> hashMap = gen.getMapRef();   
     //System.out.println(String.valueOf(hashMap.size()));
