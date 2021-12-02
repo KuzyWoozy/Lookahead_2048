@@ -71,7 +71,7 @@ class TreeGeneratorMDP {
 
               // Debug info
               if (map.size() % 10000 == 0) {
-                System.out.println(map.size());
+                System.out.println("Unique states in DAG: " + String.valueOf(map.size()));
               } 
               
               
