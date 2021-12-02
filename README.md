@@ -24,3 +24,7 @@ This chapter focuses on going over all of the components which make up the speci
 
   ```java -jar optimal_3x3_256_algo.jar```
 
+## Directory layout:
+
+This project uses the Maven Java Build Tool standard directory structure, whose documentation may be found here: https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
+

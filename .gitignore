@@ -1,5 +1,5 @@
 
-
+*.serial
 target/*
 .classpath
 .project
