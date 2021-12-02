@@ -19,23 +19,17 @@ This chapter focuses on going over all of the components which make up the speci
   **Controls:**
     Each command is entered via stdin (ascii within single quotes below), either in turn or as a sequence of several commands.
 
-     <ins>Movement:</ins>
+      <ins>Movement:</ins>
 
         - 'w' = Shift every node up
-
         - 'd' = Shift every node right
-
         - 's' = Shift every node down
-
         - 'a' = Shift every node left
 
       <ins>Grid:</ins>
 
-        - 'u' = Undo the most recent action, note that taking an                action after an undo will overwrite the redo 
-                buffer.
-
+        - 'u' = Undo the most recent action, note that taking an                action after an undo will overwrite the redo buffer.
         - 'r' = Redo the most recent action
-
         - 'x' = Restart the game
 
       <ins>System:</ins>
