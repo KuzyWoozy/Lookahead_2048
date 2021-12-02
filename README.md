@@ -10,13 +10,7 @@ This chapter focuses on going over all of the components which make up the speci
 - Maven == 5.5.0
 - Java == 17
 
-## Getting started:
-
-- Play 2048 with the command line interface:
-  
-  ```java -jar cli_2048.jar```
-
-### Controls:
+## Controls
 Each command is entered via stdin (ascii within single quotes below), either in turn or as a sequence of several commands.
 
 #### Movement:
@@ -32,7 +26,12 @@ Each command is entered via stdin (ascii within single quotes below), either in 
 
 #### System:
 - 'q' = Exit game
-      
+
+## Getting started:
+
+- Play 2048 with the command line interface:
+  
+  ```java -jar cli_2048.jar```
 
 - Compute optimal model for 2x2 grid with a random initial state:
 
