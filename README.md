@@ -16,22 +16,22 @@ This chapter focuses on going over all of the components which make up the speci
   
   ```java -jar cli_2048.jar```
 
-  **Controls:**
-    Each command is entered via stdin (ascii within single quotes below), either in turn or as a sequence of several commands.
+### Controls:
+Each command is entered via stdin (ascii within single quotes below), either in turn or as a sequence of several commands.
 
-      **Movement:**
-        - 'w' = Shift every node up
-        - 'd' = Shift every node right
-        - 's' = Shift every node down
-        - 'a' = Shift every node left
+#### Movement:
+- 'w' = Shift every node up
+- 'd' = Shift every node right
+- 's' = Shift every node down
+- 'a' = Shift every node left
 
-      **Grid:**
-        - 'u' = Undo the most recent action, note that taking an                action after an undo will overwrite the redo buffer.
-        - 'r' = Redo the most recent action
-        - 'x' = Restart the game
+#### Grid:
+- 'u' = Undo the most recent action, note that taking an                action after an undo will overwrite the redo buffer.
+- 'r' = Redo the most recent action
+- 'x' = Restart the game
 
-      **System:**
-        - 'q' = Exit game
+#### System:
+- 'q' = Exit game
       
 
 - Compute optimal model for 2x2 grid with a random initial state:
