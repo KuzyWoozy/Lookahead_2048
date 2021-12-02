@@ -14,13 +14,13 @@ This chapter focuses on going over all of the components which make up the speci
 
 - Play the game:
   
-  java -jar cli_2048.jar
+  ```java -jar cli_2048.jar```
 
 - Compute optimal model for 2x2 grid with a random initial state:
 
-java -jar optimal_2x2_16_algo.jar 
+  ```java -jar optimal_2x2_16_algo.jar```
 
 - Compute optimal model for 3x3 grid with a random initial state:
 
-  java -jar optimal_3x3_256_algo.jar 
+  ```java -jar optimal_3x3_256_algo.jar```
 
