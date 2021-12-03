@@ -5,23 +5,22 @@ import java.util.List;
 import java.util.Scanner;
 
 
-/*
-  1000|0002|0003|0004
-  -------------------
-  0002|0003|0004|0005
-  -------------------
-  0003|0004|0004|0005
-  -------------------
-*/
+/**
+ * The CLI interface.
+ *
+ * @author Daniil Kuznetsov
+ */
 class StdoutView implements View {
  
   private Scanner scan = new Scanner(System.in);
-  
+ 
+  /** Converts String object into a corresponding Action. */
   private List<Action> convertStringToAction(String actionString) {
     actionString = actionString.toLowerCase();
     LinkedList<Action> list = new LinkedList<Action>();
     for (char x : actionString.toCharArray()) {
       Action ac = null;
+      // Chech if this is a valid action, ignore if not
       try {
         ac = Action.getAction(x);
       } catch(UnknownNodeTypeException e) {
@@ -58,13 +57,14 @@ class StdoutView implements View {
     return list;
   }
   
+  /** Obtain the list of user Actions from the stdin. */
   @Override
   public List<Action> getInput() throws UnknownNodeTypeException {
     System.out.print("\nEnter command(s): ");
     return convertStringToAction(scan.nextLine()); 
   }
   
-
+  /** Clear the stdout. */
   private String clear() {
     LinkedList<String> list = new LinkedList<String>();
     for (int i = 0; i<2; i++) {
@@ -74,7 +74,7 @@ class StdoutView implements View {
   }
 
   
-  
+  /** Print the specified grid to stdout. */ 
   @Override
   public void display(Grid grid) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     System.out.println(clear() + grid.stringify() + "\n\n\n");

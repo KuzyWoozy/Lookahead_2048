@@ -6,11 +6,18 @@ import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
+/**
+ * Responsible for processing the DAG of instances
+ * generated from the initial node and creating 
+ * the optimal model to play the game.
+ *
+ * @author Daniil Kuznetsov
+ */
 class TreeGeneratorMDP {
   private HashMap<Integer, SolTableItem> map;
   private float twoProb;
 
+  /** Initialize class with initial node and probability of generating a 2. */
   public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException {
     this.map = new HashMap<Integer, SolTableItem>();
     this.twoProb = twoProb;
@@ -129,11 +136,21 @@ class TreeGeneratorMDP {
     };
   }
 
+  /**
+   * Performs shifts upwards until a terminal is reached, 
+   * a loss, win or no more possible moves upwards. 
+   * All of the processing information is recoded in 
+   * the specified Stack and Hash table.
+   *
+   * @param grid Start point for the dive
+   * @param history Stack manager for processing in a DFS manner
+   * @param map Hash table of optimal solutions
+   */
   private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
 
     while(true) {
       int hash = grid.hashCode(); 
-      
+      // Hash caching
       if (map.containsKey(hash)) {
         TreeDFSNode node = history.peek();
 
@@ -141,14 +158,17 @@ class TreeGeneratorMDP {
         node.setAction(Action.NONE);
         return;
       }
-      
+
+      // Check if the state is stuck  
       if (!grid.canMoveUp()) {
         history.peek().updateMaxReward(0f);
         return;
       }
 
+      // Move the state upwards
       grid.slideUp(false);
       
+      // Check if the game is beat
       if (grid.won()) {
         history.peek().updateMaxReward(1f);
         grid.undo();
@@ -156,7 +176,8 @@ class TreeGeneratorMDP {
         history.peek().setAction(Action.SWIPE_LEFT);
         return;
       } 
-
+      
+      // Create a new node in the DAG 
       history.push(new TreeDFSNode(grid, twoProb));
       // Need to check if we lost AFTER instantiating
       if (grid.lost()) {
@@ -166,11 +187,13 @@ class TreeGeneratorMDP {
       }
     }
   }
-
+  
+  /** Returns hash table of optimal actions. */
   public HashMap<Integer, SolTableItem> getMapRef() {
     return map;
   }
 
+  /** Save the model to the specified file. */
   public void save(String fileName) throws IOException {
     FileOutputStream file = null;
     ObjectOutputStream out = null;
