@@ -22,17 +22,20 @@ class TreeDFSNode {
   private float twoProb;
   private float fourProb;
 
-
-  /** Constructs a node with the given grid and probability of generating a 2.*/
-  public TreeDFSNode(Grid grid, float twoProb) throws UnknownNodeTypeException, NoValueException {
-    
+  /** Initial state constructor. */
+  public TreeDFSNode(float twoProb) {
     this.bestReward = 0;
     this.action = Action.SWIPE_UP;
     this.bestAction = Action.SWIPE_UP;
 
     this.twoProb = twoProb;
     this.fourProb = 1 - twoProb;
+  }
 
+
+  /** Constructs a node with the given grid and probability of generating a 2.*/
+  public TreeDFSNode(Grid grid, float twoProb) throws UnknownNodeTypeException, NoValueException {
+    this(twoProb);
 
     List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
     
