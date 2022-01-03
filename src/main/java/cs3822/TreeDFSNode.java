@@ -15,18 +15,25 @@ class TreeDFSNode {
   private Action action;
   
   // Per collection of possibility attr
-  private float expSumReward = 0;
-  private LinkedList<ValueNode> posi = new LinkedList<ValueNode>();
-  private int posiNum = 0;
+  private float expSumReward;
+  private LinkedList<ValueNode> posi;
+  private int posiNum;
 
   private float twoProb;
   private float fourProb;
 
+  private int currentNodeValue;
+
   /** Initial state constructor. */
   public TreeDFSNode(float twoProb) {
+    this.bestAction = Action.SWIPE_UP;
     this.bestReward = 0;
     this.action = Action.SWIPE_UP;
-    this.bestAction = Action.SWIPE_UP;
+
+    this.expSumReward = 0;
+    
+    this.posi = new LinkedList<ValueNode>();
+    this.posiNum = 0;
 
     this.twoProb = twoProb;
     this.fourProb = 1 - twoProb;
@@ -38,17 +45,16 @@ class TreeDFSNode {
     this(twoProb);
 
     List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
-    
+    this.posiNum = emptyNodes.size();
     // Update grid with the given possibility
-    if (emptyNodes.size() > 0) {
-      for (EmptyNode node : emptyNodes) { 
-        this.posi.add(new ValueNode(node, 2));
-        this.posi.add(new ValueNode(node, 4));
-      }
-      
-      this.posiNum = this.posi.size() / 2;
-      grid.setValueNode(this.posi.get(0), true);
+    for (EmptyNode node : emptyNodes) { 
+      this.posi.add(new ValueNode(node, 2));
+      this.posi.add(new ValueNode(node, 4));
     }
+    
+    ValueNode node = posi.remove(0);
+    this.currentNodeValue = node.getValue();
+    grid.setValueNode(node, true);
   }
 
   /** Set the maximal reward obtained. */
@@ -63,34 +69,35 @@ class TreeDFSNode {
       bestAction = action;
     }
   }
-  
-  /** Process the next possibility, updating the grid accordingly. */
-  public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException, InvalidValueException { 
+ 
+  public void commitReward(Grid grid) throws InvalidValueException, UnknownNodeTypeException, NoValueException {
+    // Remove the previous possibility insertion
+    grid.undo();
 
-    if (posi.size() > 0) {
-      grid.undo();
-
-      int val = posi.remove(0).getValue();
-      
-      if (val == 2) {
-        this.expSumReward += this.twoProb * this.bestReward; 
-      } else if (val == 4) {
-        this.expSumReward += this.fourProb * this.bestReward; 
-      } else {
-        throw new InvalidValueException();
-      }
-
-      if (posi.size() > 0) {
-        // Init for next possibility
-        this.bestReward = 0;
-        this.action = Action.SWIPE_UP;
-        this.bestAction = Action.SWIPE_UP;
-
-        grid.setValueNode(posi.get(0), true);
-
-      }
-    } 
+    // Now that we processed the previous node, we can delete it
+    if (currentNodeValue == 2) {
+      expSumReward += twoProb * bestReward; 
+    } else if (currentNodeValue == 4) {
+      expSumReward += fourProb * bestReward;
+    } else {
+      throw new InvalidValueException();
+    }
   }
+
+  /** Process the next possibility, updating the grid accordingly. */
+  public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException, InvalidValueException {
+  
+    commitReward(grid);
+
+    // Init for next possibility
+    bestReward = 0;
+    action = Action.SWIPE_UP;
+    bestAction = Action.SWIPE_UP;
+
+    ValueNode node = posi.remove(0);
+    currentNodeValue = node.getValue();
+    grid.setValueNode(node, true); 
+  } 
   
   /** Return current set action. */
   public Action getAction() {

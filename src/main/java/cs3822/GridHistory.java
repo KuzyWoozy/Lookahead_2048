@@ -16,14 +16,14 @@ class GridHistory {
 
   /** Constructs from specified initial state of nodes. */ 
   public GridHistory(List<Node> initialState) {
-    instances = new Stack<Node[]>();
-    instances.push(initialState.toArray(new Node[initialState.size()]));
-    temp = new Stack<Node[]>();
+    this.instances = new Stack<Node[]>();
+    this.instances.push(initialState.toArray(new Node[initialState.size()]));
+    this.temp = new Stack<Node[]>();
   }
 
   /** Copy constructor. */
   public GridHistory(GridHistory history) throws UnknownNodeTypeException, NoValueException {
-    instances = new Stack<Node[]>();
+    this.instances = new Stack<Node[]>();
     Node[] list;
     Node[] new_list;
     for (int i = 0; i < history.instances.size(); i++) {
@@ -33,10 +33,10 @@ class GridHistory {
       for (int x = 0; x < list.length; x++) {
         new_list[x] = Node.copyNode(list[x]);
       }
-      instances.push(new_list);
+      this.instances.push(new_list);
     }
 
-    temp = new Stack<Node[]>();
+    this.temp = new Stack<Node[]>();
     for (int i = 0; i < history.temp.size(); i++) {
       list = history.temp.get(i);
       // Make sure to peform deep copies
@@ -44,7 +44,7 @@ class GridHistory {
       for (int x = 0; x < list.length; x++) {
         new_list[x] = Node.copyNode(list[x]);
       }
-      temp.push(new_list);
+      this.temp.push(new_list);
     }
   }
   
@@ -97,6 +97,16 @@ class GridHistory {
     instances.push(instance.toArray(new Node[instance.size()]));
     // Delete the current future
     clearBuffer();
+  }
+
+  public List<Node> initialInstanceCopy() throws UnknownNodeTypeException, NoValueException {
+    Node[] items = instances.get(0);
+    Node[] items_copy = new Node[items.length];
+    for (int i = 0; i < items.length; i++) {
+      items_copy[i] = Node.copyNode(items[i]);
+    }
+
+    return new ArrayList<Node>(Arrays.asList(items_copy));
   }
    
 }

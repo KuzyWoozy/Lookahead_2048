@@ -12,6 +12,7 @@ import java.util.Arrays;
  * @author Daniil Kuznetsov
  */
 class Grid {
+  private String map;
 
   private List<Node> nodes;
   private GridHistory history;
@@ -34,12 +35,14 @@ class Grid {
    * @param win_condition Target value to be reached to win the game
    * @param twoProb Probability of generating a node with the value 2
    */
-  public Grid(String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
+  public Grid(String map, int winCondition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException  {
+
+    this.map = map;
 
     this.twoProb = twoProb;
-    this.winCondition = win_condition;
-    List<String> rows = Arrays.asList(map.split("\n"));
+    this.winCondition = winCondition;
 
+    List<String> rows = Arrays.asList(map.split("\n"));
     this.columnSize = rows.get(0).length();
     this.rowSize = rows.size();
     // Set the boundaries for Position
@@ -60,8 +63,8 @@ class Grid {
       } 
     } 
     // Generate the initial nodes
-    generateNewNode();
-    generateNewNode();
+    //generateNewNode();
+    //generateNewNode();
     
     // Start keeping track of history
     this.history = new GridHistory(cloneNodes());
@@ -700,6 +703,31 @@ class Grid {
     
   }
 
+  public void reset() throws UnknownNodeTypeException, NoValueException {
+    nodes = history.initialInstanceCopy();
+    this.history = new GridHistory(cloneNodes());
+  }
+
+  public void restart() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+    List<String> rows = Arrays.asList(map.split("\n"));
+    
+    nodes = Arrays.asList(new Node[rowSize * columnSize]);
+    Position pos;
+    // Initialize Node list
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = 0; x < columnSize; x++) {
+        pos = new Position(x, y);
+        nodes.set(index(pos), createNode(rows.get(y).charAt(x), pos)); 
+      } 
+    } 
+    // Generate the initial nodes
+    generateNewNode();
+    generateNewNode();
+    
+    // Start keeping track of history
+    this.history = new GridHistory(cloneNodes());
+
+  }
 
 }
 

@@ -13,8 +13,8 @@ public class Controller {
   private Grid grid;
 
   private String map;
-  float twoProb;
-  int winCondition;
+
+  private Algorithm algo;
 
   /**
    * Controller constructor.
@@ -24,13 +24,12 @@ public class Controller {
    * @param win_condition The target value to be reached to win the game
    * @param twoProb Probability of generating a value node containing a 2
    */
-  public Controller(View view, String map, int win_condition, float twoProb) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public Controller(Grid grid, View view, Algorithm algo) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
     this.view = view;
     this.map = map;
-    this.twoProb = twoProb;
-    this.winCondition = win_condition;
+    this.algo = algo;
     // Create the grid representation from the string map
-    grid = new Grid(map, win_condition, twoProb);
+    this.grid = grid; 
   }
 
   /** Return grid instance */
@@ -75,16 +74,64 @@ public class Controller {
 
   /** Reset the grid instance. */
   public void reset() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
-    grid = new Grid(map, winCondition, twoProb);
+    grid.reset();
   }
-  
+
+  /** Restart the grid instance. */
+  public void restart() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+    grid.restart();
+  }
+
   /** Execute the game logic. */
-  public void play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException {
-    while(!grid.lost()) {
+  public GameStats play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException {
+    GameStats stat = new GameStats();
+    while (true) {
+      if (grid.won()) {
+        stat.won();
+        break;
+      } else if (grid.lost()) {
+        stat.lost();
+        break;
+      }
       view.display(grid);
-      process(view.getInput()); 
+      process(algo.move(grid)); 
     }
     view.display(grid);
+
+    return stat;
   }
-  
+
+  public GameStats play(int iterations) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException, InvalidNumberOfGamesException {
+    if (iterations < 1) {
+      throw new InvalidNumberOfGamesException();
+    }
+    GameStats stats = new GameStats();
+    for (int i = 0; i < iterations; i++) {
+      stats.merge(play()); 
+      restart();
+    }
+    return stats;
+  }
+
+  public GameStats play(int iterations, boolean reset) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException, InvalidNumberOfGamesException {
+    if (iterations < 1) {
+      throw new InvalidNumberOfGamesException();
+    }
+    GameStats stats = new GameStats();
+    for (int i = 0; i < iterations; i++) {
+      stats.merge(play()); 
+      if (reset) {
+        reset();
+      } else {
+        restart();
+      }
+    }
+    return stats;
+  }
+
+  public void setAlgorithm(Algorithm algo) {
+    this.algo = algo;
+  }
+
+
 }

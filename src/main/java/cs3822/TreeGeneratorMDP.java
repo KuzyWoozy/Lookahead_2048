@@ -2,9 +2,13 @@ package cs3822;
 
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.LinkedList;
+import java.util.List;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.Math;
+
 
 /**
  * Responsible for processing the DAG of instances
@@ -13,12 +17,12 @@ import java.io.IOException;
  *
  * @author Daniil Kuznetsov
  */
-class TreeGeneratorMDP {
+class TreeGeneratorMDP implements Algorithm {
   private HashMap<Integer, SolTableItem> map;
   private float twoProb;
 
   /** Initialize class with initial node and probability of generating a 2. */
-  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException {
+  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, MaxPosNotInitializedException {
     this.map = new HashMap<Integer, SolTableItem>();
     this.twoProb = twoProb;
    
@@ -83,7 +87,6 @@ class TreeGeneratorMDP {
               
               
               map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
-
               break loop;
 
             // Part of caching optimization
@@ -111,22 +114,33 @@ class TreeGeneratorMDP {
 
         dive(grid, history, map);
       }
-  
-
-      history.peek().setNextPosi(grid);
-      if (history.peek().isPosiEmpty()) {
-        TreeDFSNode node = history.pop();
+     
+      
+      TreeDFSNode node = history.peek();
+      if (node.isPosiEmpty()) {
+        
+        history.pop();
         if (history.isEmpty()) {
           break;
         }
-        // Time to go up a level in the tree
-        grid.undo();
 
-        history.peek().updateMaxReward(node.getExpectedReward());
+        node.commitReward(grid);
+
+        // One to go up a level in the tree
+        grid.undo();
+        
+        float expectedReward = node.getExpectedReward();
+        
+        history.peek().updateMaxReward(expectedReward);
+        // Early branch cutting optimizations, has to be after above line!!
+        if (Math.abs(1f - expectedReward) <= 0.0001) {
+          history.peek().setAction(Action.SWIPE_LEFT);
+        }
       } else {
+        node.setNextPosi(grid);
         if (grid.lost()) { 
-          history.peek().updateMaxReward(0f);
-          history.peek().setAction(Action.NONE);
+          node.updateMaxReward(0f);
+          node.setAction(Action.NONE);
         } else {
           // Need to dive if we have a new possibility
           dive(grid, history, map);
@@ -134,6 +148,9 @@ class TreeGeneratorMDP {
       }
             
     };
+    
+    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(map.size()) + "\nInitial state:\n" + grid.stringify() + "\nExpected win rate (%): " + String.valueOf(map.get(grid.hashCode()).getReward() * 100));
+
   }
 
   /**
@@ -148,7 +165,8 @@ class TreeGeneratorMDP {
    */
   private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
 
-    while(true) {
+    while(true) { 
+
       int hash = grid.hashCode(); 
       // Hash caching
       if (map.containsKey(hash)) {
@@ -175,8 +193,8 @@ class TreeGeneratorMDP {
         // Can skip other alternatives if we won
         history.peek().setAction(Action.SWIPE_LEFT);
         return;
-      } 
-      
+      }
+
       // Create a new node in the DAG 
       history.push(new TreeDFSNode(grid, twoProb));
       // Need to check if we lost AFTER instantiating
@@ -185,6 +203,7 @@ class TreeGeneratorMDP {
         history.peek().setAction(Action.NONE);
         return;
       }
+      
     }
   }
   
@@ -197,8 +216,7 @@ class TreeGeneratorMDP {
   public void save(String fileName) throws IOException {
     FileOutputStream file = null;
     ObjectOutputStream out = null;
-    try {
-    
+    try {    
       file = new FileOutputStream(fileName);
       out = new ObjectOutputStream(file);
   
@@ -212,6 +230,12 @@ class TreeGeneratorMDP {
         out.close();
       }
     }
+  }
+
+  public List<Action> move(Grid grid) {
+    LinkedList<Action> list = new LinkedList<Action>();
+    list.add(map.get(grid.hashCode()).getAction());
+    return list;
   }
 
 }
