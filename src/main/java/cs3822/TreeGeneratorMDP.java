@@ -1,12 +1,8 @@
 package cs3822;
 
-import java.util.HashMap;
 import java.util.Stack;
 import java.util.LinkedList;
 import java.util.List;
-import java.io.ObjectOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.Math;
 
 
@@ -18,19 +14,19 @@ import java.lang.Math;
  * @author Daniil Kuznetsov
  */
 class TreeGeneratorMDP implements Algorithm {
-  private HashMap<Integer, SolTableItem> map;
   private float twoProb;
+  private ModelStorage db;
 
   /** Initialize class with initial node and probability of generating a 2. */
-  public TreeGeneratorMDP(Grid grid, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, MaxPosNotInitializedException {
-    this.map = new HashMap<Integer, SolTableItem>();
+  public TreeGeneratorMDP(Grid grid, ModelStorage db, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, MaxPosNotInitializedException {
     this.twoProb = twoProb;
+    this.db = db;
    
     // Initialize the Tree DFS stack
     Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
     history.push(new TreeDFSNode(twoProb));
     // Initial dive
-    dive(grid, history, map);
+    dive(grid, history, db);
     while(true) {
       loop:  
         while(true)  { 
@@ -81,12 +77,12 @@ class TreeGeneratorMDP implements Algorithm {
               TreeDFSNode node = history.peek();
 
               // Debug info
-              if (map.size() % 10000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(map.size()));
+              if (db.getElemCount() % 10000 == 0) {
+                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()));
               } 
               
               
-              map.put(grid.hashCode(), new SolTableItem(node.getBestAction(), node.getBestReward()));
+              db.insert(grid.hashCode(), node.getBestAction(), node.getBestReward());
               break loop;
 
             // Part of caching optimization
@@ -112,7 +108,7 @@ class TreeGeneratorMDP implements Algorithm {
           continue;
         }
 
-        dive(grid, history, map);
+        dive(grid, history, db);
       }
      
       
@@ -143,13 +139,13 @@ class TreeGeneratorMDP implements Algorithm {
           node.setAction(Action.NONE);
         } else {
           // Need to dive if we have a new possibility
-          dive(grid, history, map);
+          dive(grid, history, db);
         }
       }
             
     };
     
-    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(map.size()) + "\nInitial state:\n" + grid.stringify() + "\nExpected win rate (%): " + String.valueOf(map.get(grid.hashCode()).getReward() * 100));
+    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nExpected win rate (%): " + String.valueOf(db.fetchReward(grid.hashCode()) * 100));
 
   }
 
@@ -161,18 +157,18 @@ class TreeGeneratorMDP implements Algorithm {
    *
    * @param grid Start point for the dive
    * @param history Stack manager for processing in a DFS manner
-   * @param map Hash table of optimal solutions
+   * @param db Table of optimal solutions
    */
-  private void dive(Grid grid, Stack<TreeDFSNode> history, HashMap<Integer, SolTableItem> map) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
+  private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
 
     while(true) { 
 
       int hash = grid.hashCode(); 
       // Hash caching
-      if (map.containsKey(hash)) {
+      if (db.contains(hash)) {
         TreeDFSNode node = history.peek();
 
-        node.setMaxReward(map.get(hash).getReward());
+        node.setMaxReward(db.fetchReward(hash));
         node.setAction(Action.NONE);
         return;
       }
@@ -202,39 +198,13 @@ class TreeGeneratorMDP implements Algorithm {
         history.peek().updateMaxReward(0f);
         history.peek().setAction(Action.NONE);
         return;
-      }
-      
+      } 
     }
   }
   
-  /** Returns hash table of optimal actions. */
-  public HashMap<Integer, SolTableItem> getMapRef() {
-    return map;
-  }
-
-  /** Save the model to the specified file. */
-  public void save(String fileName) throws IOException {
-    FileOutputStream file = null;
-    ObjectOutputStream out = null;
-    try {    
-      file = new FileOutputStream(fileName);
-      out = new ObjectOutputStream(file);
-  
-      out.writeObject(map);
-
-    } finally {
-      if (file != null) {
-        file.close();
-      }
-      if (out != null) {
-        out.close();
-      }
-    }
-  }
-
   public List<Action> move(Grid grid) {
     LinkedList<Action> list = new LinkedList<Action>();
-    list.add(map.get(grid.hashCode()).getAction());
+    list.add(db.fetchAction(grid.hashCode()));
     return list;
   }
 

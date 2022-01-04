@@ -18,8 +18,8 @@ public class App
 
     float twoProb = 0.9f;
     View view = new StdoutView();
-    Grid grid = new Grid(map5, 256, twoProb);
-    Algorithm algo = new TreeGeneratorMDP(grid, twoProb);
+    Grid grid = new Grid(map1, 128, twoProb);
+    Algorithm algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
     //Algorithm algo = new PlayerAlgo(view);
     Controller control = new Controller(grid, view, algo);
     //GameStats stats = control.play(10000, true); 
