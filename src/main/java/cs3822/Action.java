@@ -49,4 +49,54 @@ enum Action {
     }
   }
 
+  public static int convertToInt(Action action) throws UnknownNodeTypeException { 
+    switch(action) {
+      case SWIPE_UP:
+        return 0;
+      case SWIPE_RIGHT:
+        return 1;
+      case SWIPE_DOWN:
+        return 2;
+      case SWIPE_LEFT:
+        return 3;
+      case UNDO:
+        return 4;
+      case REDO:
+        return 5;
+      case RESET:
+        return 6;
+      case NONE:
+        return 7;
+      case EXIT:
+        return 8;
+      default:
+        throw new UnknownNodeTypeException();
+    }
+  }
+
+  public static Action convertToAction(int val) throws UnknownNodeTypeException {
+    switch(val) {
+      case 0:
+        return SWIPE_UP;
+      case 1:
+        return SWIPE_RIGHT;
+      case 2:
+        return SWIPE_DOWN;
+      case 3:
+        return SWIPE_LEFT;
+      case 4:
+        return UNDO;
+      case 5:
+        return REDO;
+      case 6:
+        return RESET;
+      case 7:
+        return NONE;
+      case 8:
+        return EXIT;
+      default:
+        throw new UnknownNodeTypeException();
+    }
+  }
+
 }

@@ -34,7 +34,10 @@ class TreeGeneratorMDP implements Algorithm {
           switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
             case SWIPE_UP:
-               
+              if (existsInDAG(grid.hashCode(), history)) {
+                continue;
+              }
+
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
@@ -47,7 +50,10 @@ class TreeGeneratorMDP implements Algorithm {
               break;
 
             case SWIPE_RIGHT:
-              
+              if (existsInDAG(grid.hashCode(), history)) {
+                continue;
+              }
+
               history.peek().setAction(Action.SWIPE_DOWN);
 
               if (!grid.canMoveDown()) {
@@ -60,7 +66,10 @@ class TreeGeneratorMDP implements Algorithm {
               break;
 
             case SWIPE_DOWN:
-                            
+              if (existsInDAG(grid.hashCode(), history)) {
+                continue;
+              }
+
               history.peek().setAction(Action.SWIPE_LEFT);
  
               if (!grid.canMoveLeft()) { 
@@ -80,7 +89,6 @@ class TreeGeneratorMDP implements Algorithm {
               if (db.getElemCount() % 10000 == 0) {
                 System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()));
               } 
-              
               
               db.insert(grid.hashCode(), node.getBestAction(), node.getBestReward());
               break loop;
@@ -163,16 +171,11 @@ class TreeGeneratorMDP implements Algorithm {
 
     while(true) { 
 
-      int hash = grid.hashCode(); 
       // Hash caching
-      if (db.contains(hash)) {
-        TreeDFSNode node = history.peek();
-
-        node.setMaxReward(db.fetchReward(hash));
-        node.setAction(Action.NONE);
+      if (existsInDAG(grid.hashCode(), history)) {
         return;
       }
-
+      
       // Check if the state is stuck  
       if (!grid.canMoveUp()) {
         history.peek().updateMaxReward(0f);
@@ -207,6 +210,17 @@ class TreeGeneratorMDP implements Algorithm {
     list.add(db.fetchAction(grid.hashCode()));
     return list;
   }
+  
+  public boolean existsInDAG(int hash, Stack<TreeDFSNode> history) {
+    if (db.contains(hash)) {
+      TreeDFSNode node = history.peek();
 
+      node.setMaxReward(db.fetchReward(hash));
+      node.setAction(Action.NONE);
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 

@@ -10,6 +10,5 @@ interface ModelStorage {
   public float fetchReward(int hash);
   public int getElemCount();
   public boolean contains(int hash);
-  public void save(String fileName) throws IOException;
 
 }
