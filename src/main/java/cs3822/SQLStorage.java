@@ -8,18 +8,30 @@ import java.sql.ResultSet;
 
 import java.sql.SQLException;
 
+import java.util.Map;
+import java.util.HashMap;
+
 
 class SQLStorage implements ModelStorage {
   private Connection con;
   private int count;
 
-  PreparedStatement insertStmt;
-  PreparedStatement selectActionStmt;
-  PreparedStatement selectRewardStmt;
-  PreparedStatement containsStmt;
+  private Integer latestHash = null;
+  private Action latestAction;
+  private float latestReward;
 
-  public SQLStorage(String location) {
+  private HashMap<Integer, SolTableItem> buffer;
+  private int bufferSize;
+
+  private PreparedStatement insertStmt;
+  private PreparedStatement selectSolInfoStmt;
+  private PreparedStatement containsStmt;
+
+  public SQLStorage(String location, int bufferSize) {
     this.count = 0;
+    this.buffer = new HashMap<Integer, SolTableItem>();
+    this.bufferSize = bufferSize;
+
     try {
       // Establish a connection
       this.con = DriverManager.getConnection("jdbc:sqlite:" + location);
@@ -35,8 +47,7 @@ class SQLStorage implements ModelStorage {
 
 
       insertStmt = con.prepareStatement("INSERT INTO db VALUES (?,?,?);");
-      selectActionStmt = con.prepareStatement("SELECT action FROM db WHERE instance = ?;");
-      selectRewardStmt = con.prepareStatement("SELECT expReward FROM db WHERE instance = ?;");
+      selectSolInfoStmt = con.prepareStatement("SELECT action, expReward FROM db WHERE instance = ?;");
       containsStmt = con.prepareStatement("SELECT * FROM db WHERE instance = ?;");
 
     } catch(SQLException e) {
@@ -47,67 +58,104 @@ class SQLStorage implements ModelStorage {
   
   public void insert(int hash, Action action, float reward) {
     count++;
-    try { 
-      insertStmt.setInt(1, hash);
-      insertStmt.setInt(2, Action.convertToInt(action));
-      insertStmt.setFloat(3, reward);
-      insertStmt.executeUpdate();
 
-    } catch(SQLException | UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    buffer.put(hash, new SolTableItem(action, reward));
+    if (buffer.size() > bufferSize) {
+      try {
+        con.setAutoCommit(false);
+        for (Map.Entry<Integer, SolTableItem> item : buffer.entrySet()) {
+          insertStmt.setInt(1, item.getKey());
+          insertStmt.setInt(2, Action.convertToInt(item.getValue().getAction()));
+          insertStmt.setFloat(3, item.getValue().getReward());
+
+          insertStmt.addBatch();
+        }
+        insertStmt.executeBatch();
+        
+        con.commit();
+        con.setAutoCommit(true);
+      } catch(SQLException | UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+    buffer.clear();
     }
-
   }
   
   public Action fetchAction(int hash) {
-    int x = 0;
-    Action action = Action.NONE;
-    try {
-      selectActionStmt.setInt(1, hash);
-      ResultSet rs = selectActionStmt.executeQuery();
-      rs.next(); 
-      x = rs.getInt("action");
-      rs.close();
-      action = Action.convertToAction(x);
-    } catch(SQLException | UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (latestHash != null && latestHash.equals(hash)) {
+      return latestAction;
+    // Check buffer
+    } else if (buffer.containsKey(hash)) {
+      latestHash = Integer.valueOf(hash);
+      SolTableItem item = buffer.get(hash);
+      latestAction = item.getAction();
+      latestReward = item.getReward();
+      return latestAction;
+    // check database
+    } else {
+      latestHash = Integer.valueOf(hash);
+      try {
+        selectSolInfoStmt.setInt(1, hash);
+        ResultSet rs = selectSolInfoStmt.executeQuery();
+        rs.next(); 
+        latestAction = Action.convertToAction(rs.getInt("action"));
+        latestReward = rs.getFloat("expReward");
+        rs.close();
+      } catch(SQLException | UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+      return latestAction;
     }
-    return action;
   }
   
   public float fetchReward(int hash) {
-    float x = 0;
-    try {
-      selectRewardStmt.setInt(1, hash);
-      ResultSet rs = selectRewardStmt.executeQuery();
-      rs.next();
-      x = rs.getFloat("expReward");
-      rs.close();
-    } catch(SQLException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (latestHash != null && latestHash.equals(hash)) {
+      return latestReward;
+    } else if (buffer.containsKey(hash)) {
+      latestHash = Integer.valueOf(hash);
+      SolTableItem item = buffer.get(hash);
+      latestAction = item.getAction();
+      latestReward = item.getReward();
+      return latestReward;
+    } else {
+      latestHash = Integer.valueOf(hash);
+      try {
+        selectSolInfoStmt.setInt(1, hash);
+        ResultSet rs = selectSolInfoStmt.executeQuery();
+        rs.next(); 
+        latestAction = Action.convertToAction(rs.getInt("action"));
+        latestReward = rs.getFloat("expReward");
+        rs.close();
+      } catch(SQLException | UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+      return latestReward;
     }
-    return x;
   }
   
   public boolean contains(int hash) {
-    boolean x = false;
-    try {
-      containsStmt.setInt(1, hash);
-      ResultSet rs = containsStmt.executeQuery();
-      if (rs.next()) {
-        x = true;
-      } else {
-        x = false;
+    if (buffer.containsKey(hash)) {
+      return true;
+    } else {
+      boolean x = false;
+      try {
+        containsStmt.setInt(1, hash);
+        ResultSet rs = containsStmt.executeQuery();
+        if (rs.next()) {
+          x = true;
+        } else {
+          x = false;
+        }
+        rs.close();
+      } catch(SQLException e) {
+        e.printStackTrace();
+        System.exit(1);
       }
-      rs.close();
-    } catch(SQLException e) {
-      e.printStackTrace();
-      System.exit(1);
+      return x;
     }
-    return x;
   }
   
   public int getElemCount() {
