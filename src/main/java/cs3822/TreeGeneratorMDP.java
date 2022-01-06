@@ -173,6 +173,7 @@ class TreeGeneratorMDP implements Algorithm {
 
         node.setMaxReward(db.fetchReward(hash));
         node.setAction(Action.NONE);
+      	return;
       }
       
       // Check if the state is stuck  
@@ -210,16 +211,5 @@ class TreeGeneratorMDP implements Algorithm {
     return list;
   }
   
-  public boolean existsInDAG(int hash, Stack<TreeDFSNode> history) {
-    if (db.contains(hash)) {
-      TreeDFSNode node = history.peek();
-
-      node.setMaxReward(db.fetchReward(hash));
-      node.setAction(Action.NONE);
-      return true;
-    } else {
-      return false;
-    }
-  }
 }
 
