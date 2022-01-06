@@ -30,9 +30,14 @@ class TreeGeneratorMDP implements Algorithm {
     while(true) {
       loop:  
         while(true)  { 
+          int hash = grid.hashCode();
+          if (db.contains(hash)) {
+      	    TreeDFSNode node = history.peek();
 
-	  existsInDAG(grid.hashCode(), history);
-          switch(history.peek().getAction()) {
+            node.setMaxReward(db.fetchReward(hash));
+            node.setAction(Action.NONE);
+	  }
+	  switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
 	    case SWIPE_UP:
               history.peek().setAction(Action.SWIPE_RIGHT); 
@@ -162,8 +167,12 @@ class TreeGeneratorMDP implements Algorithm {
     while(true) { 
 
       // Hash caching
-      if (existsInDAG(grid.hashCode(), history)) {
-        return;
+      int hash = grid.hashCode();
+      if (db.contains(hash)) {
+        TreeDFSNode node = history.peek();
+
+        node.setMaxReward(db.fetchReward(hash));
+        node.setAction(Action.NONE);
       }
       
       // Check if the state is stuck  

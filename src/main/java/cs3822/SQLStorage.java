@@ -36,7 +36,7 @@ class SQLStorage implements ModelStorage {
       // Establish a connection
       this.con = DriverManager.getConnection("jdbc:sqlite:" + location);
       String cleanTable = "DROP TABLE IF EXISTS db;"; 
-      String createTable = "CREATE TABLE db (instance INT PRIMARY KEY NOT NULL, action TINYINT NOT NULL, expReward FLOAT(24) NOT NULL);";
+      String createTable = "CREATE TABLE db (instance INT PRIMARY KEY, action TINYINT, expReward FLOAT(24));";
       String createIndex = "CREATE UNIQUE INDEX indexDB ON db (instance);";
 
       Statement stmt = con.createStatement();
@@ -60,7 +60,7 @@ class SQLStorage implements ModelStorage {
     count++;
 
     buffer.put(hash, new SolTableItem(action, reward));
-    if (buffer.size() > bufferSize) {
+    if (buffer.size() >= bufferSize) {
       try {
         con.setAutoCommit(false);
         for (Map.Entry<Integer, SolTableItem> item : buffer.entrySet()) {
