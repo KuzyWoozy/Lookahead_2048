@@ -31,13 +31,10 @@ class TreeGeneratorMDP implements Algorithm {
       loop:  
         while(true)  { 
 
+	  existsInDAG(grid.hashCode(), history);
           switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
-            case SWIPE_UP:
-              if (existsInDAG(grid.hashCode(), history)) {
-                continue;
-              }
-
+	    case SWIPE_UP:
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
@@ -50,10 +47,6 @@ class TreeGeneratorMDP implements Algorithm {
               break;
 
             case SWIPE_RIGHT:
-              if (existsInDAG(grid.hashCode(), history)) {
-                continue;
-              }
-
               history.peek().setAction(Action.SWIPE_DOWN);
 
               if (!grid.canMoveDown()) {
@@ -66,9 +59,6 @@ class TreeGeneratorMDP implements Algorithm {
               break;
 
             case SWIPE_DOWN:
-              if (existsInDAG(grid.hashCode(), history)) {
-                continue;
-              }
 
               history.peek().setAction(Action.SWIPE_LEFT);
  
