@@ -38,11 +38,13 @@ class SQLStorage implements ModelStorage {
       String cleanTable = "DROP TABLE IF EXISTS db;"; 
       String createTable = "CREATE TABLE db (instance INT PRIMARY KEY, action TINYINT, expReward FLOAT(24));";
       String createIndex = "CREATE UNIQUE INDEX indexDB ON db (instance);";
+      String pragmaOff = "PRAGMA synchronous = OFF;";
 
       Statement stmt = con.createStatement();
+      stmt.executeUpdate(pragmaOff);
       stmt.executeUpdate(cleanTable);
       stmt.executeUpdate(createTable);
-      stmt.executeUpdate(createIndex);
+      //stmt.executeUpdate(createIndex);
       stmt.close();
 
 
