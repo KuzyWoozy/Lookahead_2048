@@ -23,7 +23,7 @@ public class App
     Grid grid = null;
     Algorithm algo = null;
     try {
-      grid = new Grid(map0, 16, twoProb);
+      grid = new Grid(map5, 2048, twoProb);
       algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
     } catch(InvalidMapSizeException | InvalidActionException e) {
       e.printStackTrace();
