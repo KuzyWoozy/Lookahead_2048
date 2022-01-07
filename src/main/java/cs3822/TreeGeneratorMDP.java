@@ -14,6 +14,8 @@ import java.lang.Math;
  * @author Daniil Kuznetsov
  */
 class TreeGeneratorMDP implements Algorithm {
+  private int instancesProcessed = 0;
+
   private float twoProb;
   private ModelStorage db;
 
@@ -30,16 +32,22 @@ class TreeGeneratorMDP implements Algorithm {
     while(true) {
       loop:  
         while(true)  { 
+         
+          if (instancesProcessed % 10000 == 0) {
+            System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
+          } 
+          instancesProcessed++;
+          
           int hash = grid.hashCode();
           if (db.contains(hash)) {
       	    TreeDFSNode node = history.peek();
 
             node.setMaxReward(db.fetchReward(hash));
             node.setAction(Action.NONE);
-	  }
-	  switch(history.peek().getAction()) {
+	        }
+	        switch(history.peek().getAction()) {
             // If the previous action was UP, do a right
-	    case SWIPE_UP:
+	          case SWIPE_UP:
               history.peek().setAction(Action.SWIPE_RIGHT); 
               
               if (!grid.canMoveRight()) {
@@ -79,11 +87,6 @@ class TreeGeneratorMDP implements Algorithm {
             case SWIPE_LEFT: 
 
               TreeDFSNode node = history.peek();
-
-              // Debug info
-              if (db.getElemCount() % 10000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()));
-              } 
               
               db.insert(grid.hashCode(), node.getBestAction(), node.getBestReward());
               break loop;
@@ -169,7 +172,6 @@ class TreeGeneratorMDP implements Algorithm {
   private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) {
 
     while(true) { 
-
       // Hash caching
       int hash = grid.hashCode();
       if (db.contains(hash)) {
@@ -205,7 +207,12 @@ class TreeGeneratorMDP implements Algorithm {
         history.peek().updateMaxReward(0f);
         history.peek().setAction(Action.NONE);
         return;
+      }
+      // Debug info
+      if (instancesProcessed % 10000 == 0) {
+        System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
       } 
+      instancesProcessed++;
     }
   }
   

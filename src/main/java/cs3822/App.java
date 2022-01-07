@@ -23,7 +23,7 @@ public class App
     Grid grid = null;
     Algorithm algo = null;
     try {
-      grid = new Grid(map5, 2048, twoProb);
+      grid = new Grid(map1, 32, twoProb);
       algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
     } catch(InvalidMapSizeException | InvalidActionException e) {
       e.printStackTrace();
@@ -32,6 +32,7 @@ public class App
       
     //Algorithm algo = new PlayerAlgo(view);
     Controller control = new Controller(grid, view, algo);
+    /*
     GameStats stats = null;
     try {
       stats = control.play(10000, true); 
@@ -41,6 +42,7 @@ public class App
     }
 
     System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
+    */
     
   }
 }

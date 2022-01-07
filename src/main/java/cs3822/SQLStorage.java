@@ -13,6 +13,8 @@ import java.util.HashMap;
 
 
 class SQLStorage implements ModelStorage {
+  private int subBatch = 5000;
+
   private Connection con;
   private int count;
 
@@ -36,15 +38,15 @@ class SQLStorage implements ModelStorage {
       // Establish a connection
       this.con = DriverManager.getConnection("jdbc:sqlite:" + location);
       String cleanTable = "DROP TABLE IF EXISTS db;"; 
-      String createTable = "CREATE TABLE db (instance INT, action TINYINT, expReward FLOAT(24));";
-      String createIndex = "CREATE INDEX indexDB ON db (instance);";
+      String createTable = "CREATE TABLE db (instance INT PRIMARY KEY, action TINYINT, expReward FLOAT(24));";
+      //String createIndex = "CREATE INDEX indexDB ON db (instance);";
       String pragmaOff = "PRAGMA synchronous = OFF;";
 
       Statement stmt = con.createStatement();
       stmt.executeUpdate(pragmaOff);
       stmt.executeUpdate(cleanTable);
       stmt.executeUpdate(createTable);
-      stmt.executeUpdate(createIndex);
+      //stmt.executeUpdate(createIndex);
       stmt.close();
 
 
@@ -75,7 +77,7 @@ class SQLStorage implements ModelStorage {
 
           insertStmt.addBatch();
 
-          if (i % 5000 == 0) {
+          if (i % subBatch == 0) {
             insertStmt.executeBatch();
             con.commit();
           }
