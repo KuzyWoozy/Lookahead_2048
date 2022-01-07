@@ -22,7 +22,7 @@ class GridHistory {
   }
 
   /** Copy constructor. */
-  public GridHistory(GridHistory history) throws UnknownNodeTypeException, NoValueException {
+  public GridHistory(GridHistory history) {
     this.instances = new Stack<Node[]>();
     Node[] list;
     Node[] new_list;
@@ -31,7 +31,12 @@ class GridHistory {
       // Make sure to peform deep copies
       new_list = new Node[list.length];
       for (int x = 0; x < list.length; x++) {
-        new_list[x] = Node.copyNode(list[x]);
+        try {
+          new_list[x] = Node.copyNode(list[x]);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
       }
       this.instances.push(new_list);
     }
@@ -42,7 +47,12 @@ class GridHistory {
       // Make sure to peform deep copies
       new_list = new Node[list.length];
       for (int x = 0; x < list.length; x++) {
-        new_list[x] = Node.copyNode(list[x]);
+        try {
+          new_list[x] = Node.copyNode(list[x]);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
       }
       this.temp.push(new_list);
     }
@@ -56,7 +66,7 @@ class GridHistory {
   }
 
   /** Return list of nodes representing the new Grid after an undo operation. */
-  public List<Node> undo() throws UnknownNodeTypeException, NoValueException {
+  public List<Node> undo() {
     // Do not take initial state into account for instances size
     if (instances.size() > 1) {
       temp.push(instances.pop());
@@ -65,7 +75,12 @@ class GridHistory {
     Node[] items = instances.peek();
     Node[] items_copy = new Node[items.length];
     for (int i = 0; i < items.length; i++) {
-      items_copy[i] = Node.copyNode(items[i]);
+      try {
+        items_copy[i] = Node.copyNode(items[i]);
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
 
     return new ArrayList<Node>(Arrays.asList(items_copy));
@@ -77,7 +92,7 @@ class GridHistory {
    * @return list of nodes representing the new Grid
    * @throws NoFutureGridException 
    */
-  public List<Node> redo() throws NoFutureGridException, UnknownNodeTypeException, NoValueException {
+  public List<Node> redo() throws NoFutureGridException {
     if (temp.empty()) {
       throw new NoFutureGridException();
     }
@@ -86,9 +101,13 @@ class GridHistory {
 
     Node[] items_copy = new Node[items.length];
     for (int i = 0; i < items.length; i++) {
-      items_copy[i] = Node.copyNode(items[i]); 
+      try {
+        items_copy[i] = Node.copyNode(items[i]); 
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
-
     return new ArrayList<Node>(Arrays.asList(items_copy));
   }
 
@@ -99,11 +118,16 @@ class GridHistory {
     clearBuffer();
   }
 
-  public List<Node> initialInstanceCopy() throws UnknownNodeTypeException, NoValueException {
+  public List<Node> initialInstanceCopy() {
     Node[] items = instances.get(0);
     Node[] items_copy = new Node[items.length];
     for (int i = 0; i < items.length; i++) {
-      items_copy[i] = Node.copyNode(items[i]);
+      try {
+        items_copy[i] = Node.copyNode(items[i]);
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
 
     return new ArrayList<Node>(Arrays.asList(items_copy));

@@ -10,8 +10,8 @@ import java.util.List;
  */
 interface View {
   /** Obtain the input of Actions from the user. */
-  public List<Action> getInput() throws UnknownNodeTypeException;
+  public List<Action> getInput();
  
   /** Update the interface with the new grid state. */
-  public void display(Grid grid) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException;
+  public void display(Grid grid);
 }

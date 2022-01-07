@@ -33,9 +33,14 @@ class ValueNode extends Node {
   }
 
   /** Copy constructor. */
-  public ValueNode(Node node) throws NoValueException {
+  public ValueNode(Node node) {
     super(node);
-    this.value = node.getValue();
+    try {
+      this.value = node.getValue();
+    } catch(NoValueException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   /**

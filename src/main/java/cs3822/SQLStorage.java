@@ -36,15 +36,15 @@ class SQLStorage implements ModelStorage {
       // Establish a connection
       this.con = DriverManager.getConnection("jdbc:sqlite:" + location);
       String cleanTable = "DROP TABLE IF EXISTS db;"; 
-      String createTable = "CREATE TABLE db (instance INT PRIMARY KEY, action TINYINT, expReward FLOAT(24));";
-      String createIndex = "CREATE UNIQUE INDEX indexDB ON db (instance);";
+      String createTable = "CREATE TABLE db (instance INT, action TINYINT, expReward FLOAT(24));";
+      String createIndex = "CREATE INDEX indexDB ON db (instance);";
       String pragmaOff = "PRAGMA synchronous = OFF;";
 
       Statement stmt = con.createStatement();
       stmt.executeUpdate(pragmaOff);
       stmt.executeUpdate(cleanTable);
       stmt.executeUpdate(createTable);
-      //stmt.executeUpdate(createIndex);
+      stmt.executeUpdate(createIndex);
       stmt.close();
 
 
@@ -65,16 +65,24 @@ class SQLStorage implements ModelStorage {
     if (buffer.size() >= bufferSize) {
       try {
         con.setAutoCommit(false);
+        int i = 0;
         for (Map.Entry<Integer, SolTableItem> item : buffer.entrySet()) {
+          i++;
+
           insertStmt.setInt(1, item.getKey());
           insertStmt.setInt(2, Action.convertToInt(item.getValue().getAction()));
           insertStmt.setFloat(3, item.getValue().getReward());
 
           insertStmt.addBatch();
+
+          if (i % 5000 == 0) {
+            insertStmt.executeBatch();
+            con.commit();
+          }
         }
         insertStmt.executeBatch();
-        
         con.commit();
+
         con.setAutoCommit(true);
       } catch(SQLException | UnknownNodeTypeException e) {
         e.printStackTrace();

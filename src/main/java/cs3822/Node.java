@@ -17,7 +17,7 @@ abstract class Node {
    * @return Copied node
    * @throws UnknownNodeTypeException A node with an unknown type was discovered
    */
-  public static Node copyNode(Node node) throws UnknownNodeTypeException, NoValueException {
+  public static Node copyNode(Node node) throws UnknownNodeTypeException {
     switch(node.getType()) {
       case BRICK:
         return new BrickNode(node);
@@ -35,6 +35,7 @@ abstract class Node {
     try {
       this.pos = new Position(0, 0);
     } catch(MaxPosNotInitializedException e) {
+      e.printStackTrace();
     }
   }
   
@@ -68,29 +69,33 @@ abstract class Node {
   }
 
   /** Return true if the node can move within the specified grid. */
-  public boolean canMove(Grid grid) throws NoValueException, UnknownNodeTypeException {
-  
-    if (canMoveUp(grid)) {
-      return true;
+  public boolean canMove(Grid grid) {
+    try { 
+      if (canMoveUp(grid)) {
+        return true;
+      }
+
+      if (canMoveRight(grid)) {
+        return true;
+      }
+
+      if (canMoveDown(grid)) {
+        return true;
+      }
+
+      if (canMoveLeft(grid)) {
+        return true;
+      }
+    } catch(UnknownNodeTypeException e) {
+      e.printStackTrace();
+      System.exit(1);
     }
 
-    if (canMoveRight(grid)) {
-      return true;
-    }
-
-    if (canMoveDown(grid)) {
-      return true;
-    }
-
-    if (canMoveLeft(grid)) {
-      return true;
-    }
-    
     return false;
   }
   
   /** Return true of the specified Node can move up in the grid. */
-  public boolean canMoveUp(Grid grid) throws NoValueException, UnknownNodeTypeException {
+  public boolean canMoveUp(Grid grid) throws UnknownNodeTypeException {
     // check boundary
     if (pos.canMoveUp()) {
       Node node = grid.getNodes().get(grid.indexUp(pos));
@@ -102,8 +107,13 @@ abstract class Node {
           break;
 
         case VALUE:
-          if (node.getValue() == this.getValue()) {
-            return true;
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch (NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
           }
           break;
         
@@ -114,7 +124,7 @@ abstract class Node {
     return false;
   }
   /** Return true of the specified Node can move right in the grid. */
-  public boolean canMoveRight(Grid grid) throws NoValueException, UnknownNodeTypeException {
+  public boolean canMoveRight(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveRight()) {
       Node node = grid.getNodes().get(grid.indexRight(pos));
       switch (node.getType()) {
@@ -125,8 +135,13 @@ abstract class Node {
           break;
 
         case VALUE:
-          if (node.getValue() == this.getValue()) {
-            return true;
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
           }
           break;
         
@@ -138,7 +153,7 @@ abstract class Node {
   }
 
 /** Return true of the specified Node can move down in the grid. */
-  public boolean canMoveDown(Grid grid) throws NoValueException, UnknownNodeTypeException {
+  public boolean canMoveDown(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveDown()) {
       Node node = grid.getNodes().get(grid.indexDown(pos));
       switch (node.getType()) {
@@ -149,8 +164,13 @@ abstract class Node {
           break;
 
         case VALUE:
-          if (node.getValue() == this.getValue()) {
-            return true;
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
           }
           break;
         
@@ -162,7 +182,7 @@ abstract class Node {
   }
 
 /** Return true of the specified Node can move left in the grid. */
-  public boolean canMoveLeft(Grid grid) throws NoValueException, UnknownNodeTypeException {
+  public boolean canMoveLeft(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveLeft()) {
       Node node = grid.getNodes().get(grid.indexLeft(pos));
       switch (node.getType()) {
@@ -173,8 +193,13 @@ abstract class Node {
           break;
 
         case VALUE:
-          if (node.getValue() == this.getValue()) {
-            return true;
+          try { 
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
           }
           break;
         
@@ -186,19 +211,31 @@ abstract class Node {
   }
 
   /** Return true if the two nodes are equal. */
-  public boolean equals(Node node) throws NoValueException {
-    return pos.equals(node.getPos()) && getType() == node.getType() && getValue() == node.getValue();
+  public boolean equals(Node node) {
+    boolean x = false;
+    try {
+      x = (pos.equals(node.getPos()) && getType() == node.getType() && getValue() == node.getValue());
+    } catch(NoValueException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    return x;
   }
 
   /** Return the string representation of the node. */
-  public String stringify() throws UnknownNodeTypeException, NoValueException {
+  public String stringify() throws UnknownNodeTypeException {
     switch(this.getType()) {
       case BRICK:
         return "XXXX";
       case EMPTY:
         return "    ";
       case VALUE:
-        return String.format("%4d", this.getValue());
+        try {
+          return String.format("%4d", this.getValue());
+        } catch(NoValueException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
       default:
         throw new UnknownNodeTypeException(); 
     }

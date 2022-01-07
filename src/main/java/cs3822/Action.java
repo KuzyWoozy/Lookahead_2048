@@ -22,9 +22,9 @@ enum Action {
    *
    * @param chr Character to be converted into an Action
    * @return Action corresponding to the provided character
-   * @throws UnknownNodeTypeException Character has no translation into an Action
+   * @throws InvalidActionException Character has no translation into an Action
    */
-  public static Action getAction(char chr) throws UnknownNodeTypeException {
+  public static Action getAction(char chr) throws InvalidActionException {
     switch(chr) {
       case 'w': 
         return SWIPE_UP;
@@ -45,11 +45,11 @@ enum Action {
       case 'q':
         return EXIT;
       default:
-        throw new UnknownNodeTypeException();
+        throw new InvalidActionException();
     }
   }
 
-  public static int convertToInt(Action action) throws UnknownNodeTypeException { 
+  public static int convertToInt(Action action) throws InvalidActionException { 
     switch(action) {
       case SWIPE_UP:
         return 0;
@@ -70,11 +70,11 @@ enum Action {
       case EXIT:
         return 8;
       default:
-        throw new UnknownNodeTypeException();
+        throw new InvalidActionException();
     }
   }
 
-  public static Action convertToAction(int val) throws UnknownNodeTypeException {
+  public static Action convertToAction(int val) throws InvalidActionException {
     switch(val) {
       case 0:
         return SWIPE_UP;
@@ -95,7 +95,7 @@ enum Action {
       case 8:
         return EXIT;
       default:
-        throw new UnknownNodeTypeException();
+        throw new InvalidActionException();
     }
   }
 

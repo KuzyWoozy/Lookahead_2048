@@ -24,7 +24,7 @@ public class Controller {
    * @param win_condition The target value to be reached to win the game
    * @param twoProb Probability of generating a value node containing a 2
    */
-  public Controller(Grid grid, View view, Algorithm algo) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public Controller(Grid grid, View view, Algorithm algo) {
     this.view = view;
     this.map = map;
     this.algo = algo;
@@ -42,7 +42,7 @@ public class Controller {
    * @param actions Sequence of actions to process
    * @throws InvalidActionException Action does not exist
    * */
-  public void process(List<Action> actions) throws NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoMoveFlagException {
+  public void process(List<Action> actions) throws InvalidActionException {
     for (Action action : actions) {
       switch(action) {
         case SWIPE_UP:
@@ -73,17 +73,17 @@ public class Controller {
   }
 
   /** Reset the grid instance. */
-  public void reset() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public void reset() {
     grid.reset();
   }
 
   /** Restart the grid instance. */
-  public void restart() throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public void restart() {
     grid.restart();
   }
 
   /** Execute the game logic. */
-  public GameStats play() throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException {
+  public GameStats play() {
     GameStats stat = new GameStats();
     while (true) {
       if (grid.won()) {
@@ -101,7 +101,7 @@ public class Controller {
     return stat;
   }
 
-  public GameStats play(int iterations) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException, InvalidNumberOfGamesException {
+  public GameStats play(int iterations) throws InvalidNumberOfGamesException {
     if (iterations < 1) {
       throw new InvalidNumberOfGamesException();
     }
@@ -113,7 +113,7 @@ public class Controller {
     return stats;
   }
 
-  public GameStats play(int iterations, boolean reset) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, InvalidActionException, InvalidMapSizeException, InvalidMapSymbolException, NoMoveFlagException, InvalidNumberOfGamesException {
+  public GameStats play(int iterations, boolean reset) throws InvalidNumberOfGamesException {
     if (iterations < 1) {
       throw new InvalidNumberOfGamesException();
     }
@@ -128,10 +128,5 @@ public class Controller {
     }
     return stats;
   }
-
-  public void setAlgorithm(Algorithm algo) {
-    this.algo = algo;
-  }
-
 
 }

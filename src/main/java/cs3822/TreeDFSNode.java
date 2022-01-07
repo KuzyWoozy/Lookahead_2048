@@ -41,7 +41,7 @@ class TreeDFSNode {
 
 
   /** Constructs a node with the given grid and probability of generating a 2.*/
-  public TreeDFSNode(Grid grid, float twoProb) throws UnknownNodeTypeException, NoValueException {
+  public TreeDFSNode(Grid grid, float twoProb) {
     this(twoProb);
 
     List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
@@ -53,8 +53,13 @@ class TreeDFSNode {
     }
     
     ValueNode node = posi.remove(0);
-    this.currentNodeValue = node.getValue();
-    grid.setValueNode(node, true);
+    try {
+      this.currentNodeValue = node.getValue();
+      grid.setValueNode(node, true);
+    } catch(UnknownNodeTypeException | NoValueException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   /** Set the maximal reward obtained. */
@@ -70,7 +75,7 @@ class TreeDFSNode {
     }
   }
  
-  public void commitReward(Grid grid) throws InvalidValueException, UnknownNodeTypeException, NoValueException {
+  public void commitReward(Grid grid) throws InvalidValueException {
     // Remove the previous possibility insertion
     grid.undo();
 
@@ -85,7 +90,7 @@ class TreeDFSNode {
   }
 
   /** Process the next possibility, updating the grid accordingly. */
-  public void setNextPosi(Grid grid) throws UnknownNodeTypeException, NoValueException, InvalidValueException {
+  public void setNextPosi(Grid grid) {
   
     commitReward(grid);
 

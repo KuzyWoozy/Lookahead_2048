@@ -18,7 +18,7 @@ class TreeGeneratorMDP implements Algorithm {
   private ModelStorage db;
 
   /** Initialize class with initial node and probability of generating a 2. */
-  public TreeGeneratorMDP(Grid grid, ModelStorage db, float twoProb) throws NoValueException, MovingOutOfBoundsException, UnknownNodeTypeException, NoMoveFlagException, InvalidActionException, InvalidValueException, MaxPosNotInitializedException {
+  public TreeGeneratorMDP(Grid grid, ModelStorage db, float twoProb) throws InvalidActionException {
     this.twoProb = twoProb;
     this.db = db;
    
@@ -162,7 +162,7 @@ class TreeGeneratorMDP implements Algorithm {
    * @param history Stack manager for processing in a DFS manner
    * @param db Table of optimal solutions
    */
-  private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) throws UnknownNodeTypeException, NoValueException, MovingOutOfBoundsException, NoMoveFlagException {
+  private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) {
 
     while(true) { 
 

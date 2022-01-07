@@ -7,7 +7,7 @@ import java.io.IOException;
 /** Class with the main method, contains all the setup. */
 public class App 
 {
-    public static void main( String[] args ) throws InvalidMapSizeException, InvalidMapSymbolException, MaxPosNotInitializedException, NoValueException, MovingOutOfBoundsException, InvalidActionException, UnknownNodeTypeException, NoMoveFlagException, IOException, InvalidValueException, InvalidNumberOfGamesException {
+    public static void main( String[] args ) {
     
     String map0 = "##\n##";
     String map1 = "#2#\n#2#\n###";

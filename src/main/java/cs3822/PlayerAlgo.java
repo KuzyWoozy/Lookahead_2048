@@ -11,7 +11,7 @@ class PlayerAlgo implements Algorithm {
     this.view = view;
   }
 
-  public List<Action> move(Grid instance) throws UnknownNodeTypeException {
+  public List<Action> move(Grid instance) {
     return view.getInput();
   } 
 }

@@ -59,7 +59,7 @@ class StdoutView implements View {
   
   /** Obtain the list of user Actions from the stdin. */
   @Override
-  public List<Action> getInput() throws UnknownNodeTypeException {
+  public List<Action> getInput() {
     System.out.print("\nEnter command(s): ");
     return convertStringToAction(scan.nextLine()); 
   }
@@ -76,7 +76,7 @@ class StdoutView implements View {
   
   /** Print the specified grid to stdout. */ 
   @Override
-  public void display(Grid grid) throws MaxPosNotInitializedException, UnknownNodeTypeException, NoValueException {
+  public void display(Grid grid) {
     System.out.println(clear() + grid.stringify() + "\n\n\n");
   }
   
