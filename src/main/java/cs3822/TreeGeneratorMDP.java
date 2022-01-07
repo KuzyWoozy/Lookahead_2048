@@ -84,8 +84,7 @@ class TreeGeneratorMDP implements Algorithm {
             case SWIPE_LEFT:
               // Debug info
               instancesProcessed++;
-              // if (instancesProcessed % 10000 == 0) {
-              if (true) {
+              if (instancesProcessed % 100000 == 0) {
                 System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
                 System.out.println(grid.stringify());
               } 
@@ -100,8 +99,7 @@ class TreeGeneratorMDP implements Algorithm {
             case NONE:
               // Debug info
               instancesProcessed++;
-              // if (instancesProcessed % 10000 == 0) {
-              if (true) {
+              if (instancesProcessed % 100000 == 0) {
                 System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
                 System.out.println(grid.stringify());
               } 
