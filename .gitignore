@@ -1,4 +1,4 @@
-
+*.db
 *.serial
 target/*
 .classpath

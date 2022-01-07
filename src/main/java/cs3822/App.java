@@ -19,13 +19,27 @@ public class App
     
     float twoProb = 0.9f;
     View view = new StdoutView();
-    Grid grid = new Grid(map5, 2048, twoProb);
+
+    Grid grid = null;
+    Algorithm algo = null;
+    try {
+      grid = new Grid(map5, 2048, twoProb);
+      algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 10000), twoProb);
+    } catch(InvalidMapSizeException | InvalidActionException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
       
-    Algorithm algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
     //Algorithm algo = new PlayerAlgo(view);
     Controller control = new Controller(grid, view, algo);
-    GameStats stats = control.play(10000, true); 
-     
+    GameStats stats = null;
+    try {
+      stats = control.play(10000, true); 
+    } catch(InvalidNumberOfGamesException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+
     System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
     
   }

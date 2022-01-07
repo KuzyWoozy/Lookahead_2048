@@ -84,7 +84,7 @@ class SQLStorage implements ModelStorage {
         con.commit();
 
         con.setAutoCommit(true);
-      } catch(SQLException | UnknownNodeTypeException e) {
+      } catch(SQLException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }
@@ -112,7 +112,7 @@ class SQLStorage implements ModelStorage {
         latestAction = Action.convertToAction(rs.getInt("action"));
         latestReward = rs.getFloat("expReward");
         rs.close();
-      } catch(SQLException | UnknownNodeTypeException e) {
+      } catch(SQLException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }
@@ -138,7 +138,7 @@ class SQLStorage implements ModelStorage {
         latestAction = Action.convertToAction(rs.getInt("action"));
         latestReward = rs.getFloat("expReward");
         rs.close();
-      } catch(SQLException | UnknownNodeTypeException e) {
+      } catch(SQLException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }

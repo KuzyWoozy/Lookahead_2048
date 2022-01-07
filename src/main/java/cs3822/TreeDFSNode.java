@@ -53,13 +53,8 @@ class TreeDFSNode {
     }
     
     ValueNode node = posi.remove(0);
-    try {
-      this.currentNodeValue = node.getValue();
-      grid.setValueNode(node, true);
-    } catch(UnknownNodeTypeException | NoValueException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+    this.currentNodeValue = node.getValue();
+    grid.setValueNode(node, true);
   }
 
   /** Set the maximal reward obtained. */
@@ -91,8 +86,12 @@ class TreeDFSNode {
 
   /** Process the next possibility, updating the grid accordingly. */
   public void setNextPosi(Grid grid) {
-  
-    commitReward(grid);
+    try { 
+      commitReward(grid);
+    } catch(InvalidValueException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
 
     // Init for next possibility
     bestReward = 0;

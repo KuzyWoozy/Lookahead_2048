@@ -4,5 +4,5 @@ import java.util.List;
 
 
 interface Algorithm {
-  public List<Action> move(Grid instance) throws UnknownNodeTypeException;
+  public List<Action> move(Grid instance);
 }

@@ -85,16 +85,21 @@ public class Controller {
   /** Execute the game logic. */
   public GameStats play() {
     GameStats stat = new GameStats();
-    while (true) {
-      if (grid.won()) {
-        stat.won();
-        break;
-      } else if (grid.lost()) {
-        stat.lost();
-        break;
+    try {
+      while (true) {
+        if (grid.won()) {
+          stat.won();
+          break;
+        } else if (grid.lost()) {
+          stat.lost();
+          break;
+        }
+        view.display(grid);
+        process(algo.move(grid)); 
       }
-      view.display(grid);
-      process(algo.move(grid)); 
+    } catch(InvalidActionException e) {
+      e.printStackTrace();
+      System.exit(1);
     }
     view.display(grid);
 

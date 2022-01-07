@@ -23,7 +23,7 @@ class StdoutView implements View {
       // Chech if this is a valid action, ignore if not
       try {
         ac = Action.getAction(x);
-      } catch(UnknownNodeTypeException e) {
+      } catch(InvalidActionException e) {
         continue;
       }
 

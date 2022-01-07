@@ -122,8 +122,12 @@ class TreeGeneratorMDP implements Algorithm {
         if (history.isEmpty()) {
           break;
         }
-
-        node.commitReward(grid);
+        try {
+          node.commitReward(grid);
+        } catch (InvalidValueException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
 
         // One to go up a level in the tree
         grid.undo();
