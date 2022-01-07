@@ -33,10 +33,7 @@ class TreeGeneratorMDP implements Algorithm {
       loop:  
         while(true)  { 
          
-          if (instancesProcessed % 10000 == 0) {
-            System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
-          } 
-          instancesProcessed++;
+          
           
           int hash = grid.hashCode();
           if (db.contains(hash)) {
@@ -84,7 +81,15 @@ class TreeGeneratorMDP implements Algorithm {
 
               break;
              
-            case SWIPE_LEFT: 
+            case SWIPE_LEFT:
+              // Debug info
+              instancesProcessed++;
+              // if (instancesProcessed % 10000 == 0) {
+              if (true) {
+                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
+                System.out.println(grid.stringify());
+              } 
+
 
               TreeDFSNode node = history.peek();
               
@@ -93,6 +98,14 @@ class TreeGeneratorMDP implements Algorithm {
 
             // Part of caching optimization
             case NONE:
+              // Debug info
+              instancesProcessed++;
+              // if (instancesProcessed % 10000 == 0) {
+              if (true) {
+                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
+                System.out.println(grid.stringify());
+              } 
+
               break loop;
             
             default:
@@ -155,7 +168,7 @@ class TreeGeneratorMDP implements Algorithm {
             
     };
     
-    System.out.println("-----------------\nUnique nodes in DAG " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nExpected win rate (%): " + String.valueOf(db.fetchReward(grid.hashCode()) * 100));
+    System.out.println("-----------------\nUnique nodes in DAG: " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nExpected win rate (%): " + String.valueOf(db.fetchReward(grid.hashCode()) * 100));
 
   }
 
@@ -207,12 +220,7 @@ class TreeGeneratorMDP implements Algorithm {
         history.peek().updateMaxReward(0f);
         history.peek().setAction(Action.NONE);
         return;
-      }
-      // Debug info
-      if (instancesProcessed % 10000 == 0) {
-        System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
       } 
-      instancesProcessed++;
     }
   }
   

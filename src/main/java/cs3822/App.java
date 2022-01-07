@@ -9,7 +9,7 @@ public class App
 {
     public static void main( String[] args ) {
     
-    String map0 = "##\n##";
+    String map0 = "#2\n8~";
     String map1 = "#2#\n#2#\n###";
     String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
     String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
@@ -23,7 +23,7 @@ public class App
     Grid grid = null;
     Algorithm algo = null;
     try {
-      grid = new Grid(map5, 2048, twoProb);
+      grid = new Grid(map0, 16, twoProb);
       algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
     } catch(InvalidMapSizeException | InvalidActionException e) {
       e.printStackTrace();
@@ -33,6 +33,7 @@ public class App
     //Algorithm algo = new PlayerAlgo(view);
     Controller control = new Controller(grid, view, algo);
     
+    /*
     GameStats stats = null;
     try {
       stats = control.play(10000, true); 
@@ -42,6 +43,7 @@ public class App
     }
 
     System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
+    */
     
     
   }
