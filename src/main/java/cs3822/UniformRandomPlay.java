@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.List;
 import java.util.LinkedList;
 
+
 class UniformRandomPlay implements Algorithm {
   
   private Random random;
@@ -11,7 +12,8 @@ class UniformRandomPlay implements Algorithm {
   public UniformRandomPlay() {
     this.random = new Random();
   }
-
+  
+  @Override
   public List<Action> move(Grid instance) {
     LinkedList<Action> list = new LinkedList<Action>();
     switch(random.nextInt(4)) {
@@ -28,6 +30,9 @@ class UniformRandomPlay implements Algorithm {
         list.add(Action.SWIPE_LEFT);
         break;
     }
+    
+    Algorithm.pause();
+    
     return list;
   }
 

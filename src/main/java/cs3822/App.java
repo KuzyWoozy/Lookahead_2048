@@ -1,50 +1,53 @@
 package cs3822;
 
-import java.util.HashMap;
-import java.io.IOException;
+import javafx.application.Application;
+import javafx.stage.Stage;
+
+
 
 
 /** Class with the main method, contains all the setup. */
-public class App 
+public class App extends Application 
 {
     public static void main( String[] args ) {
-    
-    String map0 = "#2\n8~";
-    String map1 = "#2#\n#2#\n###";
-    String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
-    String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
-    String map4 = "~###\n#~##\n##~#\n###~";
-    String map5 = "#2##\n#2##\n####\n####";
-    
-    
-    float twoProb = 0.9f;
-    View view = new StdoutView();
-
-    Grid grid = null;
-    Algorithm algo = null;
-    try {
-      grid = new Grid(map5, 2048, twoProb);
-      algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
-    } catch(InvalidMapSizeException | InvalidActionException e) {
-      e.printStackTrace();
-      System.exit(1);
+      launch(args);
     }
+
+    public void start(Stage stage) {
+     
+      String map0 = "##\n##";
+      String map1 = "###\n###\n###";
+      String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
+      String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
+      String map4 = "~###\n#~##\n##~#\n###~";
+      String map5 = "~##~\n####\n####\n~##~";
+    
+    
+      float twoProb = 0.9f;
       
-    //Algorithm algo = new PlayerAlgo(view);
-    Controller control = new Controller(grid, view, algo);
-    
-    /*
-    GameStats stats = null;
-    try {
-      stats = control.play(10000, true); 
-    } catch(InvalidNumberOfGamesException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+      Grid grid = null;
+      Algorithm algo = null;
+      View view = null;
+      try {
+        grid = new Grid(map5, 2048, twoProb);
+        //algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
+        //
+        view = new GraphicsView(grid, stage, 400, 400);
+        //view = new StdoutView(System.in);
+        algo = new PlayerAlgo(view);
+        //algo = new UniformRandomPlay();
+      } catch(InvalidMapSizeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+      
+      view.play(grid, algo);
 
-    System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
-    */
-    
-    
-  }
+      /*  
+      GameStats stats = null;
+      stats = control.play(); 
+
+      System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
+      */
+    } 
 }

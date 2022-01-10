@@ -68,8 +68,8 @@ class Grid {
       } 
     } 
     // Generate the initial nodes
-    //generateNewNode();
-    //generateNewNode();
+    generateNewNode();
+    generateNewNode();
     
     // Start keeping track of history
     try {
@@ -887,6 +887,47 @@ class Grid {
       System.exit(1);
     }
   }
+
+  /** 
+   * Iterate over the sequence of actions, calling each corresponding function in turn.
+   * @param actions Sequence of actions to process
+   * @throws InvalidActionException Action does not exist
+   * */
+  public void process(List<Action> actions) throws InvalidActionException {
+    for (Action action : actions) {
+      switch(action) {
+        case SWIPE_UP:
+          slideUp();
+          break;
+        case SWIPE_RIGHT:
+          slideRight();
+          break;
+        case SWIPE_DOWN:
+          slideDown();
+          break;
+        case SWIPE_LEFT:
+          slideLeft();
+          break;
+        case UNDO:
+          undo();
+          break;
+        case REDO:
+          redo();
+          break;
+        case RESET:
+          reset();
+          break;
+        case NONE:
+          break;
+        case EXIT:
+          System.exit(0);
+        default:
+          throw new InvalidActionException();
+      }
+    }
+  }
+
+
 }
 
 
