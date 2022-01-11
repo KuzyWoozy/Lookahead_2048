@@ -278,7 +278,7 @@ class Grid {
     
     clearMoveFlags();
     // Generate a new node if specified
-    if (genNewNode) {
+    if (genNewNode && canMoveUp()) {
       generateNewNode();
     }
     // Make a back-up
@@ -358,7 +358,7 @@ class Grid {
     }
 
     clearMoveFlags();
-    if (genNewNode) {
+    if (genNewNode && canMoveRight()) {
       generateNewNode();
     }
     // Make a back-up 
@@ -440,7 +440,7 @@ class Grid {
     }
 
     clearMoveFlags();
-    if (genNewNode) {
+    if (genNewNode && canMoveDown()) {
       generateNewNode();
     }
     // Make a back-up 
@@ -520,7 +520,7 @@ class Grid {
     }
     
     clearMoveFlags();
-    if (genNewNode) {
+    if (genNewNode && canMoveLeft()) {
       generateNewNode();
     }
     // Make a back-up 
@@ -614,9 +614,7 @@ class Grid {
   /** Return true if swiping up is a possible action. */
   public boolean canMoveUp() {
     for (Node node : nodes) {
-      if (node.getType() == NodeType.EMPTY) {
-        return true;
-      } else if (node.getType() == NodeType.VALUE) {
+      if (node.getType() == NodeType.VALUE) {
         try {
           if (node.canMoveUp(this)) {
             return true;
@@ -633,9 +631,7 @@ class Grid {
   /** Return true if swiping right is a possible action. */
   public boolean canMoveRight() {
     for (Node node : nodes) {
-      if (node.getType() == NodeType.EMPTY) {
-        return true;
-      } else if (node.getType() == NodeType.VALUE) {
+      if (node.getType() == NodeType.VALUE) {
         try {
           if (node.canMoveRight(this)) {
             return true;
@@ -652,9 +648,7 @@ class Grid {
   /** Return true if swiping down is a possible action. */
   public boolean canMoveDown() {
     for (Node node : nodes) {
-      if (node.getType() == NodeType.EMPTY) {
-        return true;
-      } else if (node.getType() == NodeType.VALUE) {
+      if (node.getType() == NodeType.VALUE) {
         try {
           if (node.canMoveDown(this)) {
             return true;
@@ -671,9 +665,7 @@ class Grid {
   /** Return true if swiping left is a possible action. */
   public boolean canMoveLeft() {
     for (Node node : nodes) {
-      if (node.getType() == NodeType.EMPTY) {
-        return true;
-      } else if (node.getType() == NodeType.VALUE) {
+      if (node.getType() == NodeType.VALUE) {
         try {
           if (node.canMoveRight(this)) {
             return true;
