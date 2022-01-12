@@ -7,7 +7,7 @@ import java.lang.Thread;
 interface Algorithm {
   public static void pause() {
     try {
-      Thread.sleep(1000);
+      Thread.sleep(500);
     } catch(InterruptedException e) {
       e.printStackTrace();
     }

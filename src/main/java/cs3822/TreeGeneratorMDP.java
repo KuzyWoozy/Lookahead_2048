@@ -14,7 +14,8 @@ import java.lang.Math;
  * @author Daniil Kuznetsov
  */
 class TreeGeneratorMDP implements Algorithm {
-  private int instancesProcessed = 0;
+  private long instancesProcessed = 0;
+  private long depth = 0;
 
   private float twoProb;
   private ModelStorage db;
@@ -27,14 +28,13 @@ class TreeGeneratorMDP implements Algorithm {
     // Initialize the Tree DFS stack
     Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
     history.push(new TreeDFSNode(twoProb));
+    depth++;
     // Initial dive
     dive(grid, history, db);
     while(true) {
       loop:  
         while(true)  { 
          
-          
-          
           int hash = grid.hashCode();
           if (db.contains(hash)) {
       	    TreeDFSNode node = history.peek();
@@ -46,46 +46,46 @@ class TreeGeneratorMDP implements Algorithm {
             // If the previous action was UP, do a right
 	          case SWIPE_UP:
               history.peek().setAction(Action.SWIPE_RIGHT); 
-              
-              if (!grid.canMoveRight()) {
+
+
+              grid.slideRight(false);
+
+              if (!grid.moved()) {
                 history.peek().updateMaxReward(0f);
                 continue;
               }
-              
-              grid.slideRight(false);
-              
               break;
 
             case SWIPE_RIGHT:
               history.peek().setAction(Action.SWIPE_DOWN);
 
-              if (!grid.canMoveDown()) {
-                history.peek().updateMaxReward(0f);
-                continue; 
-              }
-
+              
               grid.slideDown(false);
 
+              if (!grid.moved()) {
+                history.peek().updateMaxReward(0f);
+                continue;
+              }
               break;
 
             case SWIPE_DOWN:
 
               history.peek().setAction(Action.SWIPE_LEFT);
  
-              if (!grid.canMoveLeft()) { 
+            
+              grid.slideLeft(false);
+
+              if (!grid.moved()) {
                 history.peek().updateMaxReward(0f);
                 continue;
               }
-
-              grid.slideLeft(false);
-
               break;
              
             case SWIPE_LEFT:
               // Debug info
               instancesProcessed++;
               if (instancesProcessed % 100000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
+                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
               } 
 
 
@@ -99,7 +99,7 @@ class TreeGeneratorMDP implements Algorithm {
               // Debug info
               instancesProcessed++;
               if (instancesProcessed % 100000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed));
+                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
               } 
 
               break loop;
@@ -115,14 +115,15 @@ class TreeGeneratorMDP implements Algorithm {
           continue;
         } 
 
-        history.push(new TreeDFSNode(grid, twoProb));
-              
+        history.push(new TreeDFSNode(grid, twoProb));      
+        depth++;
+        
         if (grid.lost()) {
           history.peek().updateMaxReward(0f);
           history.peek().setAction(Action.NONE);
           continue;
         }
-
+        
         dive(grid, history, db);
       }
      
@@ -131,6 +132,7 @@ class TreeGeneratorMDP implements Algorithm {
       if (node.isPosiEmpty()) {
         
         history.pop();
+        depth--;
         if (history.isEmpty()) {
           break;
         }
@@ -190,15 +192,15 @@ class TreeGeneratorMDP implements Algorithm {
         node.setAction(Action.NONE);
       	return;
       }
-      
-      // Check if the state is stuck  
-      if (!grid.canMoveUp()) {
-        history.peek().updateMaxReward(0f);
-        return;
-      }
 
       // Move the state upwards
       grid.slideUp(false);
+
+      // Check if the state is stuck  
+      if (!grid.moved()) {
+        history.peek().updateMaxReward(0f);
+        return;
+      }
       
       // Check if the game is beat
       if (grid.won()) {
@@ -211,12 +213,14 @@ class TreeGeneratorMDP implements Algorithm {
 
       // Create a new node in the DAG 
       history.push(new TreeDFSNode(grid, twoProb));
+      depth++;
+
       // Need to check if we lost AFTER instantiating
       if (grid.lost()) {
         history.peek().updateMaxReward(0f);
         history.peek().setAction(Action.NONE);
         return;
-      } 
+      }
     }
   }
   

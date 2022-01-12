@@ -21,25 +21,31 @@ import javafx.util.Duration;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
+import java.lang.Math;
 
 class GraphicsView implements View {
   private Stage stage;
 
+
   private Group group;
+  private Group nodes;
   private Scene scene;
   private Canvas canvas;
   private GraphicsContext gc;
 
-  private Duration animationLength = new Duration(1000);
+  private Duration animationLength = new Duration(100);
 
   private float paddingPercent = 5;
   private float roundingPercent = 15;
   private float textSizePercent = 35;
 
+  private boolean animate = true;
+
   private ArrayList<String> input;
 
   private boolean canPressFlag = true;
-
+  
+  
   private void display(Grid grid) {
     
     float width = (float)stage.getWidth();
@@ -70,26 +76,25 @@ class GraphicsView implements View {
     float x_text;
     float y_text;
 
-    if (node_width < node_height) {
-      gc.setFont(new Font((int) (node_width * (textSizePercent/100f))));
-    } else {
-      gc.setFont(new Font((int) (node_height * (textSizePercent/100f))));
-    }
 
     gc.setFill(Color.WHITE);
     gc.fillRect(0, 0, width, height);
 
+    nodes.getChildren().clear();
+    
     ParallelTransition transitions = new ParallelTransition();
-
-    for (Node node : grid.getNodes() ) {
-        
+    for (Node node : grid.getNodes() ) {        
       x = node.getPos().getX();
       x = ((x+1) * pad_width) + (x * node_width);
 
       y = node.getPos().getY();
       y = ((y+1) * pad_height) + (y * node_height);
 
+      gc.setFill(Color.GREY);
+      gc.fillRoundRect(x, y, node_width, node_height, node_arc_width, node_arc_height);
+
       if (node.getType() == NodeType.VALUE) {
+
         x_old = 0;
         y_old = 0;
         try {
@@ -103,15 +108,18 @@ class GraphicsView implements View {
         x_old = ((x_old+1) * pad_width) + (x_old * node_width);
         y_old = ((y_old+1) * pad_height) + (y_old * node_height);
        
-
-        Rectangle rect = new Rectangle(width, height, Color.BLACK);
+        Rectangle rect = new Rectangle(node_width, node_height, Color.BLACK);
         rect.setArcWidth(node_arc_width);
         rect.setArcHeight(node_arc_height);
+
+
+        this.nodes.getChildren().add(rect);
         
         TranslateTransition transition= new TranslateTransition(animationLength, rect);
 
         transition.setFromX(x_old);
         transition.setFromY(y_old);
+
 
         transition.setToX(x);
         transition.setToY(y);
@@ -125,13 +133,23 @@ class GraphicsView implements View {
           e.printStackTrace();
           System.exit(1);
         }
+        text.setFill(Color.WHITE);
+        if (node_width < node_height) {
+          text.setFont(new Font((int) (node_width * (textSizePercent/100f))));
+        } else {
+          text.setFont(new Font((int) (node_height * (textSizePercent/100f))));
+        }
+        text.setTextOrigin(VPos.CENTER);
+  
 
-        x_text_old = x_old + node_width / 2;
+        x_text_old = x_old + Math.abs(node_width - (float)text.getLayoutBounds().getWidth()) / 2;
+
         y_text_old = y_old + node_height / 2;
 
-        x_text = x + node_width / 2;
+        x_text = x + Math.abs(node_width - (float)text.getLayoutBounds().getWidth()) / 2;
         y_text = y + node_height / 2;
 
+        this.nodes.getChildren().add(text);
         TranslateTransition transitionText = new TranslateTransition(animationLength, text);
 
         transitionText.setFromX(x_text_old);
@@ -140,25 +158,45 @@ class GraphicsView implements View {
         transitionText.setToX(x_text);
         transitionText.setToY(y_text);
 
-        transitions.getChildren().add(transitionText);
-
-      } else if (node.getType() == NodeType.EMPTY) {
-        gc.setFill(Color.GREY);
-        gc.fillRoundRect(x, y, node_width, node_height, node_arc_width, node_arc_height);
+        transitions.getChildren().add(transitionText);  
       }
     }
+    lock(grid);
+    transitions.setOnFinished(e -> unlock());
     transitions.play();
   }
 
+  private void lock(Grid grid) {
+    // A bit hacky ik :(
+    for (Node node : grid.getNodes()) {
+      if (node.getType() == NodeType.VALUE) {
+        try {
+          node.setOldPos(node.getPos());
+        } catch(CantMoveException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+      }
+    }
+    animate = false;
+  }
+  
+  private void unlock() {
+    animate = true;
+  }
+  
 
   public GraphicsView(Grid grid, Stage stage, float width, float height) {
     this.stage = stage;
 
     this.group = new Group();
+    this.nodes = new Group();
+
     this.canvas = new Canvas(width, height);
     this.group.getChildren().add(this.canvas);
-    
-    this.scene = new Scene(this.group);
+    this.group.getChildren().add(this.nodes);
+
+    this.scene = new Scene(this.group, Color.WHITE);
     this.stage.setScene(this.scene);
     
     this.gc = canvas.getGraphicsContext2D();
@@ -187,10 +225,8 @@ class GraphicsView implements View {
           }
         });
     
-    gc.setTextAlign(TextAlignment.CENTER);
-    gc.setTextBaseline(VPos.CENTER);
- 
     stage.show();
+    display(grid);
   }
   
   @Override
@@ -207,27 +243,32 @@ class GraphicsView implements View {
   @Override
   public GameStats play(Grid grid, Algorithm algo) {
     GameStats stat = new GameStats();
+
     new AnimationTimer() {
       public void handle(long nanoTime) {
-        try {
-          if (grid.won()) {
-            stat.won();
-            stop();
-          } else if (grid.lost()) {
-            stat.lost();
-            stop();
+        if (animate) {
+          try {
+            if (grid.won()) {
+              stat.won();
+              stop();
+            } else if (grid.lost()) {
+              stat.lost();
+              stop();
+            }
+            grid.process(algo.move(grid));
+            display(grid);
+            input.clear();
+          } catch(InvalidActionException e) {
+            e.printStackTrace();
+            System.exit(1);
           }
-          display(grid);
-          grid.process(algo.move(grid));
-
-          input.clear();
-        } catch(InvalidActionException e) {
-          e.printStackTrace();
-          System.exit(1);
         }
       }
     }.start();
+    
+    
     return stat;
   }
+
 
 }

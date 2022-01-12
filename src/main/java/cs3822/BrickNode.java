@@ -110,6 +110,11 @@ class BrickNode extends Node {
   }
   
   @Override
+  public void setOldPos(Position pos) throws CantMoveException {
+    throw new CantMoveException();
+  }
+
+  @Override
   public Position getOldPos() throws CantMoveException {
     throw new CantMoveException();
   }

@@ -68,8 +68,8 @@ class Grid {
       } 
     } 
     // Generate the initial nodes
-    generateNewNode();
-    generateNewNode();
+    //generateNewNode();
+    //generateNewNode();
     
     // Start keeping track of history
     try {
@@ -203,7 +203,7 @@ class Grid {
     toHash = true;
   }
  
-  private boolean moved() {
+  public boolean moved() {
     try {
       for (Node node : nodes) {
         if (node.getType() == NodeType.VALUE && node.getMoveFlag()) {
@@ -306,16 +306,18 @@ class Grid {
       }
     }
 
-    if (genNewNode && moved()) {
-      generateNewNode();
-    }
-    
-    // Make a back-up 
-    try {
-      history.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (moved()) {
+      if (genNewNode) {
+        generateNewNode();
+      }
+      
+      // Make a back-up 
+      try {
+        history.add(cloneNodes());
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
   } 
   /** Slide every node rightwards. */
@@ -379,16 +381,18 @@ class Grid {
       }
     }
 
-    if (genNewNode && moved()) {
-      generateNewNode();
-    }
-    
-    // Make a back-up 
-    try {
-      history.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (moved()) {
+      if (genNewNode) {
+        generateNewNode();
+      }
+      
+      // Make a back-up 
+      try {
+        history.add(cloneNodes());
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
   } 
   /** Slide every node downwards. */
@@ -452,16 +456,18 @@ class Grid {
       }
     }
 
-    if (genNewNode && moved()) {
-      generateNewNode();
-    }
-    
-    // Make a back-up 
-    try {
-      history.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (moved()) {
+      if (genNewNode) {
+        generateNewNode();
+      }
+      
+      // Make a back-up 
+      try {
+        history.add(cloneNodes());
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
   } 
 
@@ -526,16 +532,18 @@ class Grid {
       }
     }
 
-    if (genNewNode && moved()) {
-      generateNewNode();
-    }
-    
-    // Make a back-up 
-    try {
-      history.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (moved()) {
+      if (genNewNode) {
+        generateNewNode();
+      }
+      
+      // Make a back-up 
+      try {
+        history.add(cloneNodes());
+      } catch(UnknownNodeTypeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
   } 
 
@@ -623,74 +631,6 @@ class Grid {
     return true;
   }
   
-  /** Return true if swiping up is a possible action. */
-  public boolean canMoveUp() {
-    for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
-        try {
-          if (node.canMoveUp(this)) {
-            return true;
-          }
-        } catch(UnknownNodeTypeException | CantMoveException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-    } 
-    return false;
-  }
-
-  /** Return true if swiping right is a possible action. */
-  public boolean canMoveRight() {
-    for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
-        try {
-          if (node.canMoveRight(this)) {
-            return true;
-          }
-        } catch(UnknownNodeTypeException | CantMoveException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-    } 
-    return false;
-  }
-
-  /** Return true if swiping down is a possible action. */
-  public boolean canMoveDown() {
-    for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
-        try {
-          if (node.canMoveDown(this)) {
-            return true;
-          }
-        } catch(UnknownNodeTypeException | CantMoveException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-    } 
-    return false;
-  }
-
-  /** Return true if swiping left is a possible action. */
-  public boolean canMoveLeft() {
-    for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
-        try {
-          if (node.canMoveRight(this)) {
-            return true;
-          }
-        } catch(UnknownNodeTypeException | CantMoveException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-    } 
-    return false;
-  }
-
   /** Return true if the win condition is satisfied. */
   public boolean won() {
     try {

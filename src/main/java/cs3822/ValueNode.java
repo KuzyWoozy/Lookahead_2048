@@ -26,6 +26,7 @@ class ValueNode extends Node {
    */
   public ValueNode(Position pos) {
     super(pos);
+    this.oldPos = new Position(pos);
   }
 
   /** Copy constructor. */
@@ -34,7 +35,7 @@ class ValueNode extends Node {
     this.value = node.getValue();
     this.mergeFlag = node.mergeFlag;
     this.moveFlag = node.moveFlag;
-    this.oldPos = node.oldPos;
+    this.oldPos = new Position(node.oldPos);
   }
 
   /** Copy constructor. */
@@ -59,6 +60,7 @@ class ValueNode extends Node {
    */
   public ValueNode(EmptyNode node, int value) {
     super(node.getPos());
+    this.oldPos = new Position(node.getPos());
     this.value = value;
   }
   
@@ -71,6 +73,7 @@ class ValueNode extends Node {
   public ValueNode(Position pos, int value) {
     super(pos);
     this.value = value;
+    this.oldPos = new Position(pos);
   }
 
   /** Return the type of the node. */
@@ -151,6 +154,11 @@ class ValueNode extends Node {
       this.oldPos = this.pos;
       this.pos = new Position(pos);
     }
+  }
+  
+  @Override
+  public void setOldPos(Position pos) {
+    this.oldPos = pos;
   }
 
   /** Return true if the node can move within the specified grid. */

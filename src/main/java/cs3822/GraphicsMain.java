@@ -15,11 +15,11 @@ public class GraphicsMain extends Application
     public void start(Stage stage) {
      
       String map0 = "##\n##";
-      String map1 = "###\n###\n###";
+      String map1 = "#2#\n##2\n###";
       String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
       String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
       String map4 = "~###\n#~##\n##~#\n###~";
-      String map5 = "####\n####\n####\n####";
+      String map5 = "#2##\n#2##\n####\n####";
     
     
       float twoProb = 0.9f;
@@ -29,23 +29,23 @@ public class GraphicsMain extends Application
       View view = null;
       try {
         grid = new Grid(map5, 2048, twoProb);
-        //algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
-        //
-        //view = new GraphicsView(grid, stage, 400, 400);
         view = new StdoutView(System.in);
-        algo = new PlayerAlgo(view);
+        //view = new GraphicsView(grid, stage, 400, 400);
+        algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
+        //algo = new PlayerAlgo(view);
         //algo = new UniformRandomPlay();
-      } catch(InvalidMapSizeException e) {
+      } catch(InvalidMapSizeException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }
       
+      /*
       view.play(grid, algo);
-
-      /*  
-      GameStats stats = null;
-      stats = control.play(); 
-
+      
+      GameStats stats = new GameStats();
+      for (int i=0; i < 10000; i++) {
+        stats.merge(view.play(grid, algo));
+      }
       System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
       */
     } 

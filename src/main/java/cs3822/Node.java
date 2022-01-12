@@ -40,7 +40,7 @@ abstract class Node {
   
   /** Constructs the Node with the specified position. */
   public Node(Position pos) {
-    this.pos = new Position(pos);
+    this.pos = pos;
   }
 
   /** Copy constructor. */
@@ -70,11 +70,19 @@ abstract class Node {
   /** Return true if the two nodes are equal. */
   public boolean equals(Node node) {
     boolean x = false;
-    try {
-      x = (pos.equals(node.getPos()) && getType() == node.getType() && getValue() == node.getValue());
-    } catch(NoValueException e) {
-      e.printStackTrace();
-      System.exit(1);
+    if (pos.equals(node.getPos()) && getType() == node.getType()) {
+      if (getType() == NodeType.VALUE) {
+        try {
+          if (getValue() == node.getValue()) {
+            x = true;
+          }
+        } catch(NoValueException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+      } else {
+        x = true;
+      }
     }
     return x;
   }
@@ -98,6 +106,7 @@ abstract class Node {
     }
   }
   
+  public abstract void setOldPos(Position pos) throws CantMoveException;
   public abstract Position getOldPos() throws CantMoveException;
 
   public abstract void moveTo(Position pos) throws CantMoveException;

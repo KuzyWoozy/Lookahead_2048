@@ -26,7 +26,7 @@ class HashMapStorage implements ModelStorage {
     return map.get(hash).getReward();
   }
 
-  public int getElemCount() {
+  public long getElemCount() {
     return map.size();
   }
 
