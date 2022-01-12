@@ -31,8 +31,8 @@ public class GraphicsMain extends Application
         grid = new Grid(map5, 2048, twoProb);
         //algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
         //
-        view = new GraphicsView(grid, stage, 400, 400);
-        //view = new StdoutView(System.in);
+        //view = new GraphicsView(grid, stage, 400, 400);
+        view = new StdoutView(System.in);
         algo = new PlayerAlgo(view);
         //algo = new UniformRandomPlay();
       } catch(InvalidMapSizeException e) {

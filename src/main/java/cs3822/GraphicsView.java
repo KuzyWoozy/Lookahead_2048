@@ -15,6 +15,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.geometry.VPos;
 import javafx.scene.text.Font;
 import javafx.animation.AnimationTimer;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ParallelTransition; 
+import javafx.util.Duration;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
 
 class GraphicsView implements View {
@@ -24,6 +29,8 @@ class GraphicsView implements View {
   private Scene scene;
   private Canvas canvas;
   private GraphicsContext gc;
+
+  private Duration animationLength = new Duration(1000);
 
   private float paddingPercent = 5;
   private float roundingPercent = 15;
@@ -51,8 +58,17 @@ class GraphicsView implements View {
     float pad_width = width_padding / (grid.getCols() + 1);
     float pad_height = height_padding / (grid.getRows() + 1);
 
+    float x_old;
+    float y_old;
+
     float x;
     float y;
+
+    float x_text_old;
+    float y_text_old;
+
+    float x_text;
+    float y_text;
 
     if (node_width < node_height) {
       gc.setFont(new Font((int) (node_width * (textSizePercent/100f))));
@@ -63,32 +79,75 @@ class GraphicsView implements View {
     gc.setFill(Color.WHITE);
     gc.fillRect(0, 0, width, height);
 
-    for (Node node : grid.getNodes() ) { 
-      
+    ParallelTransition transitions = new ParallelTransition();
+
+    for (Node node : grid.getNodes() ) {
+        
       x = node.getPos().getX();
       x = ((x+1) * pad_width) + (x * node_width);
 
       y = node.getPos().getY();
       y = ((y+1) * pad_height) + (y * node_height);
 
-      
       if (node.getType() == NodeType.VALUE) {
-        gc.setFill(Color.BLACK);
-        gc.fillRoundRect(x, y, node_width, node_height, node_arc_width, node_arc_height);
-        
+        x_old = 0;
+        y_old = 0;
         try {
-          gc.setFill(Color.WHITE);
-          gc.fillText(String.valueOf(node.getValue()), x+(node_width/2), y+(node_height/2), node_width);
+          x_old = node.getOldPos().getX();
+          y_old = node.getOldPos().getY();
+        } catch(CantMoveException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+
+        x_old = ((x_old+1) * pad_width) + (x_old * node_width);
+        y_old = ((y_old+1) * pad_height) + (y_old * node_height);
+       
+
+        Rectangle rect = new Rectangle(width, height, Color.BLACK);
+        rect.setArcWidth(node_arc_width);
+        rect.setArcHeight(node_arc_height);
+        
+        TranslateTransition transition= new TranslateTransition(animationLength, rect);
+
+        transition.setFromX(x_old);
+        transition.setFromY(y_old);
+
+        transition.setToX(x);
+        transition.setToY(y);
+
+        transitions.getChildren().add(transition);
+
+        Text text = null;
+        try {
+          text = new Text(String.valueOf(node.getValue()));
         } catch(NoValueException e) {
           e.printStackTrace();
           System.exit(1);
         }
-      } 
-      else if (node.getType() == NodeType.EMPTY) {
+
+        x_text_old = x_old + node_width / 2;
+        y_text_old = y_old + node_height / 2;
+
+        x_text = x + node_width / 2;
+        y_text = y + node_height / 2;
+
+        TranslateTransition transitionText = new TranslateTransition(animationLength, text);
+
+        transitionText.setFromX(x_text_old);
+        transitionText.setFromY(y_text_old);
+
+        transitionText.setToX(x_text);
+        transitionText.setToY(y_text);
+
+        transitions.getChildren().add(transitionText);
+
+      } else if (node.getType() == NodeType.EMPTY) {
         gc.setFill(Color.GREY);
         gc.fillRoundRect(x, y, node_width, node_height, node_arc_width, node_arc_height);
       }
     }
+    transitions.play();
   }
 
 
@@ -130,8 +189,7 @@ class GraphicsView implements View {
     
     gc.setTextAlign(TextAlignment.CENTER);
     gc.setTextBaseline(VPos.CENTER);
-
-    
+ 
     stage.show();
   }
   

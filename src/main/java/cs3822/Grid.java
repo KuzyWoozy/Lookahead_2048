@@ -183,28 +183,65 @@ class Grid {
     toHash = true;
   }
 
-  /** 
-   * Swaps the position of the two specified nodes.
-   *
-   * @param node1 Node to be swapped
-   * @param node2 Node to be swapped with
-   */
-  private void swap(Node node1, Node node2) {
-    Position tempPos = new Position(node1.getPos());
-    node1.setPos(node2.getPos());
-    node2.setPos(tempPos);
+  private void swap(Position pos1, Position pos2) throws CantMoveException {
+    Node temp = null;
+    try {
+      temp = Node.copyNode(nodes.get(index(pos1)));
+    } catch(UnknownNodeTypeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    } 
+    temp.moveTo(pos2);
 
-    nodes.set(index(node1.getPos()), node1);
-    nodes.set(index(node2.getPos()), node2);
+
+    nodes.set(index(pos1), nodes.get(index(pos2)));
+    nodes.get(index(pos1)).moveTo(pos1);
+   
+
+    nodes.set(index(pos2), temp);
+    
     toHash = true;
   }
-  
+ 
+  private boolean moved() {
+    try {
+      for (Node node : nodes) {
+        if (node.getType() == NodeType.VALUE && node.getMoveFlag()) {
+          return true;
+        }
+      }
+    } catch(NoMoveFlagException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    return false;
+  }
+
   /** Resets the movement flags for each approxpriate node. */
   private void clearMoveFlags() {
-    for (Node node : nodes) {
-      if (node.getType() == NodeType.VALUE) {
-        node.offMoveFlag();
+    try {
+      for (Node node : nodes) {
+        if (node.getType() == NodeType.VALUE) {
+          node.offMoveFlag();
+        }
       }
+    } catch(NoMoveFlagException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+
+  /** Resets the merge flags for each approxpriate node. */
+  private void clearMergeFlags() {
+    try {
+      for (Node node : nodes) {
+        if (node.getType() == NodeType.VALUE) {
+          node.offMergeFlag();
+        }
+      }
+    } catch(NoMergeFlagException e) {
+      e.printStackTrace();
+      System.exit(1);
     }
   }
 
@@ -215,152 +252,64 @@ class Grid {
 
   /** Slide every node upwards, specifying whenever to generate a new node. */
   public void slideUp(boolean genNewNode) {
-    List<Node> nodesCopy = null;
-    try {
-      nodesCopy = cloneNodes();
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
+    // Clear flags before movement
+    clearMoveFlags();
+    clearMergeFlags();
+    
+    // Reason we dont iterate over array of value nodes
+    // is to avoid looping over the nodes several times
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
-        Node node = nodesCopy.get((y * rowSize) + x);
-        
-        if (node.getType() == NodeType.VALUE) {
-  
-          Position pos = new Position(node.getPos());
-
-          // Check if we have not reached the edge and that the
-          // square we are traversing into is empty
-          try {
-            while (pos.canMoveUp()) {
-              if (nodes.get(indexUp(pos)).getType() == NodeType.EMPTY) {
-                pos.moveUp();
-                
-              } else {
-                break;
-              }
-            }
-          } catch(MovingOutOfBoundsException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-        
-          if (!pos.canMoveUp()) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else if (nodes.get(indexUp(pos)).getType() == NodeType.BRICK) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else {
-            try {
-              if (node.getValue() == nodes.get(indexUp(pos)).getValue() && !nodes.get(indexUp(pos)).getMoveFlag()) {
-                
-                pos.moveUp();
-                Node replacementNode = nodes.get(index(pos));
-                replacementNode.onMoveFlag();
-               
-                replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
-
-                nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
-                toHash = true;
-
-              } else {
-                swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-              }
-            } catch(NoValueException | NoMoveFlagException | MovingOutOfBoundsException e) {
-              e.printStackTrace();
-              System.exit(1);
-            }
-          }
-        }
-      }
-    }
-    
-    clearMoveFlags();
-    // Generate a new node if specified
-    if (genNewNode && canMoveUp()) {
-      generateNewNode();
-    }
-    // Make a back-up
-    try {
-      history.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
-
-  /** Slide every node rightwards. */
-  public void slideRight() {
-    slideRight(true);
-  }
-
-  /** Slide every node rightwards, specifying if a new node should be generated. */
-  public void slideRight(boolean genNewNode) {
-    List<Node> nodesCopy = null;
-    try {
-      nodesCopy = cloneNodes();
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    
-    for (int y = 0; y < rowSize; y++) {
-      for (int x = (columnSize-1); x >= 0; x--) {
-        Node node = nodesCopy.get((y * rowSize) + x);
+        Node node = nodes.get((y * rowSize) + x);
 
         if (node.getType() == NodeType.VALUE) {
-  
+
           Position pos = new Position(node.getPos());
-
-          // Check if we have not reached the edge and that the
-          // square we are traversing into is empty
-          try {
-            while (pos.canMoveRight()) {
-              if (nodes.get(indexRight(pos)).getType() == NodeType.EMPTY) {
-                pos.moveRight();
-              } else {
-                break;
+          if (pos.canMoveUp()) { 
+            if (nodes.get(indexUp(pos)).getType() == NodeType.EMPTY) {
+              try {
+                do {
+                  pos.moveUp();
+                } while (pos.canMoveUp() && nodes.get(indexUp(pos)).getType() == NodeType.EMPTY);
+              } catch(MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
             }
-          } catch(MovingOutOfBoundsException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-        
-          if (!pos.canMoveRight()) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else if (nodes.get(indexRight(pos)).getType() == NodeType.BRICK) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else {
-            try {
-              if (node.getValue() == nodes.get(indexRight(pos)).getValue() && !nodes.get(indexRight(pos)).getMoveFlag()) {
-                // Merge 
-                pos.moveRight();
-                
-                Node replacementNode = nodes.get(index(pos));
-                replacementNode.onMoveFlag();
-               
-                replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
+            if (pos.canMoveUp()) { 
+              try {
+                if (node.getValue() == nodes.get(indexUp(pos)).getValue() && !nodes.get(indexUp(pos)).getMergeFlag()) {
+                  // Merge 
+                  pos.moveUp();
+ 
+                  node.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
-                nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
-                toHash = true;
-              } else {
-                swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
+                  nodes.set(index(pos), new EmptyNode(new Position(pos)));
+                  node.onMergeFlag();
+                  toHash = true;
+                }
+              } catch(NoValueException | NoMergeFlagException | MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
-            } catch(NoValueException | NoMoveFlagException | MovingOutOfBoundsException e) {
-              e.printStackTrace();
-              System.exit(1);
             }
+            if (!pos.equals(node.getPos())) {
+              try {
+                swap(pos, node.getPos());
+              } catch(CantMoveException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            } 
           }
         }
       }
     }
 
-    clearMoveFlags();
-    if (genNewNode && canMoveRight()) {
+    if (genNewNode && moved()) {
       generateNewNode();
     }
+    
     // Make a back-up 
     try {
       history.add(cloneNodes());
@@ -368,8 +317,80 @@ class Grid {
       e.printStackTrace();
       System.exit(1);
     }
+  } 
+  /** Slide every node rightwards. */
+  public void slideRight() {
+    slideRight(true);
   }
 
+  /** Slide every node rightwards, specifying if a new node should be generated. */
+   public void slideRight(boolean genNewNode) {
+    // Clear flags before movement
+    clearMoveFlags();
+    clearMergeFlags();
+    
+    // Reason we dont iterate over array of value nodes
+    // is to avoid looping over the nodes several times
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = (columnSize-1); x >= 0; x--) {
+        Node node = nodes.get((y * rowSize) + x);
+
+        if (node.getType() == NodeType.VALUE) {
+
+          Position pos = new Position(node.getPos());
+          if (pos.canMoveRight()) { 
+            if (nodes.get(indexRight(pos)).getType() == NodeType.EMPTY) {
+              try {
+                do {
+                  pos.moveRight();
+                } while (pos.canMoveRight() && nodes.get(indexRight(pos)).getType() == NodeType.EMPTY);
+              } catch(MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            }
+            if (pos.canMoveRight()) { 
+              try {
+                if (node.getValue() == nodes.get(indexRight(pos)).getValue() && !nodes.get(indexRight(pos)).getMergeFlag()) {
+                  // Merge 
+                  pos.moveRight();
+ 
+                  node.setValue(node.getValue() + nodes.get(index(pos)).getValue());
+
+                  nodes.set(index(pos), new EmptyNode(new Position(pos)));
+                  node.onMergeFlag();
+                  toHash = true;
+                }
+              } catch(NoValueException | NoMergeFlagException | MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            }
+            if (!pos.equals(node.getPos())) {
+              try {
+                swap(pos, node.getPos());
+              } catch(CantMoveException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            } 
+          }
+        }
+      }
+    }
+
+    if (genNewNode && moved()) {
+      generateNewNode();
+    }
+    
+    // Make a back-up 
+    try {
+      history.add(cloneNodes());
+    } catch(UnknownNodeTypeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+  } 
   /** Slide every node downwards. */
   public void slideDown() {
     slideDown(true);
@@ -377,72 +398,64 @@ class Grid {
 
   /** Slide every node downwards, specifying if a new node should be generated. */
   public void slideDown(boolean genNewNode) {
-    List<Node> nodesCopy = null;
-    try {
-      nodesCopy = cloneNodes();
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
+    // Clear flags before movement
+    clearMoveFlags();
+    clearMergeFlags();
     
+    // Reason we dont iterate over array of value nodes
+    // is to avoid looping over the nodes several times
     for (int y = (rowSize-1); y >= 0; y--) {
-      for (int  x = 0; x < columnSize; x ++) {
-        Node node = nodesCopy.get((y * rowSize) + x);
-
+      for (int x = 0; x < columnSize; x++) {
+        Node node = nodes.get((y * rowSize) + x);
 
         if (node.getType() == NodeType.VALUE) {
-    
+
           Position pos = new Position(node.getPos());
-
-          // Check if we have not reached the edge and that the
-          // square we are traversing into is empty
-          try {
-            while (pos.canMoveDown()) {
-              if (nodes.get(indexDown(pos)).getType() == NodeType.EMPTY) {
-                pos.moveDown();
-              } else {
-                break;
+          if (pos.canMoveDown()) { 
+            if (nodes.get(indexDown(pos)).getType() == NodeType.EMPTY) {
+              try {
+                do {
+                  pos.moveDown();
+                } while (pos.canMoveDown() && nodes.get(indexDown(pos)).getType() == NodeType.EMPTY);
+              } catch(MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
             }
-          } catch(MovingOutOfBoundsException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-        
-          if (!pos.canMoveDown()) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else if (nodes.get(indexDown(pos)).getType() == NodeType.BRICK) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else {
-            try {
-              if (node.getValue() == nodes.get(indexDown(pos)).getValue() && !nodes.get(indexDown(pos)).getMoveFlag()) {
-                // Merge 
-                pos.moveDown();
-                
-                Node replacementNode = nodes.get(index(pos));
-                replacementNode.onMoveFlag();
-               
-                replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
+            if (pos.canMoveDown()) { 
+              try {
+                if (node.getValue() == nodes.get(indexDown(pos)).getValue() && !nodes.get(indexDown(pos)).getMergeFlag()) {
+                  // Merge 
+                  pos.moveDown();
+ 
+                  node.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
-                nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos())));
-                toHash = true;
-              } else {
-                swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
+                  nodes.set(index(pos), new EmptyNode(new Position(pos)));
+                  node.onMergeFlag();
+                  toHash = true;
+                }
+              } catch(NoValueException | NoMergeFlagException | MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
-            } catch(NoValueException | NoMoveFlagException | MovingOutOfBoundsException e) {
-              e.printStackTrace();
-              System.exit(1);
             }
+            if (!pos.equals(node.getPos())) {
+              try {
+                swap(pos, node.getPos());
+              } catch(CantMoveException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            } 
           }
         }
       }
     }
 
-    clearMoveFlags();
-    if (genNewNode && canMoveDown()) {
+    if (genNewNode && moved()) {
       generateNewNode();
     }
+    
     // Make a back-up 
     try {
       history.add(cloneNodes());
@@ -450,7 +463,7 @@ class Grid {
       e.printStackTrace();
       System.exit(1);
     }
-  }
+  } 
 
   /** Slide every node leftwards. */
   public void slideLeft() {
@@ -459,70 +472,64 @@ class Grid {
 
   /** Slide every node leftwards, specifying if a new node should be generated. */
   public void slideLeft(boolean genNewNode) {
-    List<Node> nodesCopy = null;
-    try {
-      nodesCopy = cloneNodes();
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
+    // Clear flags before movement
+    clearMoveFlags();
+    clearMergeFlags();
+    
+    // Reason we dont iterate over array of value nodes
+    // is to avoid looping over the nodes several times
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
-        Node node = nodesCopy.get((y * rowSize) + x);
-
+        Node node = nodes.get((y * rowSize) + x);
 
         if (node.getType() == NodeType.VALUE) {
-       
+
           Position pos = new Position(node.getPos());
-
-          // Check if we have not reached the edge and that the
-          // square we are traversing into is empty
-          try {
-            while (pos.canMoveLeft()) {
-              if (nodes.get(indexLeft(pos)).getType() == NodeType.EMPTY) {
-                pos.moveLeft();
-              } else {
-                break;
+          if (pos.canMoveLeft()) { 
+            if (nodes.get(indexLeft(pos)).getType() == NodeType.EMPTY) {
+              try {
+                do {
+                  pos.moveLeft();
+                } while (pos.canMoveLeft() && nodes.get(indexLeft(pos)).getType() == NodeType.EMPTY);
+              } catch(MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
             }
-          } catch(MovingOutOfBoundsException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-        
-          if (!pos.canMoveLeft()) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else if (nodes.get(indexLeft(pos)).getType() == NodeType.BRICK) {
-            swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
-          } else {
-            try {
-              if (node.getValue() == nodes.get(indexLeft(pos)).getValue() && !nodes.get(indexLeft(pos)).getMoveFlag()) { 
-                // Merge 
-                pos.moveLeft();
-                Node replacementNode = nodes.get(index(pos));
-                replacementNode.onMoveFlag();
-               
-                replacementNode.setValue(node.getValue() + nodes.get(index(pos)).getValue());
+            if (pos.canMoveLeft()) { 
+              try {
+                if (node.getValue() == nodes.get(indexLeft(pos)).getValue() && !nodes.get(indexLeft(pos)).getMergeFlag()) {
+                  // Merge 
+                  pos.moveLeft();
+ 
+                  node.setValue(node.getValue() + nodes.get(index(pos)).getValue());
 
-                nodes.set(index(node.getPos()), new EmptyNode(new Position(node.getPos()))); 
-                toHash = true;
-              } else {
-                swap(nodes.get(index(node.getPos())), nodes.get(index(pos)));
+                  nodes.set(index(pos), new EmptyNode(new Position(pos)));
+                  node.onMergeFlag();
+                  toHash = true;
+                }
+              } catch(NoValueException | NoMergeFlagException | MovingOutOfBoundsException e) {
+                e.printStackTrace();
+                System.exit(1);
               }
-            } catch(NoValueException | NoMoveFlagException | MovingOutOfBoundsException e) {
-              e.printStackTrace();
-              System.exit(1);
             }
+            if (!pos.equals(node.getPos())) {
+              try {
+                swap(pos, node.getPos());
+              } catch(CantMoveException e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+            } 
           }
         }
       }
     }
-    
-    clearMoveFlags();
-    if (genNewNode && canMoveLeft()) {
+
+    if (genNewNode && moved()) {
       generateNewNode();
     }
+    
     // Make a back-up 
     try {
       history.add(cloneNodes());
@@ -603,8 +610,13 @@ class Grid {
       if (node.getType() == NodeType.EMPTY) {
         return false;
       } else if (node.getType() == NodeType.VALUE) {
-        if (node.canMove(this)) {
-          return false;
+        try {
+          if (node.canMove(this)) {
+            return false;
+          }
+        } catch(CantMoveException e) {
+          e.printStackTrace();
+          System.exit(1);
         }
       }
     } 
@@ -619,7 +631,7 @@ class Grid {
           if (node.canMoveUp(this)) {
             return true;
           }
-        } catch(UnknownNodeTypeException e) {
+        } catch(UnknownNodeTypeException | CantMoveException e) {
           e.printStackTrace();
           System.exit(1);
         }
@@ -636,7 +648,7 @@ class Grid {
           if (node.canMoveRight(this)) {
             return true;
           }
-        } catch(UnknownNodeTypeException e) {
+        } catch(UnknownNodeTypeException | CantMoveException e) {
           e.printStackTrace();
           System.exit(1);
         }
@@ -653,7 +665,7 @@ class Grid {
           if (node.canMoveDown(this)) {
             return true;
           }
-        } catch(UnknownNodeTypeException e) {
+        } catch(UnknownNodeTypeException | CantMoveException e) {
           e.printStackTrace();
           System.exit(1);
         }
@@ -670,7 +682,7 @@ class Grid {
           if (node.canMoveRight(this)) {
             return true;
           }
-        } catch(UnknownNodeTypeException e) {
+        } catch(UnknownNodeTypeException | CantMoveException e) {
           e.printStackTrace();
           System.exit(1);
         }

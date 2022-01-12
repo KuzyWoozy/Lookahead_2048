@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author Daniil Kuznetsov
  */
 class Position {
-  
+
   private int x;
   private int y;
 

@@ -10,7 +10,9 @@ import java.util.Objects;
 class ValueNode extends Node {
   
   private int value;
+  private boolean mergeFlag = false;
   private boolean moveFlag = false;
+  private Position oldPos = null;
 
   /** Default constructor */
   public ValueNode() {
@@ -30,6 +32,9 @@ class ValueNode extends Node {
   public ValueNode(ValueNode node) {
     super(node);
     this.value = node.getValue();
+    this.mergeFlag = node.mergeFlag;
+    this.moveFlag = node.moveFlag;
+    this.oldPos = node.oldPos;
   }
 
   /** Copy constructor. */
@@ -37,7 +42,10 @@ class ValueNode extends Node {
     super(node);
     try {
       this.value = node.getValue();
-    } catch(NoValueException e) {
+      this.mergeFlag = node.getMergeFlag();
+      this.moveFlag = node.getMoveFlag();
+      this.oldPos = node.getOldPos();
+    } catch(NoValueException | NoMergeFlagException | NoMoveFlagException | CantMoveException e) {
       e.printStackTrace();
       System.exit(1);
     }
@@ -82,7 +90,25 @@ class ValueNode extends Node {
     this.value = value;
   }
   
-  /** Return the movement flag. */
+  /** Return the merge flag. */
+  @Override
+  public boolean getMergeFlag() {
+    return mergeFlag;
+  }
+
+  /** Set boolean flag. */
+  @Override
+  public void onMergeFlag() {
+    mergeFlag = true;
+  }
+
+  /** Unset boolean flag. */
+  @Override
+  public void offMergeFlag() {
+    mergeFlag = false;
+  }
+
+  /** Return the merge flag. */
   @Override
   public boolean getMoveFlag() {
     return moveFlag;
@@ -111,6 +137,165 @@ class ValueNode extends Node {
   public String toString() {
     return "[" + pos + " " + String.valueOf(value) + "]";
   }
+
+  @Override
+  public Position getOldPos() {
+    return oldPos;
+  }
+
+  /** Set position for the node. */
+  @Override
+  public void moveTo(Position pos) {
+    if (!this.pos.equals(pos)) {
+      onMoveFlag(); 
+      this.oldPos = this.pos;
+      this.pos = new Position(pos);
+    }
+  }
+
+  /** Return true if the node can move within the specified grid. */
+  @Override
+  public boolean canMove(Grid grid) {
+    try { 
+      if (canMoveUp(grid)) {
+        return true;
+      }
+
+      if (canMoveRight(grid)) {
+        return true;
+      }
+
+      if (canMoveDown(grid)) {
+        return true;
+      }
+
+      if (canMoveLeft(grid)) {
+        return true;
+      }
+    } catch(UnknownNodeTypeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    return false;
+  }
+  
+  /** Return true of the specified Node can move up in the grid. */
+  public boolean canMoveUp(Grid grid) throws UnknownNodeTypeException {
+    // check boundary
+    if (pos.canMoveUp()) {
+      Node node = grid.getNodes().get(grid.indexUp(pos));
+      switch (node.getType()) {
+        case EMPTY:
+          return true;
+
+        case BRICK:
+          break;
+
+        case VALUE:
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch (NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
+        
+        default:
+          throw new UnknownNodeTypeException();
+      }
+    }
+    return false;
+  }
+  /** Return true of the specified Node can move right in the grid. */
+  public boolean canMoveRight(Grid grid) throws UnknownNodeTypeException {
+    if (pos.canMoveRight()) {
+      Node node = grid.getNodes().get(grid.indexRight(pos));
+      switch (node.getType()) {
+        case EMPTY:
+          return true;
+
+        case BRICK:
+          break;
+
+        case VALUE:
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
+        
+        default:
+          throw new UnknownNodeTypeException();
+      }
+    }
+    return false;
+  }
+
+/** Return true of the specified Node can move down in the grid. */
+  public boolean canMoveDown(Grid grid) throws UnknownNodeTypeException {
+    if (pos.canMoveDown()) {
+      Node node = grid.getNodes().get(grid.indexDown(pos));
+      switch (node.getType()) {
+        case EMPTY:
+          return true;
+
+        case BRICK:
+          break;
+
+        case VALUE:
+          try {
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
+        
+        default:
+          throw new UnknownNodeTypeException();
+      }
+    }
+    return false;
+  }
+
+/** Return true of the specified Node can move left in the grid. */
+  public boolean canMoveLeft(Grid grid) throws UnknownNodeTypeException {
+    if (pos.canMoveLeft()) {
+      Node node = grid.getNodes().get(grid.indexLeft(pos));
+      switch (node.getType()) {
+        case EMPTY:
+          return true;
+
+        case BRICK:
+          break;
+
+        case VALUE:
+          try { 
+            if (node.getValue() == this.getValue()) {
+              return true;
+            }
+          } catch(NoValueException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
+        
+        default:
+          throw new UnknownNodeTypeException();
+      }
+    }
+    return false;
+  }
+
 
 } 
 
