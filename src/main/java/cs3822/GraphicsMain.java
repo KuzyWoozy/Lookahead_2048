@@ -6,13 +6,13 @@ import javafx.stage.Stage;
 
 
 /** Class with the main method, contains all the setup. */
-public class GraphicsMain extends Application 
-{
+//public class GraphicsMain extends Application 
+public class GraphicsMain {
     public static void main( String[] args ) {
-      launch(args);
-    }
+      //launch(args);
+    //}
 
-    public void start(Stage stage) {
+    //public void start(Stage stage) {
      
       String map0 = "##\n##";
       String map1 = "#2#\n##2\n###";
