@@ -10,6 +10,7 @@ import java.util.Objects;
 class ValueNode extends Node {
   
   private int value;
+  private int oldValue;
   private boolean mergeFlag = false;
   private boolean moveFlag = false;
   private Position oldPos = null;
@@ -32,6 +33,7 @@ class ValueNode extends Node {
   /** Copy constructor. */
   public ValueNode(ValueNode node) {
     super(node);
+    this.oldValue = node.getOldValue();
     this.value = node.getValue();
     this.mergeFlag = node.mergeFlag;
     this.moveFlag = node.moveFlag;
@@ -42,6 +44,7 @@ class ValueNode extends Node {
   public ValueNode(Node node) {
     super(node);
     try {
+      this.oldValue = node.getOldValue();
       this.value = node.getValue();
       this.mergeFlag = node.getMergeFlag();
       this.moveFlag = node.getMoveFlag();
@@ -62,8 +65,9 @@ class ValueNode extends Node {
     super(node.getPos());
     this.oldPos = new Position(node.getPos());
     this.value = value;
+    this.oldValue = value;
   }
-  
+
   /**
    * Create a corresponding value node.
    *
@@ -73,14 +77,33 @@ class ValueNode extends Node {
   public ValueNode(Position pos, int value) {
     super(pos);
     this.value = value;
+    this.oldValue = value;
     this.oldPos = new Position(pos);
+  }
+  
+  /**
+   * Create a corresponding value node.
+   *
+   * @param node Position to create the node at
+   * @param value Value to assign to the node
+   */
+  public ValueNode(Position oldPos, Position pos, int value) {
+    super(pos);
+    this.value = value;
+    this.oldValue = value;
+    this.oldPos = new Position(oldPos);
   }
 
   /** Return the type of the node. */
   public NodeType getType() {
     return NodeType.VALUE;
   }
-  
+ 
+  @Override
+  public int getOldValue() {
+    return oldValue;
+  }
+
   /** Return the value of the node. */
   @Override
   public int getValue() {
@@ -90,6 +113,7 @@ class ValueNode extends Node {
   /** Set the value for the node. */
   @Override
   public void setValue(int value) {
+    this.oldValue = this.value;
     this.value = value;
   }
   
@@ -126,6 +150,7 @@ class ValueNode extends Node {
   /** Unset boolean flag. */
   @Override
   public void offMoveFlag() {
+    this.oldPos = new Position(this.pos);
     moveFlag = false;
   }
 

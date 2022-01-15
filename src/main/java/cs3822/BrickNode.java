@@ -39,6 +39,11 @@ class BrickNode extends Node {
     return NodeType.BRICK;
   }
 
+  @Override
+  public int getOldValue() throws NoValueException {
+    throw new NoValueException();
+  }
+
   /** 
    * Return the value of the node.
    *

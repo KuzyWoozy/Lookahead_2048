@@ -49,6 +49,7 @@ abstract class Node {
   }
 
   public abstract NodeType getType();
+  public abstract int getOldValue() throws NoValueException;
   public abstract int getValue() throws NoValueException;
   public abstract void setValue(int value) throws NoValueException;
   public abstract String toString();

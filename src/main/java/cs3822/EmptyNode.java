@@ -38,6 +38,11 @@ class EmptyNode extends Node {
   public NodeType getType() {
     return NodeType.EMPTY;
   }
+  
+  @Override
+  public int getOldValue() throws NoValueException {
+    throw new NoValueException();
+  }
 
   /** 
    * Return the value of the node.
