@@ -19,11 +19,11 @@ abstract class Node {
   public static Node copyNode(Node node) throws UnknownNodeTypeException {
     switch(node.getType()) {
       case BRICK:
-        return new BrickNode(node);
+        return new BrickNode((BrickNode) node);
       case EMPTY:
-        return new EmptyNode(node);
+        return new EmptyNode((EmptyNode) node);
       case VALUE:
-        return new ValueNode(node);
+        return new ValueNode((ValueNode) node);
       default:
         throw new UnknownNodeTypeException();
     } 

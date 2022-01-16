@@ -19,9 +19,8 @@ public class GraphicsMain extends Application {
       String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
       String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
       String map4 = "~###\n#~##\n##~#\n###~";
-      String map5 = "#2##\n####\n####\n####";
-    
-    
+      String map5 = "#2##\n#2##\n####\n####";
+     
       float twoProb = 0.9f;
       
       Grid grid = null;

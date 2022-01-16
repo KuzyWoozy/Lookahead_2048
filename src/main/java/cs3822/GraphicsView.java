@@ -27,15 +27,12 @@ import javafx.animation.PauseTransition;
 import java.lang.Math;
 import java.util.LinkedList;
 
+
 class GraphicsView implements View {
   private Stage stage;
 
-  List<Group> oldFrameGroups;
-
   private Group group;
   private Group nodes;
-
-  Integer i;
 
   private Scene scene;
   private Canvas canvas;
@@ -52,6 +49,8 @@ class GraphicsView implements View {
   private ArrayList<String> input;
 
   private boolean canPressFlag = true;
+
+  private LinkedList<Action> actions_buffer;
    
 
   private void drawRect(GraphicsContext gc, float x, float y, float width, float height, Color color) {
@@ -60,7 +59,7 @@ class GraphicsView implements View {
   }
 
   private void drawRoundRect(GraphicsContext gc, float x, float y, float width, float height, float arc_width, float arc_height, Color color) {
-    gc.setFill(color);
+    gc.setFill(color); 
     gc.fillRoundRect(x, y, width, height, arc_width, arc_height);
   }
 
@@ -83,6 +82,9 @@ class GraphicsView implements View {
     rect.setArcWidth(node_arc_width);
     rect.setArcHeight(node_arc_height);
     
+    rect.setStroke(Color.BLACK);
+    rect.setStrokeWidth(2);
+
     return rect;
   }
 
@@ -99,18 +101,18 @@ class GraphicsView implements View {
     return text;
   }
   
-  private ParallelTransition createTranslateAnimation(Rectangle rect, Text text, float fromX, float fromY, float toX, float toY, float node_width, float node_height, float node_arc_width, float node_arc_height, Color color) {
+  private ParallelTransition createTranslateAnimation(Rectangle rect, Text text, float fromX, float fromY, float toX, float toY, float node_width, float node_height) {
        
-    rect.setX(toX);
-    rect.setY(toY);
+    rect.setX(fromX);
+    rect.setY(fromY);
 
     TranslateTransition trans_node = new TranslateTransition(animationLength, rect);
 
-    trans_node.setFromX(fromX-toX);
-    trans_node.setFromY(fromY-toY);
+    trans_node.setFromX(0);
+    trans_node.setFromY(0);
     
-    trans_node.setToX(0);
-    trans_node.setToY(0);
+    trans_node.setToX(toX - fromX);
+    trans_node.setToY(toY - fromY);
 
     
     float textFromX = fromX + Math.abs(node_width - (float)text.getLayoutBounds().getWidth()) / 2;
@@ -120,17 +122,16 @@ class GraphicsView implements View {
     float textToX = toX + Math.abs(node_width - (float)text.getLayoutBounds().getWidth()) / 2;
     float textToY = toY + node_height / 2;
     
-    text.setX(textToX);
-    text.setY(textToY);
+    text.setX(textFromX);
+    text.setY(textFromY);
     
     TranslateTransition trans_text = new TranslateTransition(animationLength, text);
 
-    trans_text.setFromX(textFromX-textToX);
-    trans_text.setFromY(textFromY-textToY);
-    
+    trans_text.setFromX(0);
+    trans_text.setFromY(0);
 
-    trans_text.setToX(0);
-    trans_text.setToY(0);
+    trans_text.setToX(textToX - textFromX);
+    trans_text.setToY(textToY - textFromY);
     
     ParallelTransition trans = new ParallelTransition(trans_node, trans_text);
 
@@ -174,12 +175,10 @@ class GraphicsView implements View {
 
     drawRect(gc, 0, 0, width, height, Color.WHITE);
 
-    this.i = 0;
+    this.nodes.getChildren().clear();
           
     SequentialTransition animation = new SequentialTransition();
-  
-    List<Group> frameGroups = new LinkedList<Group>();
-
+    List<Group> frameGroups = new LinkedList<Group>(); 
     ParallelTransition transitions;
     for (List<Node> frames : grid.getFrames()) {
       Group frameGroup = new Group();
@@ -192,13 +191,28 @@ class GraphicsView implements View {
         drawRoundRect(gc, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.GREY);
         
         if (node.getType() == NodeType.VALUE) {
-          Rectangle rect = createRect(node_width, node_height, node_arc_width, node_arc_height, Color.BLACK);
+          Color rectColor = null;
+          Color textColor = null; 
+          try {
+            if (node.getMergeFlag() || (grid.getGenPos() != null && grid.getGenPos().equals(node.getPos()))) {
+              rectColor = Color.WHITE;
+              textColor = Color.BLACK;
+            } else {
+              rectColor = Color.BLACK;
+              textColor = Color.WHITE;
+            }
+          } catch(NoMergeFlagException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+
+          Rectangle rect = createRect(node_width, node_height, node_arc_width, node_arc_height, rectColor);
 
           Text text = null;
           x_old = 0;
           y_old = 0;
           try {
-            text = createText(node.getValue(), node_width, node_height, Color.WHITE);
+            text = createText(node.getValue(), node_width, node_height, textColor);
             x_old = node_canvas_x(node.getOldPos().getX(), node_width, pad_width); 
             y_old = node_canvas_y(node.getOldPos().getY(), node_height, pad_height);
 
@@ -210,29 +224,24 @@ class GraphicsView implements View {
           frameGroup.getChildren().add(rect);
           frameGroup.getChildren().add(text);
 
-
-          ParallelTransition tran = createTranslateAnimation(rect, text, x_old, y_old, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.BLACK);
+          ParallelTransition tran = createTranslateAnimation(rect, text, x_old, y_old, x, y, node_width, node_height);
 
           transitions.getChildren().add(tran);
         }
       }
-      frameGroup.setVisible(false);
-      this.nodes.getChildren().add(frameGroup);
       frameGroups.add(frameGroup);
-
-      transitions.setOnFinished(e -> {frameGroups.get(i).setVisible(false); i++; frameGroups.get(i).setVisible(true);});
+      transitions.setOnFinished(e -> {this.nodes.getChildren().clear(); this.nodes.getChildren().add(frameGroups.remove(0));});
       animation.getChildren().add(transitions);
     }
-
-    frameGroups.get(0).setVisible(true);
-
+   
+    this.nodes.getChildren().add(frameGroups.remove(0));
     grid.setDefaultFrame();
-    lock();
+    
     animation.setOnFinished(e -> unlock(grid));
     animation.getChildren().get(animation.getChildren().size()-1).setOnFinished(e -> {});
-    this.nodes.getChildren().removeAll(oldFrameGroups);
-    this.oldFrameGroups = frameGroups;
     animation.play();
+    
+    lock();
   }
 
   private void lock() {
@@ -249,10 +258,6 @@ class GraphicsView implements View {
 
     this.group = new Group();
     this.nodes = new Group();
-
-    this.i = new Integer(0);
-   
-    this.oldFrameGroups = new LinkedList<Group>();
 
     this.canvas = new Canvas(width, height);
     this.group.getChildren().add(this.canvas);
@@ -287,6 +292,8 @@ class GraphicsView implements View {
             input.remove(code);
           }
         });
+
+    this.actions_buffer = new LinkedList<Action>();
     
     gc.setTextBaseline(VPos.CENTER);
     gc.setTextAlign(TextAlignment.CENTER);
@@ -298,11 +305,11 @@ class GraphicsView implements View {
   @Override
   public List<Action> getInput() {
     if (input.isEmpty()) {
-      List<Action> list = new ArrayList<Action>();
-      list.add(Action.NONE);
-      return list;
+      return new ArrayList<Action>();
     } else {
-      return View.convertStringToActions(String.join("", input));
+      List<Action> actions = View.convertStringToActions(String.join("", input));
+      input.clear();
+      return actions;
     }
   }
  
@@ -312,6 +319,7 @@ class GraphicsView implements View {
 
     new AnimationTimer() {
       public void handle(long nanoTime) {
+        actions_buffer.addAll(algo.move(grid));
         if (animate) {
           try {
             if (grid.won()) {
@@ -321,9 +329,10 @@ class GraphicsView implements View {
               stat.lost();
               stop();
             }
-            grid.process(algo.move(grid));
+            if (!actions_buffer.isEmpty()) {
+              grid.process(actions_buffer.remove(0));
+            }
             display(grid);
-            input.clear();
           } catch(InvalidActionException e) {
             e.printStackTrace();
             System.exit(1);

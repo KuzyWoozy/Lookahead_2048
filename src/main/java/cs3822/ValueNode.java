@@ -33,26 +33,11 @@ class ValueNode extends Node {
   /** Copy constructor. */
   public ValueNode(ValueNode node) {
     super(node);
-    this.oldValue = node.getOldValue();
-    this.value = node.getValue();
+    this.oldValue = node.oldValue;
+    this.value = node.value;
     this.mergeFlag = node.mergeFlag;
     this.moveFlag = node.moveFlag;
     this.oldPos = new Position(node.oldPos);
-  }
-
-  /** Copy constructor. */
-  public ValueNode(Node node) {
-    super(node);
-    try {
-      this.oldValue = node.getOldValue();
-      this.value = node.getValue();
-      this.mergeFlag = node.getMergeFlag();
-      this.moveFlag = node.getMoveFlag();
-      this.oldPos = node.getOldPos();
-    } catch(NoValueException | NoMergeFlagException | NoMoveFlagException | CantMoveException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
   }
 
   /**
@@ -81,18 +66,6 @@ class ValueNode extends Node {
     this.oldPos = new Position(pos);
   }
   
-  /**
-   * Create a corresponding value node.
-   *
-   * @param node Position to create the node at
-   * @param value Value to assign to the node
-   */
-  public ValueNode(Position oldPos, Position pos, int value) {
-    super(pos);
-    this.value = value;
-    this.oldValue = value;
-    this.oldPos = new Position(oldPos);
-  }
 
   /** Return the type of the node. */
   public NodeType getType() {

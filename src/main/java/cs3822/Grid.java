@@ -28,6 +28,7 @@ class Grid {
 
   private Random rand = new Random();
 
+  private Position genNodePos = null;
   /**
    * Grid constructor.
    *
@@ -143,25 +144,7 @@ class Grid {
   private List<Node> cloneNodes() throws UnknownNodeTypeException {
     List<Node> nodeCopy = Arrays.asList(new Node[nodes.size()]);
     for (int i = 0; i < nodes.size(); i++) {
-      switch(nodes.get(i).getType()) {
-        case EMPTY:
-          nodeCopy.set(i, new EmptyNode(nodes.get(i).getPos()));
-          break;
-        case BRICK:
-          nodeCopy.set(i, new BrickNode(nodes.get(i).getPos()));
-          break;
-        case VALUE:
-          try {
-            nodeCopy.set(i, new ValueNode(nodes.get(i).getOldPos(), nodes.get(i).getPos(), nodes.get(i).getValue()));
-          } catch(NoValueException | CantMoveException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-          break;
-   
-        default:
-          throw new UnknownNodeTypeException();
-      }
+      nodeCopy.set(i, Node.copyNode(nodes.get(i)));
     }
     return nodeCopy;
   }
@@ -184,6 +167,8 @@ class Grid {
     Node newNode = new ValueNode(availablePos.get(rand.nextInt(availablePos.size())), rand.nextFloat() <= twoProb ? 2 : 4);
     // Insert the new node into the grid
     nodes.set(index(newNode.getPos()), newNode);
+
+    genNodePos = new Position(newNode.getPos());
   }
 
   private void swap(Position pos1, Position pos2) throws CantMoveException {
@@ -297,6 +282,7 @@ class Grid {
     // Clear flags before movement
     clearMergeFlags();
     this.frames.clear();
+    genNodePos = null;
   
     slideUpIteration();
     if (moved()) {
@@ -376,6 +362,7 @@ class Grid {
     // Clear flags before movement
     clearMergeFlags();
     this.frames.clear();
+    genNodePos = null;
   
     slideRightIteration();
     if (moved()) {
@@ -452,6 +439,7 @@ class Grid {
     // Clear flags before movement
     clearMergeFlags();
     this.frames.clear();
+    genNodePos = null;
   
     slideDownIteration();
     if (moved()) {
@@ -530,6 +518,7 @@ class Grid {
     // Clear flags before movement
     clearMergeFlags();
     this.frames.clear();
+    genNodePos = null;
   
     slideLeftIteration();
     if (moved()) {
@@ -626,7 +615,7 @@ class Grid {
   public void setDefaultFrame() {
     this.frames.clear();
     clearMoveFlags();
-    try {
+    try { 
       this.frames.add(cloneNodes());
     } catch(UnknownNodeTypeException e) {
       e.printStackTrace();
@@ -846,6 +835,42 @@ class Grid {
     }
   }
 
+  public Position getGenPos() {
+    return genNodePos;
+  }
+
+  public void process(Action action) throws InvalidActionException {
+    switch(action) {
+      case SWIPE_UP:
+        slideUp();
+        break;
+      case SWIPE_RIGHT:
+        slideRight();
+        break;
+      case SWIPE_DOWN:
+        slideDown();
+        break;
+      case SWIPE_LEFT:
+        slideLeft();
+        break;
+      case UNDO:
+        undo();
+        break;
+      case REDO:
+        redo();
+        break;
+      case RESET:
+        reset();
+        break;
+      case NONE:
+        break;
+      case EXIT:
+        System.exit(0);
+      default:
+        throw new InvalidActionException();
+    }
+  }
+
   /** 
    * Iterate over the sequence of actions, calling each corresponding function in turn.
    * @param actions Sequence of actions to process
@@ -853,35 +878,7 @@ class Grid {
    * */
   public void process(List<Action> actions) throws InvalidActionException {
     for (Action action : actions) {
-      switch(action) {
-        case SWIPE_UP:
-          slideUp();
-          break;
-        case SWIPE_RIGHT:
-          slideRight();
-          break;
-        case SWIPE_DOWN:
-          slideDown();
-          break;
-        case SWIPE_LEFT:
-          slideLeft();
-          break;
-        case UNDO:
-          undo();
-          break;
-        case REDO:
-          redo();
-          break;
-        case RESET:
-          reset();
-          break;
-        case NONE:
-          break;
-        case EXIT:
-          System.exit(0);
-        default:
-          throw new InvalidActionException();
-      }
+      process(action);      
     }
   }
 
