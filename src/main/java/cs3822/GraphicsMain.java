@@ -14,11 +14,11 @@ public class GraphicsMain extends Application {
 
     public void start(Stage stage) {
      
-      String map0 = "##\n##";
+      String map0 = "28\n#~";
       String map1 = "#2#\n##2\n###";
       String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
       String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
-      String map4 = "~###\n#~##\n##~#\n###~";
+      String map4 = "~22#\n#~##\n##~#\n###~";
       String map5 = "#2##\n#2##\n####\n####";
      
       float twoProb = 0.9f;
@@ -27,19 +27,20 @@ public class GraphicsMain extends Application {
       Algorithm algo = null;
       View view = null;
       try {
-        grid = new Grid(map5, 2048, twoProb);
-        //view = new StdoutView(System.in);
-        view = new GraphicsView(grid, stage, 400, 400);
-        //algo = new TreeGeneratorMDP(grid, new SQLStorage("model.db", 1000000), twoProb);
-        algo = new PlayerAlgo(view);
+        grid = new Grid(map0, 16, twoProb);
+        System.out.println(grid.stringify());
+        view = new StdoutView(System.in);
+        //view = new GraphicsView(grid, stage, 400, 400);
+        algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
+        //algo = new PlayerAlgo(view);
         //algo = new UniformRandomPlay();
-      } catch(InvalidMapSizeException e) {
+      } catch(InvalidMapSizeException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }
       
-      
-      view.play(grid, algo);
+       
+      //view.play(grid, algo);
       /* 
       GameStats stats = new GameStats();
       for (int i=0; i < 10000; i++) {

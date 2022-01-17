@@ -132,5 +132,9 @@ class GridHistory {
 
     return new ArrayList<Node>(Arrays.asList(items_copy));
   }
+
+  public Stack<Node[]> getInstances() {
+    return instances;
+  }
    
 }

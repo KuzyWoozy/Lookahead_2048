@@ -187,10 +187,9 @@ class GraphicsView implements View {
       for (Node node : frames) {
         x = node_canvas_x(node.getPos().getX(), node_width, pad_width); 
         y = node_canvas_y(node.getPos().getY(), node_height, pad_height);
-        
-        drawRoundRect(gc, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.GREY);
-        
-        if (node.getType() == NodeType.VALUE) {
+        if (node.getType() == NodeType.EMPTY) {
+          drawRoundRect(gc, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.GREY);
+        } else if (node.getType() == NodeType.VALUE) {
           Color rectColor = null;
           Color textColor = null; 
           try {
