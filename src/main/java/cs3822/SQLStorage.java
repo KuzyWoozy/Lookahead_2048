@@ -72,7 +72,7 @@ class SQLStorage implements ModelStorage {
           i++;
 
           insertStmt.setInt(1, item.getKey());
-          insertStmt.setInt(2, Action.convertToInt(item.getValue().getAction()));
+          insertStmt.setInt(2, Action.convertActionToInt(item.getValue().getAction()));
           insertStmt.setFloat(3, item.getValue().getReward());
 
           insertStmt.addBatch();
@@ -111,7 +111,7 @@ class SQLStorage implements ModelStorage {
         selectSolInfoStmt.setInt(1, hash);
         ResultSet rs = selectSolInfoStmt.executeQuery();
         rs.next(); 
-        latestAction = Action.convertToAction(rs.getInt("action"));
+        latestAction = Action.convertIntToAction(rs.getInt("action"));
         latestReward = rs.getFloat("expReward");
         rs.close();
       } catch(SQLException | InvalidActionException e) {
@@ -137,7 +137,7 @@ class SQLStorage implements ModelStorage {
         selectSolInfoStmt.setInt(1, hash);
         ResultSet rs = selectSolInfoStmt.executeQuery();
         rs.next(); 
-        latestAction = Action.convertToAction(rs.getInt("action"));
+        latestAction = Action.convertIntToAction(rs.getInt("action"));
         latestReward = rs.getFloat("expReward");
         rs.close();
       } catch(SQLException | InvalidActionException e) {

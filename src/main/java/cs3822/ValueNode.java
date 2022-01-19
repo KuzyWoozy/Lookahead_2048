@@ -32,7 +32,7 @@ class ValueNode extends Node {
 
   /** Copy constructor. */
   public ValueNode(ValueNode node) {
-    super(node);
+    super(node.pos);
     this.oldValue = node.oldValue;
     this.value = node.value;
     this.mergeFlag = node.mergeFlag;
@@ -65,129 +65,9 @@ class ValueNode extends Node {
     this.oldValue = value;
     this.oldPos = new Position(pos);
   }
-  
-
-  /** Return the type of the node. */
-  public NodeType getType() {
-    return NodeType.VALUE;
-  }
  
-  @Override
-  public int getOldValue() {
-    return oldValue;
-  }
-
-  /** Return the value of the node. */
-  @Override
-  public int getValue() {
-    return value;
-  }
-  
-  /** Set the value for the node. */
-  @Override
-  public void setValue(int value) {
-    this.oldValue = this.value;
-    this.value = value;
-  }
-  
-  /** Return the merge flag. */
-  @Override
-  public boolean getMergeFlag() {
-    return mergeFlag;
-  }
-
-  /** Set boolean flag. */
-  @Override
-  public void onMergeFlag() {
-    mergeFlag = true;
-  }
-
-  /** Unset boolean flag. */
-  @Override
-  public void offMergeFlag() {
-    mergeFlag = false;
-  }
-
-  /** Return the merge flag. */
-  @Override
-  public boolean getMoveFlag() {
-    return moveFlag;
-  }
-
-  /** Set boolean flag. */
-  @Override
-  public void onMoveFlag() {
-    moveFlag = true;
-  }
-
-  /** Unset boolean flag. */
-  @Override
-  public void offMoveFlag() {
-    this.oldPos = new Position(this.pos);
-    moveFlag = false;
-  }
-
-  /** Return hash of node. */
-  @Override
-  public int hashCode() {
-    return Objects.hash(pos, NodeType.VALUE, value);
-  }
-
-  /** Return node as a string. */
-  @Override
-  public String toString() {
-    return "[" + pos + " " + String.valueOf(value) + "]";
-  }
-
-  @Override
-  public Position getOldPos() {
-    return oldPos;
-  }
-
-  /** Set position for the node. */
-  @Override
-  public void moveTo(Position pos) {
-    if (!this.pos.equals(pos)) {
-      onMoveFlag(); 
-      this.oldPos = this.pos;
-      this.pos = new Position(pos);
-    }
-  }
-  
-  @Override
-  public void setOldPos(Position pos) {
-    this.oldPos = pos;
-  }
-
-  /** Return true if the node can move within the specified grid. */
-  @Override
-  public boolean canMove(Grid grid) {
-    try { 
-      if (canMoveUp(grid)) {
-        return true;
-      }
-
-      if (canMoveRight(grid)) {
-        return true;
-      }
-
-      if (canMoveDown(grid)) {
-        return true;
-      }
-
-      if (canMoveLeft(grid)) {
-        return true;
-      }
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-    return false;
-  }
-  
   /** Return true of the specified Node can move up in the grid. */
-  public boolean canMoveUp(Grid grid) throws UnknownNodeTypeException {
+  private boolean canMoveUp(Grid grid) throws UnknownNodeTypeException {
     // check boundary
     if (pos.canMoveUp()) {
       Node node = grid.getNodes().get(grid.indexUp(pos));
@@ -216,7 +96,7 @@ class ValueNode extends Node {
     return false;
   }
   /** Return true of the specified Node can move right in the grid. */
-  public boolean canMoveRight(Grid grid) throws UnknownNodeTypeException {
+  private boolean canMoveRight(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveRight()) {
       Node node = grid.getNodes().get(grid.indexRight(pos));
       switch (node.getType()) {
@@ -245,7 +125,7 @@ class ValueNode extends Node {
   }
 
 /** Return true of the specified Node can move down in the grid. */
-  public boolean canMoveDown(Grid grid) throws UnknownNodeTypeException {
+  private boolean canMoveDown(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveDown()) {
       Node node = grid.getNodes().get(grid.indexDown(pos));
       switch (node.getType()) {
@@ -274,7 +154,7 @@ class ValueNode extends Node {
   }
 
 /** Return true of the specified Node can move left in the grid. */
-  public boolean canMoveLeft(Grid grid) throws UnknownNodeTypeException {
+  private boolean canMoveLeft(Grid grid) throws UnknownNodeTypeException {
     if (pos.canMoveLeft()) {
       Node node = grid.getNodes().get(grid.indexLeft(pos));
       switch (node.getType()) {
@@ -303,6 +183,114 @@ class ValueNode extends Node {
   }
 
 
+  /** Return the type of the node. */
+  public NodeType getType() {
+    return NodeType.VALUE;
+  }
+ 
+  @Override
+  public int getOldValue() {
+    return oldValue;
+  }
+
+  /** Return the value of the node. */
+  @Override
+  public int getValue() {
+    return value;
+  }
+  
+  /** Set the value for the node. */
+  @Override
+  public void setValue(int value) {
+    this.oldValue = this.value;
+    this.value = value;
+  }
+  
+  @Override
+  public void setOldPos(Position pos) {
+    this.oldPos = pos;
+  }
+
+  @Override
+  public Position getOldPos() {
+    return oldPos;
+  }
+
+  /** Return the merge flag. */
+  @Override
+  public boolean getMergeFlag() {
+    return mergeFlag;
+  }
+  
+  /** Set boolean flag. */
+  @Override
+  public void onMergeFlag() {
+    mergeFlag = true;
+  }
+  
+  /** Unset boolean flag. */
+  @Override
+  public void offMergeFlag() {
+    mergeFlag = false;
+  }
+
+  /** Return the merge flag. */
+  @Override
+  public boolean getMoveFlag() {
+    return moveFlag;
+  }
+
+  /** Return hash of node. */
+  @Override
+  public int hashCode() {
+    return Objects.hash(pos, NodeType.VALUE, value);
+  }
+
+  /** Return node as a string. */
+  @Override
+  public String toString() {
+    return "[" + pos + " " + String.valueOf(value) + "]";
+  }
+  
+  /** Set position for the node. */
+  @Override
+  public void moveTo(Position pos) {
+    if (!this.pos.equals(pos)) {
+      moveFlag = true;   
+    } else {
+      moveFlag = false;
+    }
+    this.oldPos = this.pos;
+    this.pos = new Position(pos);
+  }
+  
+  /** Return true if the node can move within the specified grid. */
+  @Override
+  public boolean canMove(Grid grid) {
+    try { 
+      if (canMoveUp(grid)) {
+        return true;
+      }
+
+      if (canMoveRight(grid)) {
+        return true;
+      }
+
+      if (canMoveDown(grid)) {
+        return true;
+      }
+
+      if (canMoveLeft(grid)) {
+        return true;
+      }
+    } catch(UnknownNodeTypeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    return false;
+  }
+  
 } 
 
 

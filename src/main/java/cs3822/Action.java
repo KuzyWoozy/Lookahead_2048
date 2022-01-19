@@ -24,7 +24,7 @@ enum Action {
    * @return Action corresponding to the provided character
    * @throws InvalidActionException Character has no translation into an Action
    */
-  public static Action getAction(char chr) throws InvalidActionException {
+  public static Action convertCharToAction(char chr) throws InvalidActionException {
     switch(chr) {
       case 'w': 
         return SWIPE_UP;
@@ -48,8 +48,15 @@ enum Action {
         throw new InvalidActionException();
     }
   }
-
-  public static int convertToInt(Action action) throws InvalidActionException { 
+  
+  /**
+   * Convert Action enum into an integer.
+   *
+   * @param action Action to be converted into an integer
+   * @return Integer corresponding to the provided Action
+   * @throws InvalidActionException Character has no translation into an Action
+   */
+  public static int convertActionToInt(Action action) throws InvalidActionException { 
     switch(action) {
       case SWIPE_UP:
         return 0;
@@ -73,8 +80,15 @@ enum Action {
         throw new InvalidActionException();
     }
   }
-
-  public static Action convertToAction(int val) throws InvalidActionException {
+  
+  /**
+   * Convert Integer into an Action enum.
+   *
+   * @param val Integer to be converted into an Action
+   * @return Integer to be converted into a corresponding Action
+   * @throws InvalidActionException Character has no translation into an Action
+   */
+  public static Action convertIntToAction(int val) throws InvalidActionException {
     switch(val) {
       case 0:
         return SWIPE_UP;

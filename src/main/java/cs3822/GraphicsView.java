@@ -2,6 +2,8 @@ package cs3822;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
+import java.util.LinkedList;
 
 import javafx.stage.Stage;
 import javafx.scene.Group;
@@ -21,11 +23,6 @@ import javafx.util.Duration;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.animation.SequentialTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.PauseTransition;
-
-import java.lang.Math;
-import java.util.LinkedList;
 
 
 class GraphicsView implements View {
@@ -138,6 +135,14 @@ class GraphicsView implements View {
     return trans; 
   }
 
+  private void lock() {
+    animate = false;
+  }
+  
+  private void unlock() {
+    animate = true;
+  }
+
   
   private void display(Grid grid) {
       
@@ -187,13 +192,14 @@ class GraphicsView implements View {
       for (Node node : frames) {
         x = node_canvas_x(node.getPos().getX(), node_width, pad_width); 
         y = node_canvas_y(node.getPos().getY(), node_height, pad_height);
-        if (node.getType() == NodeType.EMPTY) {
-          drawRoundRect(gc, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.GREY);
-        } else if (node.getType() == NodeType.VALUE) {
+        
+        drawRoundRect(gc, x, y, node_width, node_height, node_arc_width, node_arc_height, Color.GREY);
+        
+        if (node.getType() == NodeType.VALUE) {
           Color rectColor = null;
           Color textColor = null; 
           try {
-            if (node.getMergeFlag() || (grid.getGenPos() != null && grid.getGenPos().equals(node.getPos()))) {
+            if (node.getMergeFlag() || (grid.getGeneratedNode() != null && grid.getGeneratedNode().getPos().equals(node.getPos()))) {
               rectColor = Color.WHITE;
               textColor = Color.BLACK;
             } else {
@@ -223,35 +229,29 @@ class GraphicsView implements View {
           frameGroup.getChildren().add(rect);
           frameGroup.getChildren().add(text);
 
-          ParallelTransition tran = createTranslateAnimation(rect, text, x_old, y_old, x, y, node_width, node_height);
-
-          transitions.getChildren().add(tran);
+          transitions.getChildren().add(createTranslateAnimation(rect, text, x_old, y_old, x, y, node_width, node_height));
         }
       }
+      
       frameGroups.add(frameGroup);
       transitions.setOnFinished(e -> {this.nodes.getChildren().clear(); this.nodes.getChildren().add(frameGroups.remove(0));});
       animation.getChildren().add(transitions);
     }
    
     this.nodes.getChildren().add(frameGroups.remove(0));
-    grid.setDefaultFrame();
     
-    animation.setOnFinished(e -> unlock(grid));
+    animation.setOnFinished(e -> unlock());
+    // Do not perform last group set
     animation.getChildren().get(animation.getChildren().size()-1).setOnFinished(e -> {});
-    animation.play();
     
+    grid.setDefaultFrame();
+
+    animation.play();
     lock();
   }
 
-  private void lock() {
-    animate = false;
-  }
   
-  private void unlock(Grid grid) {
-    animate = true;
-  }
   
-
   public GraphicsView(Grid grid, Stage stage, float width, float height) {
     this.stage = stage;
 
@@ -269,6 +269,15 @@ class GraphicsView implements View {
     this.gc = canvas.getGraphicsContext2D();
 
     this.input = new ArrayList<String>();
+
+    this.actions_buffer = new LinkedList<Action>();
+    
+    gc.setTextBaseline(VPos.CENTER);
+    gc.setTextAlign(TextAlignment.CENTER);
+    
+    stage.show();
+    display(grid);
+
 
     this.scene.setOnKeyPressed(
         new EventHandler<KeyEvent>() {
@@ -291,14 +300,6 @@ class GraphicsView implements View {
             input.remove(code);
           }
         });
-
-    this.actions_buffer = new LinkedList<Action>();
-    
-    gc.setTextBaseline(VPos.CENTER);
-    gc.setTextAlign(TextAlignment.CENTER);
-    
-    stage.show();
-    display(grid);
   }
   
   @Override

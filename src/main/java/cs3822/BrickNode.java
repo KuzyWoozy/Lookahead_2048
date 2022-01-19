@@ -25,18 +25,25 @@ class BrickNode extends Node {
 
   /** Copy constructor. */
   public BrickNode(BrickNode node) {
-    super(node);
-  }
-
-  /** Copy constructor. */
-  public BrickNode(Node node) {
-    super(node);
+    super(node.pos);
   }
 
   /** Return type of node. */
   @Override
   public NodeType getType() {
     return NodeType.BRICK;
+  }
+
+  /** Sets the old position of the node. */
+  @Override
+  public void setOldPos(Position pos) throws CantMoveException {
+    throw new CantMoveException();
+  }
+
+  /** Gets the old position of the node. */
+  @Override
+  public Position getOldPos() throws CantMoveException {
+    throw new CantMoveException();
   }
 
   @Override
@@ -90,18 +97,6 @@ class BrickNode extends Node {
     throw new NoMoveFlagException();
   }
 
-  /** Set boolean flag. */
-  @Override
-  public void onMoveFlag() throws NoMoveFlagException {
-    throw new NoMoveFlagException(); 
-  }
-
-  /** Unset boolean flag. */
-  @Override
-  public void offMoveFlag() throws NoMoveFlagException {
-    throw new NoMoveFlagException();  
-  }
-
   /** Return hash of node. */
   @Override 
   public int hashCode() {
@@ -114,46 +109,18 @@ class BrickNode extends Node {
     return "[" + pos + " Brick]";
   }
   
-  @Override
-  public void setOldPos(Position pos) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
-  public Position getOldPos() throws CantMoveException {
-    throw new CantMoveException();
-  }
-
+  /** Sets the node to the specified position. */
   @Override
   public void moveTo(Position pos) throws CantMoveException {
-    this.pos = pos;
+    this.pos = new Position(pos);
   }
 
+  /** Check if node can move. */
   @Override
   public boolean canMove(Grid grid) throws CantMoveException {
     throw new CantMoveException();
   }
   
-  @Override
-  public boolean canMoveUp(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-  
-  @Override
-  public boolean canMoveRight(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
-  public boolean canMoveDown(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
-  public boolean canMoveLeft(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
 } 
 
 

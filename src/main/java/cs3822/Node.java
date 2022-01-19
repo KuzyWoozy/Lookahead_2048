@@ -40,28 +40,8 @@ abstract class Node {
   
   /** Constructs the Node with the specified position. */
   public Node(Position pos) {
-    this.pos = pos;
+    this.pos = new Position(pos);
   }
-
-  /** Copy constructor. */
-  public Node(Node node) {
-    this.pos = new Position(node.pos);
-  }
-
-  public abstract NodeType getType();
-  public abstract int getOldValue() throws NoValueException;
-  public abstract int getValue() throws NoValueException;
-  public abstract void setValue(int value) throws NoValueException;
-  public abstract String toString();
-  public abstract boolean getMergeFlag() throws NoMergeFlagException;
-  public abstract void onMergeFlag() throws NoMergeFlagException;
-  public abstract void offMergeFlag() throws NoMergeFlagException;
-  
-  public abstract boolean getMoveFlag() throws NoMoveFlagException;
-  public abstract void onMoveFlag() throws NoMoveFlagException;
-  public abstract void offMoveFlag() throws NoMoveFlagException;
-
-  public abstract int hashCode();
 
   /** Return position of the node. */
   public Position getPos() {
@@ -107,21 +87,22 @@ abstract class Node {
     }
   }
   
+  public abstract NodeType getType();
+  public abstract int getOldValue() throws NoValueException;
+  public abstract int getValue() throws NoValueException;
+  public abstract void setValue(int value) throws NoValueException;
+  public abstract String toString();
+  public abstract boolean getMergeFlag() throws NoMergeFlagException;
+  public abstract void onMergeFlag() throws NoMergeFlagException;
+  public abstract void offMergeFlag() throws NoMergeFlagException;
+  public abstract boolean getMoveFlag() throws NoMoveFlagException;
+  public abstract int hashCode();
   public abstract void setOldPos(Position pos) throws CantMoveException;
   public abstract Position getOldPos() throws CantMoveException;
-
   public abstract void moveTo(Position pos) throws CantMoveException;
-
   public abstract boolean canMove(Grid grid) throws CantMoveException;
+
   
-  public abstract boolean canMoveUp(Grid grid) throws CantMoveException, UnknownNodeTypeException;
-  
-  public abstract boolean canMoveRight(Grid grid) throws CantMoveException, UnknownNodeTypeException;
-
-  public abstract boolean canMoveDown(Grid grid) throws CantMoveException, UnknownNodeTypeException;
-
-  public abstract boolean canMoveLeft(Grid grid) throws CantMoveException, UnknownNodeTypeException;
-
 } 
 
 

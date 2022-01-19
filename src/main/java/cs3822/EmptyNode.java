@@ -25,12 +25,7 @@ class EmptyNode extends Node {
 
   /** Copy constructor. */
   public EmptyNode(EmptyNode node) {
-    super(node);
-  }
-
-  /** Copy constructor. */
-  public EmptyNode(Node node) {
-    super(node);
+    super(node.pos);
   }
 
   /** Return type of node. */
@@ -38,7 +33,23 @@ class EmptyNode extends Node {
   public NodeType getType() {
     return NodeType.EMPTY;
   }
+
+  @Override
+  public void setOldPos(Position pos) throws CantMoveException {
+    throw new CantMoveException();
+  }
   
+  @Override
+  public Position getOldPos() throws CantMoveException {
+    throw new CantMoveException();
+  }
+  
+  /** 
+   * Return the old value of the node.
+   *
+   * @return Old value of node
+   * @throws NoValueException Node has no value
+   */
   @Override
   public int getOldValue() throws NoValueException {
     throw new NoValueException();
@@ -47,7 +58,7 @@ class EmptyNode extends Node {
   /** 
    * Return the value of the node.
    *
-   * @return value of node
+   * @return Value of node
    * @throws NoValueException Node has no value
    */
   @Override
@@ -90,18 +101,6 @@ class EmptyNode extends Node {
     throw new NoMoveFlagException();
   }
 
-  /** Set boolean flag. */
-  @Override
-  public void onMoveFlag() throws NoMoveFlagException {
-    throw new NoMoveFlagException(); 
-  }
-
-  /** Unset boolean flag. */
-  @Override
-  public void offMoveFlag() throws NoMoveFlagException {
-    throw new NoMoveFlagException();  
-  }
-
 
   /** Return hash of node. */
   @Override
@@ -116,18 +115,8 @@ class EmptyNode extends Node {
   }
   
   @Override
-  public void setOldPos(Position pos) throws CantMoveException {
-    throw new CantMoveException();
-  }
-  
-  @Override
-  public Position getOldPos() throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
   public void moveTo(Position pos) throws CantMoveException {
-    this.pos = pos;
+    this.pos = new Position(pos);
   }
 
   @Override
@@ -135,26 +124,6 @@ class EmptyNode extends Node {
     throw new CantMoveException();
   }
   
-  @Override
-  public boolean canMoveUp(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-  
-  @Override
-  public boolean canMoveRight(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
-  public boolean canMoveDown(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
-  @Override
-  public boolean canMoveLeft(Grid grid) throws CantMoveException {
-    throw new CantMoveException();
-  }
-
 } 
 
 

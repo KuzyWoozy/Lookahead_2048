@@ -4,9 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 
-
 /** Class with the main method, contains all the setup. */
-//public class GraphicsMain extends Application 
 public class GraphicsMain extends Application {
     public static void main( String[] args ) {
       launch(args);
@@ -27,20 +25,19 @@ public class GraphicsMain extends Application {
       Algorithm algo = null;
       View view = null;
       try {
-        grid = new Grid(map0, 16, twoProb);
-        System.out.println(grid.stringify());
-        view = new StdoutView(System.in);
-        //view = new GraphicsView(grid, stage, 400, 400);
-        algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
-        //algo = new PlayerAlgo(view);
+        grid = new Grid(map5, 2048, twoProb);
+        //view = new StdoutView(System.in);
+        view = new GraphicsView(grid, stage, 400, 400);
+        //algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
+        algo = new PlayerAlgo(view);
         //algo = new UniformRandomPlay();
-      } catch(InvalidMapSizeException | InvalidActionException e) {
+      } catch(InvalidMapSizeException e) {
         e.printStackTrace();
         System.exit(1);
       }
       
        
-      //view.play(grid, algo);
+      view.play(grid, algo);
       /* 
       GameStats stats = new GameStats();
       for (int i=0; i < 10000; i++) {

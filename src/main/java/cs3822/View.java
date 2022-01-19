@@ -17,7 +17,7 @@ interface View {
         Action ac = null;
         // Chech if this is a valid action, ignore if not
         try {
-          ac = Action.getAction(x);
+          ac = Action.convertCharToAction(x);
         } catch(InvalidActionException e) {
           continue;
         }
