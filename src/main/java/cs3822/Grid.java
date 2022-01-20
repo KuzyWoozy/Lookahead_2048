@@ -32,8 +32,7 @@ class Grid {
   
   
   public void restart() {
-   
-    List<String> rows = Arrays.asList(map.strip().split("\n"));
+    List<String> rows = Arrays.asList(map.strip().split("\\|"));
     nodes = Arrays.asList(new Node[rowSize * columnSize]);
     Position pos = null;
     // Initialize Node list
@@ -79,7 +78,7 @@ class Grid {
     this.twoProb = twoProb;
     this.winCondition = winCondition;
 
-    List<String> rows = Arrays.asList(map.strip().split("\n"));
+    List<String> rows = Arrays.asList(map.strip().split("\\|"));
     this.columnSize = rows.get(0).length();
     this.rowSize = rows.size();
     // Set the boundaries for Position
@@ -400,7 +399,7 @@ class Grid {
       hasMoved = true;
      
       clearFrames();
-      
+
       do {
         addFrame();
         slideRightIteration(); 
@@ -409,7 +408,7 @@ class Grid {
 
       if (genNewNode) {
         generateNewNode();
-        addFrame(); 
+        addFrame();
       }
       // Make a back-up 
       try {
@@ -462,11 +461,11 @@ class Grid {
             } catch(CantMoveException e) {
               e.printStackTrace();
               System.exit(1);
-            }          
+            }
           }
-        }
+        } 
       }
-    } 
+    }
   }
 
   /** Slide every node downwards, specifying whenever to generate a new node. */
@@ -479,17 +478,18 @@ class Grid {
     slideDownIteration();
     if (moved()) {
       hasMoved = true;
-    
+     
       clearFrames();
 
       do {
         addFrame();
-        slideDownIteration();
+        slideDownIteration(); 
       } while (moved());
+      
 
       if (genNewNode) {
         generateNewNode();
-        addFrame();        
+        addFrame();
       }
       // Make a back-up 
       try {
@@ -545,7 +545,7 @@ class Grid {
               System.exit(1);
             }
           }
-        }
+        } 
       }
     }
   }
@@ -560,7 +560,7 @@ class Grid {
     slideLeftIteration();
     if (moved()) {
       hasMoved = true;
-      
+     
       clearFrames();
 
       do {
@@ -610,31 +610,31 @@ class Grid {
   
   /** Return array index of position. */
   public int index(Position pos) {
-    return pos.getY() * rowSize + pos.getX();
+    return pos.getY() * columnSize + pos.getX();
   }
 
   /** Return array index of position, above the specified position. */
   public int indexUp(Position pos) {
-    return (pos.getY()-1) * rowSize + pos.getX();
+    return (pos.getY()-1) * columnSize + pos.getX();
   }
 
   /** Return array index of position, to the right of the specified position. */
   public int indexRight(Position pos) {
-    return pos.getY() * rowSize + pos.getX() + 1;
+    return pos.getY() * columnSize + pos.getX() + 1;
   }
 
   /** Return array index of position, below the specified position. */
   public int indexDown(Position pos) {
-    return (pos.getY()+1) * rowSize + pos.getX();
+    return (pos.getY()+1) * columnSize + pos.getX();
   }
 
   /** Return array index of position, to the left of the specified position. */
   public int indexLeft(Position pos) {
-    return (pos.getY() * rowSize) + pos.getX() - 1;
+    return (pos.getY() * columnSize) + pos.getX() - 1;
   }
 
   private Node getNode(int x, int y) {
-    return nodes.get(y * rowSize + x);
+    return nodes.get(y * columnSize + x);
   }
 
   /** Return grid state. */

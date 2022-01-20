@@ -6,38 +6,99 @@ import javafx.stage.Stage;
 
 /** Class with the main method, contains all the setup. */
 public class GraphicsMain extends Application {
-    public static void main( String[] args ) {
-      launch(args);
+    
+    private static int winCondition = 2048;
+    private static String map = "####|####|####|####";
+    private static float twoProb = 0.9f;
+    private static String algoName = "player";
+    private static boolean guiFlag = false;
+    
+    private static Grid grid;
+    private static View view;
+    private static Algorithm algo;
+
+
+    private static void processAlgo(String name) throws UnknownAlgorithmException {
+      switch(name.toLowerCase()) {
+
+        //algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
+        case "uniform":
+          algo = new UniformRandomPlay();
+          break;
+        case "player":
+          algo = new PlayerAlgo(view);
+          break;
+        default:
+          throw new UnknownAlgorithmException();
+      }
     }
 
-    public void start(Stage stage) {
-     
-      String map0 = "28\n#~";
-      String map1 = "#2#\n##2\n###";
-      String map2 = "#~~~~~\n##~~~~\n###~~~\n####~~\n#####~\n######\n";
-      String map3 = "~~#~~\n~###~\n#####\n~###~\n~~#~~";
-      String map4 = "~22#\n#~##\n##~#\n###~";
-      String map5 = "#2##\n#2##\n####\n####";
-     
-      float twoProb = 0.9f;
-      
-      Grid grid = null;
-      Algorithm algo = null;
-      View view = null;
+    private static int processArg(int i, String[] args) throws UnknownArgumentException {
+      switch(args[i]) {
+        case "--gui":
+          GraphicsMain.guiFlag = true;
+          break;
+        case "--map":
+          i++;
+          GraphicsMain.map = args[i];
+          break;
+        case "--algo":
+          i++;
+          GraphicsMain.algoName = args[i];
+          break;
+        default:
+          throw new UnknownArgumentException();
+      }
+      return i;
+    }
+
+    public static void main(String[] args) {
+      int i = 0;
       try {
-        grid = new Grid(map5, 2048, twoProb);
-        //view = new StdoutView(System.in);
-        view = new GraphicsView(grid, stage, 400, 400);
-        //algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
-        algo = new PlayerAlgo(view);
-        //algo = new UniformRandomPlay();
-      } catch(InvalidMapSizeException e) {
+        while (true) {
+          if (i >= args.length) {
+            break;
+          }
+          i = processArg(i, args);
+          i++;
+        }
+      } catch(UnknownArgumentException e) {
         e.printStackTrace();
         System.exit(1);
       }
       
-       
-      view.play(grid, algo);
+      try {
+        grid = new Grid(map, winCondition, twoProb);
+      } catch(InvalidMapSizeException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+
+      if (guiFlag) {
+        launch(args);
+      } else {
+        view = new StdoutView(System.in);
+        try {
+          processAlgo(algoName);
+        } catch(UnknownAlgorithmException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        GraphicsMain.view.play(grid, algo);
+      }
+    }
+
+    public void start(Stage stage) {
+      GraphicsMain.view = new GraphicsView(grid, stage, 400, 400);
+      try {
+        processAlgo(algoName);
+      } catch(UnknownAlgorithmException e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+
+      GraphicsMain.view.play(grid, algo);
+      
       /* 
       GameStats stats = new GameStats();
       for (int i=0; i < 10000; i++) {

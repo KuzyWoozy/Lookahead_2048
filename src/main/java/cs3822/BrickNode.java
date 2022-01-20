@@ -112,7 +112,9 @@ class BrickNode extends Node {
   /** Sets the node to the specified position. */
   @Override
   public void moveTo(Position pos) throws CantMoveException {
-    this.pos = new Position(pos);
+    if (!this.pos.equals(pos)) {
+      this.pos = new Position(pos);
+    }
   }
 
   /** Check if node can move. */

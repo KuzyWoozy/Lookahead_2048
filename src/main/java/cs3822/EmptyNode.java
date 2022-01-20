@@ -116,7 +116,9 @@ class EmptyNode extends Node {
   
   @Override
   public void moveTo(Position pos) throws CantMoveException {
-    this.pos = new Position(pos);
+    if (!this.pos.equals(pos)) {
+      this.pos = new Position(pos);
+    }
   }
 
   @Override

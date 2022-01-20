@@ -256,12 +256,13 @@ class ValueNode extends Node {
   @Override
   public void moveTo(Position pos) {
     if (!this.pos.equals(pos)) {
-      moveFlag = true;   
+      moveFlag = true;  
+      this.oldPos = this.pos;
+      this.pos = new Position(pos);
     } else {
       moveFlag = false;
+      this.oldPos = this.pos;
     }
-    this.oldPos = this.pos;
-    this.pos = new Position(pos);
   }
   
   /** Return true if the node can move within the specified grid. */

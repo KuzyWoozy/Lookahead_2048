@@ -31,8 +31,6 @@ class UniformRandomPlay implements Algorithm {
         break;
     }
     
-    Algorithm.pause();
-    
     return list;
   }
 
