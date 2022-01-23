@@ -39,6 +39,11 @@ class HashMapStorage implements ModelStorage {
     return map.containsKey(hash);
   }
 
+  @Override 
+  public void clear() {
+    map.clear();
+  }
+
   /** Save the model to the specified file. */
   public void save(String fileName) throws IOException {
     FileOutputStream file = null;

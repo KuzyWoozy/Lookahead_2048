@@ -60,6 +60,7 @@ class SQLStorage implements ModelStorage {
     }
   }
   
+  @Override
   public void insert(int hash, Action action, float reward) {
     count++;
 
@@ -94,6 +95,7 @@ class SQLStorage implements ModelStorage {
     }
   }
   
+  @Override
   public Action fetchAction(int hash) {
     if (latestHash != null && latestHash.equals(hash)) {
       return latestAction;
@@ -122,6 +124,7 @@ class SQLStorage implements ModelStorage {
     }
   }
   
+  @Override
   public float fetchReward(int hash) {
     if (latestHash != null && latestHash.equals(hash)) {
       return latestReward;
@@ -148,6 +151,7 @@ class SQLStorage implements ModelStorage {
     }
   }
   
+  @Override
   public boolean contains(int hash) {
     if (buffer.containsKey(hash)) {
       return true;
@@ -170,7 +174,24 @@ class SQLStorage implements ModelStorage {
     }
   }
   
+  @Override
   public long getElemCount() {
     return count;
+  }
+
+  @Override
+  public void clear() {
+    try {
+      String cleanTable = "DROP TABLE IF EXISTS db;"; 
+      String createTable = "CREATE TABLE db (instance INT PRIMARY KEY, action TINYINT, expReward FLOAT(24));";
+
+      Statement stmt = con.createStatement();
+      stmt.executeUpdate(cleanTable);
+      stmt.executeUpdate(createTable);
+      stmt.close();
+    } catch(SQLException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 }

@@ -50,8 +50,8 @@ class Grid {
       } 
     } 
     // Generate the initial nodes
-    //generateNewNode();
-    //generateNewNode();
+    generateNewNode();
+    generateNewNode();
    
 
     this.frames = new LinkedList<List<Node>>();

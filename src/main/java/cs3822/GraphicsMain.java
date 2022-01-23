@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 public class GraphicsMain extends Application {
     
     private static int winCondition = 2048;
-    private static String map = "####|####|####|####";
+    private static String map = "#2##|#2##|####|####";
     private static float twoProb = 0.9f;
     private static String algoName = "player";
     private static boolean guiFlag = false;
@@ -22,6 +22,9 @@ public class GraphicsMain extends Application {
       switch(name.toLowerCase()) {
 
         //algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
+        case "lookahead":
+          algo = new Lookahead((grid.getCols() * grid.getRows()), 5, twoProb);
+          break;
         case "uniform":
           algo = new UniformRandomPlay();
           break;
@@ -84,7 +87,13 @@ public class GraphicsMain extends Application {
           e.printStackTrace();
           System.exit(1);
         }
-        GraphicsMain.view.play(grid, algo);
+        GameStats stats = new GameStats();
+        for (int x = 0; x < 10; x++) {
+          stats.merge(view.play(grid, algo));
+          grid.restart();
+        }
+        System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
+
       }
     }
 
@@ -96,15 +105,6 @@ public class GraphicsMain extends Application {
         e.printStackTrace();
         System.exit(1);
       }
-
       GraphicsMain.view.play(grid, algo);
-      
-      /* 
-      GameStats stats = new GameStats();
-      for (int i=0; i < 10000; i++) {
-        stats.merge(view.play(grid, algo));
-      }
-      System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
-      */
     } 
 }

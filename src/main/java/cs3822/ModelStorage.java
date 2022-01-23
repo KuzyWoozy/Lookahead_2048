@@ -10,5 +10,5 @@ interface ModelStorage {
   public float fetchReward(int hash);
   public long getElemCount();
   public boolean contains(int hash);
-
+  public void clear();
 }
