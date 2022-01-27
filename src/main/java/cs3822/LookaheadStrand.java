@@ -1,15 +1,14 @@
 package cs3822;
 
-import java.lang.Thread;
 
 
-class GridThread extends Thread {
+class LookaheadStrand implements Runnable {
   
   private Grid grid;
   private Reward reward;
   private Lookahead algo;
 
-  public GridThread(Grid grid, ModelStorage db, Reward reward, float reward_max, long depth_max) {
+  public LookaheadStrand(Grid grid, ModelStorage db, Reward reward, float reward_max, long depth_max) {
     this.grid = grid;
     this.reward = reward;
     this.algo = new Lookahead(db, reward_max, depth_max);

@@ -26,17 +26,16 @@ public class GraphicsMain extends Application {
         case "optimal":
           try {
             algo = new TreeGeneratorMDP(grid, new SQLStorage("db.sql", 1000000));
-            //algo = new TreeGeneratorMDP(grid, new MapStorage(new HashMap<Integer, SolTableItem>()));
           } catch(InvalidActionException e) {
             e.printStackTrace();
             System.exit(1);
           }
           break;
         case "threaded":
-          algo = new ThreadedLookahead((grid.getCols() * grid.getRows()), 6);
+          algo = new ThreadedLookahead((grid.getCols() * grid.getRows()), 7);
           break;
         case "lookahead":
-          algo = new Lookahead((grid.getCols() * grid.getRows()), 6);
+          algo = new Lookahead((grid.getCols() * grid.getRows()), 7);
           break;
         case "uniform":
           algo = new UniformRandomPlay();

@@ -1,10 +1,15 @@
 package cs3822;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.InterruptedException;
 
 
 class ThreadedLookahead implements Algorithm {
@@ -12,8 +17,10 @@ class ThreadedLookahead implements Algorithm {
   private final float reward_max;
   private final long depth_max;
 
-  private List<GridThread> jobs = new LinkedList<GridThread>();
+  private List<Callable<Object>> jobs = new LinkedList<Callable<Object>>();
   private List<List<Reward>> rewards = new LinkedList<List<Reward>>();
+
+  private ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
   private ModelStorage db;
 
@@ -24,16 +31,12 @@ class ThreadedLookahead implements Algorithm {
   }
 
   private void processJobs() {
-    
-    for (GridThread thread : jobs) {
-      thread.start();
-    }
-    
     try {
-      for (GridThread thread : jobs) {
-        thread.join();
+      List<Future<Object>> futures = pool.invokeAll(jobs);
+      for (Future<Object> future : futures) {
+        future.get();
       }
-    } catch(InterruptedException e) {
+    } catch(InterruptedException | ExecutionException e) {
       e.printStackTrace();
       System.exit(1);
     }
@@ -92,8 +95,8 @@ class ThreadedLookahead implements Algorithm {
       Grid gridCopy1 = new Grid(grid);
       gridCopy1.setValueNode(new ValueNode(node, 2));
       
-      GridThread thread1 = new GridThread(gridCopy1, db, reward1, reward_max, depth_max - 1);
-      jobs.add(thread1);
+      LookaheadStrand thread1 = new LookaheadStrand(gridCopy1, db, reward1, reward_max, depth_max - 1);
+      jobs.add(Executors.callable(thread1));
       localRewards.add(reward1);
 
 
@@ -101,8 +104,8 @@ class ThreadedLookahead implements Algorithm {
       Grid gridCopy2 = new Grid(grid);
       gridCopy2.setValueNode(new ValueNode(node, 4));
       
-      GridThread thread2 = new GridThread(gridCopy2, db, reward2, reward_max, depth_max - 1);
-      jobs.add(thread2);
+      LookaheadStrand thread2 = new LookaheadStrand(gridCopy2, db, reward2, reward_max, depth_max - 1);
+      jobs.add(Executors.callable(thread2));
       localRewards.add(reward2);
     }
     rewards.add(localRewards);
