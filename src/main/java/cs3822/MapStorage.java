@@ -1,17 +1,17 @@
 package cs3822;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 
 
-class HashMapStorage implements ModelStorage {
+class MapStorage implements ModelStorage {
 
-  private HashMap<Integer, SolTableItem> map;
+  private Map<Integer, SolTableItem> map;
 
-  public HashMapStorage() {
-    map = new HashMap<Integer, SolTableItem> ();
+  public MapStorage(Map<Integer, SolTableItem> map) {
+    this.map = map;
   }
   
   @Override
@@ -20,23 +20,13 @@ class HashMapStorage implements ModelStorage {
   }
 
   @Override
-  public Action fetchAction(int hash) {
-    return map.get(hash).getAction();
-  }
-
-  @Override
-  public float fetchReward(int hash) {
-    return map.get(hash).getReward();
+  public SolTableItem fetch(int hash) {
+    return map.get(hash);
   }
 
   @Override
   public long getElemCount() {
     return map.size();
-  }
-
-  @Override
-  public boolean contains(int hash) {
-    return map.containsKey(hash);
   }
 
   @Override 

@@ -1,5 +1,6 @@
 package cs3822;
 
+import java.util.ArrayList;
 
 /**
  * Representation of actions a player can take.
@@ -111,6 +112,17 @@ enum Action {
       default:
         throw new InvalidActionException();
     }
+  }
+
+  public static ArrayList<Action> getMoveActions() {
+    ArrayList<Action> list = new ArrayList<Action>();
+    
+    list.add(SWIPE_UP);
+    list.add(SWIPE_RIGHT);
+    list.add(SWIPE_DOWN);
+    list.add(SWIPE_LEFT);
+
+    return list;
   }
 
 }

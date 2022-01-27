@@ -47,7 +47,7 @@ class StdoutView implements View {
     GameStats stat = new GameStats();
     try {
       while (true) {
-        //display(grid);
+        display(grid);
         if (grid.won()) {
           stat.won();
           break;
@@ -56,7 +56,7 @@ class StdoutView implements View {
           break;
         }
         List<Action> action = algo.move(grid);
-        //System.out.println(action.get(0));
+        System.out.println(action.get(0));
         grid.process(action);
       }
     } catch(InvalidActionException e) {

@@ -1,5 +1,7 @@
 package cs3822;
 
+import java.util.HashMap;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -8,7 +10,7 @@ import javafx.stage.Stage;
 public class GraphicsMain extends Application {
     
     private static int winCondition = 2048;
-    private static String map = "#2##|#2##|####|####";
+    private static String map = "####|####|####|####";
     private static float twoProb = 0.9f;
     private static String algoName = "player";
     private static boolean guiFlag = false;
@@ -21,9 +23,20 @@ public class GraphicsMain extends Application {
     private static void processAlgo(String name) throws UnknownAlgorithmException {
       switch(name.toLowerCase()) {
 
-        //algo = new TreeGeneratorMDP(grid, new HashMapStorage(), twoProb);
+        case "optimal":
+          try {
+            algo = new TreeGeneratorMDP(grid, new SQLStorage("db.sql", 1000000));
+            //algo = new TreeGeneratorMDP(grid, new MapStorage(new HashMap<Integer, SolTableItem>()));
+          } catch(InvalidActionException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
+        case "threaded":
+          algo = new ThreadedLookahead((grid.getCols() * grid.getRows()), 6);
+          break;
         case "lookahead":
-          algo = new Lookahead((grid.getCols() * grid.getRows()), 5, twoProb);
+          algo = new Lookahead((grid.getCols() * grid.getRows()), 6);
           break;
         case "uniform":
           algo = new UniformRandomPlay();
@@ -48,6 +61,10 @@ public class GraphicsMain extends Application {
         case "--algo":
           i++;
           GraphicsMain.algoName = args[i];
+          break;
+        case "--win":
+          i++;
+          GraphicsMain.winCondition = Integer.valueOf(args[i]);
           break;
         default:
           throw new UnknownArgumentException();
@@ -75,7 +92,7 @@ public class GraphicsMain extends Application {
       } catch(InvalidMapSizeException e) {
         e.printStackTrace();
         System.exit(1);
-      }
+    }
 
       if (guiFlag) {
         launch(args);
@@ -88,7 +105,7 @@ public class GraphicsMain extends Application {
           System.exit(1);
         }
         GameStats stats = new GameStats();
-        for (int x = 0; x < 10; x++) {
+        for (int x = 0; x < 100; x++) {
           stats.merge(view.play(grid, algo));
           grid.restart();
         }

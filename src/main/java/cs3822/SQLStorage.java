@@ -52,7 +52,6 @@ class SQLStorage implements ModelStorage {
 
       insertStmt = con.prepareStatement("INSERT INTO db VALUES (?,?,?);");
       selectSolInfoStmt = con.prepareStatement("SELECT action, expReward FROM db WHERE instance = ?;");
-      containsStmt = con.prepareStatement("SELECT * FROM db WHERE instance = ?;");
 
     } catch(SQLException e) {
       e.printStackTrace();
@@ -96,82 +95,37 @@ class SQLStorage implements ModelStorage {
   }
   
   @Override
-  public Action fetchAction(int hash) {
+  public SolTableItem fetch(int hash) {
+    SolTableItem item = null;
     if (latestHash != null && latestHash.equals(hash)) {
-      return latestAction;
+      return new SolTableItem(latestAction, latestReward);
     // Check buffer
     } else if (buffer.containsKey(hash)) {
-      latestHash = Integer.valueOf(hash);
-      SolTableItem item = buffer.get(hash);
-      latestAction = item.getAction();
-      latestReward = item.getReward();
-      return latestAction;
+      return buffer.get(Integer.valueOf(hash));
     // check database
     } else {
-      latestHash = Integer.valueOf(hash);
       try {
         selectSolInfoStmt.setInt(1, hash);
         ResultSet rs = selectSolInfoStmt.executeQuery();
-        rs.next(); 
-        latestAction = Action.convertIntToAction(rs.getInt("action"));
-        latestReward = rs.getFloat("expReward");
-        rs.close();
-      } catch(SQLException | InvalidActionException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-      return latestAction;
-    }
-  }
-  
-  @Override
-  public float fetchReward(int hash) {
-    if (latestHash != null && latestHash.equals(hash)) {
-      return latestReward;
-    } else if (buffer.containsKey(hash)) {
-      latestHash = Integer.valueOf(hash);
-      SolTableItem item = buffer.get(hash);
-      latestAction = item.getAction();
-      latestReward = item.getReward();
-      return latestReward;
-    } else {
-      latestHash = Integer.valueOf(hash);
-      try {
-        selectSolInfoStmt.setInt(1, hash);
-        ResultSet rs = selectSolInfoStmt.executeQuery();
-        rs.next(); 
-        latestAction = Action.convertIntToAction(rs.getInt("action"));
-        latestReward = rs.getFloat("expReward");
-        rs.close();
-      } catch(SQLException | InvalidActionException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-      return latestReward;
-    }
-  }
-  
-  @Override
-  public boolean contains(int hash) {
-    if (buffer.containsKey(hash)) {
-      return true;
-    } else {
-      boolean x = false;
-      try {
-        containsStmt.setInt(1, hash);
-        ResultSet rs = containsStmt.executeQuery();
-        if (rs.next()) {
-          x = true;
-        } else {
-          x = false;
+        if (!rs.next()) {
+          rs.close();
+          return null;
         }
+
+        latestHash = Integer.valueOf(hash);
+        latestAction = Action.convertIntToAction(rs.getInt("action"));
+        latestReward = rs.getFloat("expReward");
+
+        item = new SolTableItem(latestAction, latestReward); 
+        
         rs.close();
-      } catch(SQLException e) {
+        return item;
+      } catch(SQLException | InvalidActionException e) {
         e.printStackTrace();
         System.exit(1);
       }
-      return x;
     }
+    return item;
   }
   
   @Override

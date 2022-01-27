@@ -16,151 +16,147 @@ import java.lang.Math;
 class TreeGeneratorMDP implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
-
-  private float twoProb;
+  
+  private Stack<TreeDFSNode> history;
   private ModelStorage db;
 
   /** Initialize class with initial node and probability of generating a 2. */
-  public TreeGeneratorMDP(Grid grid, ModelStorage db, float twoProb) throws InvalidActionException {
-    this.twoProb = twoProb;
-    this.db = db;
-   
+  public TreeGeneratorMDP(Grid grid, ModelStorage db) throws InvalidActionException {
     // Initialize the Tree DFS stack
-    Stack<TreeDFSNode> history = new Stack<TreeDFSNode>();
-    history.push(new TreeDFSNode(twoProb));
+    history = new Stack<TreeDFSNode>();
+    this.db = db;
+    
     depth++;
+    history.push(new TreeDFSNode(grid.getTwoProb()));
     // Initial dive
     dive(grid, history, db);
-    while(true) {
-      loop:  
-        while(true)  { 
-          int hash = grid.hashCode();
-          if (db.contains(hash)) {
-      	    TreeDFSNode node = history.peek();
-
-            node.setMaxReward(db.fetchReward(hash));
-            node.setAction(Action.NONE);
-	        }
-	        switch(history.peek().getAction()) {
-            // If the previous action was UP, do a right
-	          case SWIPE_UP:
-              history.peek().setAction(Action.SWIPE_RIGHT); 
-
-              grid.slideRight(false);
-
-              if (!grid.getMove()) {
-                history.peek().updateMaxReward(0f);
-                continue;
-              }
-              break;
-
-            case SWIPE_RIGHT:
-              history.peek().setAction(Action.SWIPE_DOWN);
-
-              grid.slideDown(false);
-
-              if (!grid.getMove()) {
-                history.peek().updateMaxReward(0f);
-                continue;
-              }
-              break;
-
-            case SWIPE_DOWN:
-              history.peek().setAction(Action.SWIPE_LEFT);
-
-              grid.slideLeft(false);
-              if (!grid.getMove()) {
-                history.peek().updateMaxReward(0f);
-                continue;
-              }
-              break;
-             
-            case SWIPE_LEFT:
-              // Debug info
-              instancesProcessed++;
-              if (instancesProcessed % 100000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
-              } 
-              TreeDFSNode node = history.peek();
-              
-              db.insert(grid.hashCode(), node.getBestAction(), node.getBestReward());
-
-              System.out.println(grid.stringify());
-
-              break loop;
-
-            // Part of caching optimization
-            case NONE:
-              // Debug info
-              instancesProcessed++;
-              if (instancesProcessed % 100000 == 0) {
-                System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
-              } 
-
-              break loop;
+    try {
+      while(true) {
+        loop:  
+          while(true)  {
+            TreeDFSNode peek = history.peek();
             
-            default:
-              throw new InvalidActionException();
-        }
-        
-        if (grid.won()) {
-          history.peek().updateMaxReward(1f);
-          grid.undo();
-          history.peek().setAction(Action.SWIPE_LEFT);
-          continue;
-        } 
+            if (peek.getAction() != Action.NONE) {
+              SolTableItem item = db.fetch(grid.hashCode());
+              if (item != null) { 
+                peek.setMaxReward(item.getReward());
+                peek.setAction(Action.NONE);
+              }
+            }
 
-        history.push(new TreeDFSNode(grid, twoProb));      
-        depth++;
-        
-        if (grid.lost()) {
-          history.peek().updateMaxReward(0f);
-          history.peek().setAction(Action.NONE);
-          continue;
-        }
-        
-        dive(grid, history, db);
-      }
-     
-      TreeDFSNode node = history.peek();
-      if (node.isPosiEmpty()) {
-        history.pop();
-        depth--;
-        if (history.isEmpty()) {
-          break;
-        }
-        try {
-          node.commitReward(grid);
-        } catch (InvalidValueException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
+            switch(peek.getAction()) {
+              // If the previous action was UP, do a right
+              case SWIPE_UP:
+                peek.setAction(Action.SWIPE_RIGHT); 
 
-        // One to go up a level in the tree
-        grid.undo();
-        
-        float expectedReward = node.getExpectedReward();
-        
-        history.peek().updateMaxReward(expectedReward);
-        // Early branch cutting optimizations, has to be after above line!!
-        if (Math.abs(1f - expectedReward) <= 0.0001) {
-          history.peek().setAction(Action.SWIPE_LEFT);
-        }
+                grid.slideRight(false);
 
-      } else {
-        node.setNextPosi(grid);
-        if (grid.lost()) { 
-          node.updateMaxReward(0f);
-          node.setAction(Action.NONE);
-        } else {
-          // Need to dive if we have a new possibility
+                if (!grid.getMove()) {
+                  peek.updateMaxReward(0f);
+                  continue;
+                }
+                break;
+
+              case SWIPE_RIGHT:
+                peek.setAction(Action.SWIPE_DOWN);
+
+                grid.slideDown(false);
+
+                if (!grid.getMove()) {
+                  peek.updateMaxReward(0f);
+                  continue;
+                }
+                break;
+
+              case SWIPE_DOWN:
+                peek.setAction(Action.SWIPE_LEFT);
+                grid.slideLeft(false);
+                if (!grid.getMove()) {
+                  peek.updateMaxReward(0f);
+                  continue;
+                }
+                break;
+               
+              case SWIPE_LEFT:
+                // Debug info
+                instancesProcessed++;
+
+                if (instancesProcessed % 100000 == 0) {
+                  System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
+                } 
+                db.insert(grid.hashCode(), peek.getBestAction(), peek.getBestReward());
+
+                break loop;
+
+              // Part of caching optimization
+              case NONE:
+                // Debug info
+                if (instancesProcessed % 100000 == 0) {
+                  System.out.println("[DEBUG] Unique states in DAG: " + String.valueOf(db.getElemCount()) + "\n        States processed: " + String.valueOf(instancesProcessed) + "\n        Depth: " + String.valueOf(depth));
+                } 
+                instancesProcessed++;
+                break loop;
+              
+              default:
+                throw new InvalidActionException();
+          }
+          
+          if (grid.won()) {
+            peek.updateMaxReward(1f);
+            grid.undo();
+            peek.setAction(Action.SWIPE_LEFT);
+            continue;
+          } 
+          
+          depth++;
+          history.push(new TreeDFSNode(grid));      
+          
+          if (grid.lost()) {
+            history.peek().updateMaxReward(0f);
+            history.peek().setAction(Action.NONE);
+            continue;
+          }
+          
           dive(grid, history, db);
         }
-      }
-            
-    };
-    
-    System.out.println("-----------------\nUnique nodes in DAG: " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nDepth: " + String.valueOf(depth) + "\nStates processed: " + String.valueOf(instancesProcessed) + "\nExpected win rate (%): " + String.valueOf(db.fetchReward(grid.hashCode()) * 100));
+       
+        TreeDFSNode node = history.peek();
+        if (node.isPosiEmpty()) {
+          history.pop();
+          depth--;
+          if (history.isEmpty()) {
+            break;
+          }
+          try {
+            node.commitReward(grid);
+          } catch (InvalidValueException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+
+          // One to go up a level in the tree
+          grid.undo();
+          
+          float expectedReward = node.getExpectedReward();
+          
+          history.peek().updateMaxReward(expectedReward);
+        } else {
+          node.setNextPosi(grid);
+          if (grid.lost()) { 
+            node.updateMaxReward(0f);
+            node.setAction(Action.NONE);
+          } else {
+            // Need to dive if we have a new possibility
+            dive(grid, history, db);
+          }
+        }
+      };
+    } catch(InvalidActionException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    System.out.println("-----------------\nUnique nodes in DAG: " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nDepth: " + String.valueOf(depth) + "\nStates processed: " + String.valueOf(instancesProcessed) + "\nExpected win rate (%): " + String.valueOf(db.fetch(grid.hashCode()).getReward() * 100));
 
   }
 
@@ -177,17 +173,15 @@ class TreeGeneratorMDP implements Algorithm {
   private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) {
 
     while(true) {
-
       // Hash caching
-      int hash = grid.hashCode();
-      if (db.contains(hash)) {
+      SolTableItem item = db.fetch(grid.hashCode());
+      if (item != null) {
         TreeDFSNode node = history.peek();
-
-        node.setMaxReward(db.fetchReward(hash));
+        node.setMaxReward(item.getReward());
         node.setAction(Action.NONE);
-      	return;
+        return;
       }
-      
+
       // Move the state upwards
       grid.slideUp(false);
 
@@ -205,10 +199,10 @@ class TreeGeneratorMDP implements Algorithm {
         history.peek().setAction(Action.SWIPE_LEFT);
         return;
       }
-
+      
       // Create a new node in the DAG 
-      history.push(new TreeDFSNode(grid, twoProb));
       depth++;
+      history.push(new TreeDFSNode(grid));
 
       // Need to check if we lost AFTER instantiating
       if (grid.lost()) {
@@ -221,7 +215,7 @@ class TreeGeneratorMDP implements Algorithm {
   
   public List<Action> move(Grid grid) {
     LinkedList<Action> list = new LinkedList<Action>();
-    list.add(db.fetchAction(grid.hashCode()));
+    list.add(db.fetch(grid.hashCode()).getAction());
     return list;
   }
   

@@ -113,9 +113,9 @@ class Grid {
     List<Node> frameCopy;
     for (List<Node> frame : grid.frames) {
       frameCopy = Arrays.asList(new Node[grid.rowSize * grid.columnSize]);
-      for (Node node : frame) {
+      for (int i = 0; i < frame.size(); i++) {
         try {
-          frameCopy.add(Node.copyNode(node));
+          frameCopy.set(i, Node.copyNode(frame.get(i)));
         } catch(UnknownNodeTypeException e) {
           e.printStackTrace();
           System.exit(1);
@@ -719,6 +719,10 @@ class Grid {
       }
     }
     return true;
+  }
+
+  public float getTwoProb() {
+    return twoProb;
   }
 
   /** Return list of empty nodes within the grid. */

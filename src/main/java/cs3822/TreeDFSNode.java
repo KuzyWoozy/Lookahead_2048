@@ -41,8 +41,8 @@ class TreeDFSNode {
 
 
   /** Constructs a node with the given grid and probability of generating a 2.*/
-  public TreeDFSNode(Grid grid, float twoProb) {
-    this(twoProb);
+  public TreeDFSNode(Grid grid) {
+    this(grid.getTwoProb());
 
     List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
     this.posiNum = emptyNodes.size();

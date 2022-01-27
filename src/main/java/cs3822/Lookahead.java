@@ -1,5 +1,6 @@
 package cs3822;
 
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,77 +10,86 @@ import java.lang.Math;
 class Lookahead implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
-  private float twoProb;
   
   private long depth_max;
   private float reward_max;
 
   private Stack<TreeDFSNode> history;
 
-  private ModelStorage db = new HashMapStorage();
+  private ModelStorage db;
 
 
   private float rewardFunc(Grid grid) {
     return grid.getEmptyNodesCopy().size() + 1;
   }
 
-  public Lookahead(float reward_max, long depth_max, float twoProb) {
-    this.twoProb = twoProb;
+  public Lookahead(float reward_max, long depth_max) {
     this.depth_max = depth_max;
     this.reward_max = reward_max;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
+    this.db = new MapStorage(new HashMap<Integer, SolTableItem>());
   }
 
-  public List<Action> move(Grid grid) {
-    db.clear();
+  public Lookahead(ModelStorage db, float reward_max, long depth_max) {
+    this.depth_max = depth_max;
+    this.reward_max = reward_max;
+    // Initialize the Tree DFS stack
+    history = new Stack<TreeDFSNode>();
+    this.db = db;
+  }
+ 
+  private void move_pure(Grid grid) {
     depth = 0;
     instancesProcessed = 0;
 
     depth++;
-    history.push(new TreeDFSNode(twoProb));
+    history.push(new TreeDFSNode(grid.getTwoProb()));
     // Initial dive
     dive(grid, history, db);
     try {
       while(true) {
         loop:  
           while(true)  {
-            
-            if (db.contains(grid.hashCode())) {
-              TreeDFSNode node = history.peek();
-              node.setMaxReward(db.fetchReward(grid.hashCode()));
-              node.setAction(Action.NONE);
+            TreeDFSNode peek = history.peek();
+
+            if (peek.getAction() != Action.NONE) {
+              SolTableItem item = db.fetch(grid.hashCode());
+              if (item != null) {
+                peek.setMaxReward(item.getReward());
+                peek.setAction(Action.NONE);
+              }
             }
-            
-            switch(history.peek().getAction()) {
+        
+            switch(peek.getAction()) {
               // If the previous action was UP, do a right
               case SWIPE_UP:
-                history.peek().setAction(Action.SWIPE_RIGHT); 
+                peek.setAction(Action.SWIPE_RIGHT); 
 
                 grid.slideRight(false);
 
                 if (!grid.getMove()) {
-                  history.peek().updateMaxReward(0f);
+                  peek.updateMaxReward(0f);
                   continue;
                 }
                 break;
 
               case SWIPE_RIGHT:
-                history.peek().setAction(Action.SWIPE_DOWN);
+                peek.setAction(Action.SWIPE_DOWN);
 
                 grid.slideDown(false);
 
                 if (!grid.getMove()) {
-                  history.peek().updateMaxReward(0f);
+                  peek.updateMaxReward(0f);
                   continue;
                 }
                 break;
 
               case SWIPE_DOWN:
-                history.peek().setAction(Action.SWIPE_LEFT);
+                peek.setAction(Action.SWIPE_LEFT);
                 grid.slideLeft(false);
                 if (!grid.getMove()) {
-                  history.peek().updateMaxReward(0f);
+                  peek.updateMaxReward(0f);
                   continue;
                 }
                 break;
@@ -88,8 +98,7 @@ class Lookahead implements Algorithm {
                 // Debug info
                 instancesProcessed++;
 
-                TreeDFSNode node = history.peek(); 
-                db.insert(grid.hashCode(), node.getBestAction(), node.getBestReward());
+                db.insert(grid.hashCode(), peek.getBestAction(), peek.getBestReward());
 
                 break loop;
 
@@ -104,22 +113,21 @@ class Lookahead implements Algorithm {
           }
           
           if (grid.won()) {
-            history.peek().updateMaxReward(reward_max);
+            peek.updateMaxReward(reward_max);
             grid.undo();
-            history.peek().setAction(Action.SWIPE_LEFT);
+            peek.setAction(Action.SWIPE_LEFT);
             continue;
           } 
 
           depth++;
           if (depth == depth_max) {
-            TreeDFSNode node = history.peek();
-            node.setMaxReward(rewardFunc(grid));
+            peek.setMaxReward(rewardFunc(grid));
             grid.undo();
-            node.setAction(Action.NONE);
+            peek.setAction(Action.NONE);
             depth--;
             continue;
           } 
-          history.push(new TreeDFSNode(grid, twoProb));      
+          history.push(new TreeDFSNode(grid));      
           
           if (grid.lost()) {
             history.peek().updateMaxReward(0f);
@@ -165,12 +173,26 @@ class Lookahead implements Algorithm {
       e.printStackTrace();
       System.exit(1);
     }
-    LinkedList<Action> list = new LinkedList<Action>();
-    list.add(db.fetchAction(grid.hashCode())); 
 
+  }
+
+  @Override
+  public List<Action> move(Grid grid) {
+    db.clear();
+    
+    move_pure(grid);
+
+    LinkedList<Action> list = new LinkedList<Action>();
+    list.add(db.fetch(grid.hashCode()).getAction()); 
     return list;
   }
 
+  public float move_reward(Grid grid) {
+    move_pure(grid);
+    
+    return db.fetch(grid.hashCode()).getReward(); 
+  }
+  
   /**
    * Performs shifts upwards until a terminal is reached, 
    * a loss, win or no more possible moves upwards. 
@@ -185,8 +207,12 @@ class Lookahead implements Algorithm {
 
     while(true) {
       // Hash caching
-      if (db.contains(grid.hashCode())) {
-      	return;
+      SolTableItem item = db.fetch(grid.hashCode());
+      if (item != null) {
+        TreeDFSNode node = history.peek();
+        node.setMaxReward(item.getReward());
+        node.setAction(Action.NONE);
+        return;
       }
 
       // Move the state upwards
@@ -217,7 +243,7 @@ class Lookahead implements Algorithm {
         return;
       } 
       // Create a new node in the DAG 
-      history.push(new TreeDFSNode(grid, twoProb));
+      history.push(new TreeDFSNode(grid));
 
       // Need to check if we lost AFTER instantiating
       if (grid.lost()) {
