@@ -32,7 +32,7 @@ public class GraphicsMain extends Application {
             System.exit(1);
           }
           break;
-        case "lookahead_t":
+        case "threaded":
           algo = new ThreadedLookahead(16f, 6);
           break;
         case "lookahead":

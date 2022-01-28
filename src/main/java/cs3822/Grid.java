@@ -29,12 +29,15 @@ class Grid {
   private Random rand = new Random();
 
   private Node generatedNode = null;
+ 
+  private int score;
   
-  
-  public void restart() {
+  public void restart(boolean generate) {
     List<String> rows = Arrays.asList(map.strip().split("\\|"));
     nodes = Arrays.asList(new Node[rowSize * columnSize]);
     Position pos = null;
+    this.score = 0;
+    
     // Initialize Node list
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
@@ -50,8 +53,10 @@ class Grid {
       } 
     } 
     // Generate the initial nodes
-    generateNewNode();
-    generateNewNode();
+    if (generate) {
+      generateNewNode();
+      generateNewNode();
+    }
    
 
     this.frames = new LinkedList<List<Node>>();
@@ -63,6 +68,7 @@ class Grid {
       e.printStackTrace();
       System.exit(1);
     }
+
   }
 
   /**
@@ -72,7 +78,7 @@ class Grid {
    * @param win_condition Target value to be reached to win the game
    * @param twoProb Probability of generating a node with the value 2
    */
-  public Grid(String map, int winCondition, float twoProb) throws InvalidMapSizeException {
+  public Grid(String map, int winCondition, float twoProb, boolean generate) throws InvalidMapSizeException {
     this.map = map;
 
     this.twoProb = twoProb;
@@ -89,7 +95,7 @@ class Grid {
       if (row.length() != columnSize) throw new InvalidMapSizeException();
     }
 
-    restart();
+    restart(generate);
   }
 
   /** Grid copy constructor. */
@@ -129,6 +135,7 @@ class Grid {
     this.rand = new Random();
     this.hasMoved = grid.hasMoved;
     this.generatedNode = grid.generatedNode;
+    this.score = grid.score;
   }
   
   /** 
@@ -280,6 +287,8 @@ class Grid {
               } else if (upNode.getType() == NodeType.VALUE && node.getValue() == upNode.getValue() && !node.getMergeFlag() && !upNode.getMergeFlag()) {
                 // Merge 
                 node.setValue(node.getValue() * 2);
+                score += node.getValue();
+
                 node.onMergeFlag();
 
                 swap(node, upNode);
@@ -362,6 +371,7 @@ class Grid {
               } else if (rightNode.getType() == NodeType.VALUE && node.getValue() == rightNode.getValue() && !node.getMergeFlag() && !rightNode.getMergeFlag()) {
                 // Merge 
                 node.setValue(node.getValue() * 2);
+                score += node.getValue();
                 node.onMergeFlag();
 
                 swap(node, rightNode);
@@ -443,6 +453,8 @@ class Grid {
               } else if (downNode.getType() == NodeType.VALUE && node.getValue() == downNode.getValue() && !node.getMergeFlag() && !downNode.getMergeFlag()) {
                 // Merge 
                 node.setValue(node.getValue() * 2);
+                score += node.getValue();
+                
                 node.onMergeFlag();
 
                 swap(node, downNode);
@@ -525,6 +537,8 @@ class Grid {
               } else if (leftNode.getType() == NodeType.VALUE && node.getValue() == leftNode.getValue() && !node.getMergeFlag() && !leftNode.getMergeFlag()) {
                 // Merge 
                 node.setValue(node.getValue() * 2);
+                score += node.getValue();
+                
                 node.onMergeFlag();
 
                 swap(node, leftNode);
@@ -655,6 +669,10 @@ class Grid {
   /** Return number of columns in the grid. */
   public int getCols() {
     return columnSize;
+  }
+
+  public int getScore() {
+    return score;
   }
 
   public List<List<Node>> getFrames() {

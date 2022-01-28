@@ -56,8 +56,8 @@ class StdoutView implements View {
           break;
         }
         List<Action> action = algo.move(grid);
-        System.out.println(action.get(0));
         grid.process(action);
+        System.out.println(action.get(0));
       }
     } catch(InvalidActionException e) {
       e.printStackTrace();

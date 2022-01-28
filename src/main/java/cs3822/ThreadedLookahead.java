@@ -18,7 +18,7 @@ class ThreadedLookahead implements Algorithm {
   private final long depth_max;
 
   private List<Callable<Object>> jobs = new LinkedList<Callable<Object>>();
-  private List<List<Reward>> rewards = new LinkedList<List<Reward>>();
+  private List<List<MutableFloat>> rewards = new LinkedList<List<MutableFloat>>();
 
   private ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
@@ -46,13 +46,17 @@ class ThreadedLookahead implements Algorithm {
     ArrayList<Action> actions = Action.getMoveActions();
     ArrayList<Float> expRewards = new ArrayList<Float>();
     
-    for (List<Reward> localRewards : rewards) {
-      float sum = 0;
-      for (int i = 0; i < localRewards.size(); i+=2) {
-        sum += twoProb * localRewards.get(i).getReward();
-        sum += (1 - twoProb) * localRewards.get(i+1).getReward();
+    for (List<MutableFloat> localRewards : rewards) {
+      if (localRewards.isEmpty()) {
+        expRewards.add(0f);
+      } else {
+        float sum = 0;
+        for (int i = 0; i < localRewards.size(); i+=2) {
+          sum += twoProb * localRewards.get(i).get();
+          sum += (1 - twoProb) * localRewards.get(i+1).get();
+        }
+        expRewards.add((1f / (localRewards.size() / 2)) * sum);
       }
-      expRewards.add((1f / (localRewards.size() / 2)) * sum);
     }
 
     Action bestAction = null;
@@ -67,31 +71,46 @@ class ThreadedLookahead implements Algorithm {
   }
 
   private void fillUpJobs(Grid grid) {
-
     jobs.clear();
     rewards.clear();
 
     grid.slideUp(false);
-    addJobs(grid); 
-    grid.undo();
+    if (grid.getMove()) {
+      addJobs(grid); 
+      grid.undo();
+    } else {
+      rewards.add(new LinkedList<MutableFloat>());
+    }
     
     grid.slideRight(false);
-    addJobs(grid);
-    grid.undo();
+    if (grid.getMove()) {
+      addJobs(grid); 
+      grid.undo();
+    } else {
+      rewards.add(new LinkedList<MutableFloat>());
+    }
 
     grid.slideDown(false);
-    addJobs(grid); 
-    grid.undo();
+    if (grid.getMove()) {
+      addJobs(grid); 
+      grid.undo();
+    } else {
+      rewards.add(new LinkedList<MutableFloat>());
+    }
 
     grid.slideLeft(false);
-    addJobs(grid);
-    grid.undo();
+    if (grid.getMove()) {
+      addJobs(grid); 
+      grid.undo();
+    } else {
+      rewards.add(new LinkedList<MutableFloat>());
+    }
   }
 
   private void addJobs(Grid grid) {
-    LinkedList<Reward> localRewards = new LinkedList<Reward>();
+    LinkedList<MutableFloat> localRewards = new LinkedList<MutableFloat>();
     for (EmptyNode node : grid.getEmptyNodesCopy()) {
-      Reward reward1 = new Reward();
+      MutableFloat reward1 = new MutableFloat();
       Grid gridCopy1 = new Grid(grid);
       gridCopy1.setValueNode(new ValueNode(node, 2));
       
@@ -100,7 +119,7 @@ class ThreadedLookahead implements Algorithm {
       localRewards.add(reward1);
 
 
-      Reward reward2 = new Reward();
+      MutableFloat reward2 = new MutableFloat();
       Grid gridCopy2 = new Grid(grid);
       gridCopy2.setValueNode(new ValueNode(node, 4));
       
@@ -113,6 +132,8 @@ class ThreadedLookahead implements Algorithm {
 
   @Override
   public List<Action> move(Grid grid) {
+    Grid gridz = new Grid(grid);
+
     db.clear();
     
     fillUpJobs(grid);
@@ -122,6 +143,11 @@ class ThreadedLookahead implements Algorithm {
     Action bestAction = processRewards(grid.getTwoProb());
     List<Action> list = new LinkedList<Action>();
     list.add(bestAction);
+    
+    if (!gridz.equals(grid)) {
+      System.exit(1);
+    }
+
     return list;
   }
 

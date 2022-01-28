@@ -18,10 +18,16 @@ class Lookahead implements Algorithm {
 
   private ModelStorage db;
 
-
+  
   private float rewardFunc(Grid grid) {
     return grid.getEmptyNodesCopy().size() + 1;
   }
+  
+  /*
+  private float rewardFunc(Grid grid) {
+    return grid.getScore();
+  }
+  */
 
   public Lookahead(float reward_max, long depth_max) {
     this.depth_max = depth_max;
