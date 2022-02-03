@@ -14,15 +14,16 @@ public class GraphicsMain extends Application {
     private static float twoProb = 0.9f;
     private static String algoName = "player";
     private static boolean guiFlag = false;
-    
+    private static boolean generate = true;
+
     private static Grid grid;
+    private static GridManager manager;
     private static View view;
     private static Algorithm algo;
 
 
     private static void processAlgo(String name) throws UnknownAlgorithmException {
       switch(name.toLowerCase()) {
-
         case "optimal":
           try {
             algo = new TreeGeneratorMDP(grid, new SQLStorage("db.sql", 1000000));
@@ -31,11 +32,8 @@ public class GraphicsMain extends Application {
             System.exit(1);
           }
           break;
-        case "threaded":
-          algo = new ThreadedLookahead((grid.getCols() * grid.getRows()), 7);
-          break;
         case "lookahead":
-          algo = new Lookahead((grid.getCols() * grid.getRows()), 7);
+          algo = new Lookahead(17f, 4);
           break;
         case "uniform":
           algo = new UniformRandomPlay();
@@ -51,19 +49,22 @@ public class GraphicsMain extends Application {
     private static int processArg(int i, String[] args) throws UnknownArgumentException {
       switch(args[i]) {
         case "--gui":
-          GraphicsMain.guiFlag = true;
+          guiFlag = true;
           break;
         case "--map":
           i++;
-          GraphicsMain.map = args[i];
+          map = args[i];
           break;
         case "--algo":
           i++;
-          GraphicsMain.algoName = args[i];
+          algoName = args[i];
           break;
         case "--win":
           i++;
-          GraphicsMain.winCondition = Integer.valueOf(args[i]);
+          winCondition = Integer.valueOf(args[i]);
+          break;
+        case "--nogen":
+          generate = false;
           break;
         default:
           throw new UnknownArgumentException();
@@ -87,11 +88,12 @@ public class GraphicsMain extends Application {
       }
       
       try {
-        grid = new Grid(map, winCondition, twoProb);
+        grid = new Grid(map, winCondition, twoProb, generate);
+        manager = new GridManager(grid);
       } catch(InvalidMapSizeException e) {
         e.printStackTrace();
         System.exit(1);
-    }
+      }
 
       if (guiFlag) {
         launch(args);
@@ -103,10 +105,11 @@ public class GraphicsMain extends Application {
           e.printStackTrace();
           System.exit(1);
         }
+
         GameStats stats = new GameStats();
-        for (int x = 0; x < 100; x++) {
-          stats.merge(view.play(grid, algo));
-          grid.restart();
+        for (int x = 0; x < 1; x++) {
+          stats.merge(view.play(manager, algo));
+          manager.restart();
         }
         System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
 
@@ -121,6 +124,6 @@ public class GraphicsMain extends Application {
         e.printStackTrace();
         System.exit(1);
       }
-      GraphicsMain.view.play(grid, algo);
+      GraphicsMain.view.play(manager, algo);
     } 
 }

@@ -22,16 +22,15 @@ class SQLStorage implements ModelStorage {
   private Action latestAction;
   private float latestReward;
 
-  private HashMap<Integer, SolTableItem> buffer;
+  private HashMap<Integer, Pair<Float, Action>> buffer;
   private int bufferSize;
 
   private PreparedStatement insertStmt;
   private PreparedStatement selectSolInfoStmt;
-  private PreparedStatement containsStmt;
 
   public SQLStorage(String location, int bufferSize) {
     this.count = 0;
-    this.buffer = new HashMap<Integer, SolTableItem>();
+    this.buffer = new HashMap<Integer, Pair<Float, Action>>();
     this.bufferSize = bufferSize;
 
     try {
@@ -63,17 +62,17 @@ class SQLStorage implements ModelStorage {
   public void insert(int hash, Action action, float reward) {
     count++;
 
-    buffer.put(hash, new SolTableItem(action, reward));
+    buffer.put(hash, new Pair<Float, Action>(reward, action));
     if (buffer.size() >= bufferSize) {
       try {
         con.setAutoCommit(false);
         int i = 0;
-        for (Map.Entry<Integer, SolTableItem> item : buffer.entrySet()) {
+        for (Map.Entry<Integer, Pair<Float, Action>> item : buffer.entrySet()) {
           i++;
 
           insertStmt.setInt(1, item.getKey());
-          insertStmt.setInt(2, Action.convertActionToInt(item.getValue().getAction()));
-          insertStmt.setFloat(3, item.getValue().getReward());
+          insertStmt.setInt(2, Action.convertActionToInt(item.getValue().getSecond()));
+          insertStmt.setFloat(3, item.getValue().getFirst());
 
           insertStmt.addBatch();
 
@@ -95,10 +94,10 @@ class SQLStorage implements ModelStorage {
   }
   
   @Override
-  public SolTableItem fetch(int hash) {
-    SolTableItem item = null;
+  public Pair<Float, Action> fetch(int hash) {
+    Pair<Float, Action> item = null;
     if (latestHash != null && latestHash.equals(hash)) {
-      return new SolTableItem(latestAction, latestReward);
+      return new Pair<Float, Action>(latestReward, latestAction);
     // Check buffer
     } else if (buffer.containsKey(hash)) {
       return buffer.get(Integer.valueOf(hash));
@@ -116,7 +115,7 @@ class SQLStorage implements ModelStorage {
         latestAction = Action.convertIntToAction(rs.getInt("action"));
         latestReward = rs.getFloat("expReward");
 
-        item = new SolTableItem(latestAction, latestReward); 
+        item = new Pair<Float, Action>(latestReward, latestAction); 
         
         rs.close();
         return item;

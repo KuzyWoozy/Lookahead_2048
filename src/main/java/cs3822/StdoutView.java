@@ -31,7 +31,7 @@ class StdoutView implements View {
   }
 
   public StdoutView(InputStream stream) {
-    this.scan = new Scanner(System.in);
+    this.scan = new Scanner(stream);
   }
   
   /** Obtain the list of user Actions from the stdin. */
@@ -43,27 +43,22 @@ class StdoutView implements View {
    
   /** Execute the game logic. */
   @Override
-  public GameStats play(Grid grid, Algorithm algo) {
+  public GameStats play(GridManager manager, Algorithm algo) {
     GameStats stat = new GameStats();
-    try {
-      while (true) {
-        display(grid);
-        if (grid.won()) {
-          stat.won();
-          break;
-        } else if (grid.lost()) {
-          stat.lost();
-          break;
-        }
-        List<Action> action = algo.move(grid);
-        System.out.println(action.get(0));
-        grid.process(action);
+    while (true) {
+      Grid grid = manager.show();
+      display(grid);
+      if (grid.won()) {
+        stat.won();
+        break;
+      } else if (grid.lost()) {
+        stat.lost();
+        break;
       }
-    } catch(InvalidActionException e) {
-      e.printStackTrace();
-      System.exit(1);
+      List<Action> action = algo.move(grid);
+      manager.process(action);
     }
-    display(grid);
+    display(manager.show());
 
     return stat;
   }

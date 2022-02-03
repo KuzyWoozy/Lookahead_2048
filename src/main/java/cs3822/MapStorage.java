@@ -8,19 +8,19 @@ import java.io.FileOutputStream;
 
 class MapStorage implements ModelStorage {
 
-  private Map<Integer, SolTableItem> map;
+  private Map<Integer, Pair<Float, Action>> map;
 
-  public MapStorage(Map<Integer, SolTableItem> map) {
+  public MapStorage(Map<Integer, Pair<Float, Action>> map) {
     this.map = map;
   }
   
   @Override
   public void insert(int hash, Action action, float reward) {
-    map.put(hash, new SolTableItem(action, reward));
+    map.put(hash, new Pair<Float, Action>(reward, action));
   }
 
   @Override
-  public SolTableItem fetch(int hash) {
+  public Pair<Float, Action> fetch(int hash) {
     return map.get(hash);
   }
 

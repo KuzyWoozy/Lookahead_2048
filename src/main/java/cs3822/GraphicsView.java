@@ -35,20 +35,21 @@ class GraphicsView implements View {
   private Canvas canvas;
   private GraphicsContext gc;
 
-  private Duration animationLength = new Duration(100);
+  final private Duration animationLength = new Duration(100);
 
-  private float paddingPercent = 5;
-  private float roundingPercent = 15;
-  private float textSizePercent = 35;
+  final private float paddingPercent = 5;
+  final private float roundingPercent = 15;
+  final private float textSizePercent = 35;
 
-  private boolean animate = true;
+  final int grid_cols;
+  final int grid_rows;
+
+  private boolean animate = false;
 
   private ArrayList<String> input;
 
   private boolean canPressFlag = true;
 
-  private LinkedList<Action> actions_buffer;
-   
 
   private void drawRect(GraphicsContext gc, float x, float y, float width, float height, Color color) {
     gc.setFill(color);
@@ -136,16 +137,16 @@ class GraphicsView implements View {
   }
 
   private void lock() {
-    animate = false;
+    animate = true;
   }
   
   private void unlock() {
-    animate = true;
+    animate = false;
   }
 
   
-  private void display(Grid grid) {
-      
+  private void display(List<Grid> frames) {
+
     float width = (float)stage.getWidth();
     float height = (float)stage.getHeight();
     
@@ -156,8 +157,8 @@ class GraphicsView implements View {
     float width_padding = width * (paddingPercent / 100f);
     float height_padding = height * (paddingPercent / 100f);
 
-    float node_width = (width - width_padding) / grid.getCols();
-    float node_height = (height - height_padding) / grid.getRows();
+    float node_width = (width - width_padding) / grid_cols;
+    float node_height = (height - height_padding) / grid_rows;
     
     if (node_width < node_height) {
       gc.setFont(new Font((int) (node_width * (textSizePercent/100f))));
@@ -168,8 +169,8 @@ class GraphicsView implements View {
       
     float node_arc_width = node_width * (roundingPercent / 100f);
     float node_arc_height = node_height * (roundingPercent / 100f);
-    float pad_width = width_padding / (grid.getCols() + 1);
-    float pad_height = height_padding / (grid.getRows() + 1);
+    float pad_width = width_padding / (grid_cols + 1);
+    float pad_height = height_padding / (grid_rows + 1);
 
     float x_old;
     float y_old;
@@ -185,11 +186,13 @@ class GraphicsView implements View {
     SequentialTransition animation = new SequentialTransition();
     List<Group> frameGroups = new LinkedList<Group>(); 
     ParallelTransition transitions;
-    for (List<Node> frames : grid.getFrames()) {
+    
+    for (Grid frame : frames) {
+
       Group frameGroup = new Group();
       
       transitions = new ParallelTransition(); 
-      for (Node node : frames) {
+      for (Node node : frame.getNodes()) {
         x = node_canvas_x(node.getPos().getX(), node_width, pad_width); 
         y = node_canvas_y(node.getPos().getY(), node_height, pad_height);
         
@@ -199,7 +202,7 @@ class GraphicsView implements View {
           Color rectColor = null;
           Color textColor = null; 
           try {
-            if (node.getMergeFlag() || (grid.getGeneratedNode() != null && grid.getGeneratedNode().getPos().equals(node.getPos()))) {
+            if (node.hasMerged() || (frame.getGeneratedNode() != null && frame.getGeneratedNode().getPos().equals(node.getPos()))) {
               rectColor = Color.WHITE;
               textColor = Color.BLACK;
             } else {
@@ -244,8 +247,6 @@ class GraphicsView implements View {
     // Do not perform last group set
     animation.getChildren().get(animation.getChildren().size()-1).setOnFinished(e -> {});
     
-    grid.setDefaultFrame();
-
     animation.play();
     lock();
   }
@@ -262,7 +263,9 @@ class GraphicsView implements View {
     this.group.getChildren().add(this.canvas);
     this.group.getChildren().add(this.nodes);
 
-    
+    this.grid_rows = grid.getRows();
+    this.grid_cols = grid.getCols();
+
     this.scene = new Scene(this.group, Color.WHITE);
     this.stage.setScene(this.scene);
     
@@ -270,13 +273,14 @@ class GraphicsView implements View {
 
     this.input = new ArrayList<String>();
 
-    this.actions_buffer = new LinkedList<Action>();
-    
     gc.setTextBaseline(VPos.CENTER);
     gc.setTextAlign(TextAlignment.CENTER);
     
     stage.show();
-    display(grid);
+
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(grid);
+    display(frames);
 
 
     this.scene.setOnKeyPressed(
@@ -304,43 +308,40 @@ class GraphicsView implements View {
   
   @Override
   public List<Action> getInput() {
+    List<Action> actions = null;
     if (input.isEmpty()) {
-      return new ArrayList<Action>();
+      actions = new ArrayList<Action>();
+      actions.add(Action.NONE);
     } else {
-      List<Action> actions = View.convertStringToActions(String.join("", input));
+      actions = View.convertStringToActions(String.join("", input));
       input.clear();
-      return actions;
     }
+    return actions;
   }
  
   @Override
-  public GameStats play(Grid grid, Algorithm algo) {
+  public GameStats play(GridManager manager, Algorithm algo) {
     GameStats stat = new GameStats();
-
+    
     new AnimationTimer() {
       public void handle(long nanoTime) {
-        actions_buffer.addAll(algo.move(grid));
-        if (animate) {
-          try {
-            if (grid.won()) {
-              stat.won();
-              stop();
-            } else if (grid.lost()) {
-              stat.lost();
-              stop();
-            }
-            if (!actions_buffer.isEmpty()) {
-              grid.process(actions_buffer.remove(0));
-            }
-            display(grid);
-          } catch(InvalidActionException e) {
-            e.printStackTrace();
-            System.exit(1);
+        if (!animate) {
+          Grid grid = manager.show();
+          
+          if (grid.won()) {
+            stat.won();
+            stop();
+            return;
+          } else if (grid.lost()) {
+            stat.lost();
+            stop();
+            return;
           }
+          
+          display(manager.process(algo.move(grid)));
         }
       }
     }.start();
-    
     
     return stat;
   }

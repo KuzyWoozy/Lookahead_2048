@@ -8,27 +8,13 @@ import java.util.Objects;
  *
  * @author Daniil Kuznetsov
  */
-class Position {
+final class Position {
 
-  private int x;
-  private int y;
-
-  private static int x_max = -1;
-  private static int x_min = 0;
-  private static int y_max = -1;
-  private static int y_min = 0;
-
-  /** Sets the bounds of the grid, assumes to start from 0. */
-  public static void setMax(int x_maximum, int y_maximum) {
-    x_max = x_maximum;
-    y_max = y_maximum;
-  }
+  final private int x;
+  final private int y;
 
   /** Constucts object with specified coordinates. */
-  public Position(int x, int y) throws MaxPosNotInitializedException {
-    if (x_max == -1 || y_max == -1) {
-      throw new MaxPosNotInitializedException();
-    }
+  public Position(int x, int y) {
     this.x = x;
     this.y = y;
   }
@@ -49,60 +35,24 @@ class Position {
     return y;
   }
 
-  /** Returns true if node can move up. */
-  public boolean canMoveUp() {
-    return y > y_min ? true : false;
-  }
-
-  /** Returns true if node can move right. */
-  public boolean canMoveRight() {
-    return x < (x_max-1) ? true : false;
-  }
-
-  /** Returns true if node can move down. */
-  public boolean canMoveDown() {
-    return y < (y_max-1) ? true : false;
-  }
-  
-  /** Returns true if node can move left. */
-  public boolean canMoveLeft() {
-    return x > x_min ? true : false;
-  }
-
   /** Move up in the grid. */
-  public void moveUp() throws MovingOutOfBoundsException {
-    if (canMoveUp()) {
-      this.y -= 1;
-    } else {
-      throw new MovingOutOfBoundsException();
-    }
+  public Position moveUp() {
+    return new Position(x, y - 1);
   }
 
   /** Move right in the grid. */
-  public void moveRight() throws MovingOutOfBoundsException {
-    if (canMoveRight()) {
-      this.x += 1;
-    } else {
-      throw new MovingOutOfBoundsException();
-    }
+  public Position moveRight() {
+    return new Position(x + 1, y);
   }
   
   /** Move down in the grid. */
-  public void moveDown() throws MovingOutOfBoundsException {
-    if (canMoveDown()) {
-      this.y += 1;
-    } else {
-      throw new MovingOutOfBoundsException();
-    }
+  public Position moveDown() {
+    return new Position(x, y + 1);
   }
 
   /** Move left in the grid. */
-  public void moveLeft() throws MovingOutOfBoundsException {
-    if (canMoveLeft()) {
-      this.x -= 1;
-    } else {
-      throw new MovingOutOfBoundsException();
-    }
+  public Position moveLeft() {
+    return new Position(x - 1, y);
   }
 
   /** Return string representation. */

@@ -7,8 +7,9 @@ package cs3822;
  */
 abstract class Node {
   
-  protected Position pos;
+  final protected Position pos;
 
+  
   /** 
    * Returns a copy of the given node. 
    * 
@@ -29,13 +30,10 @@ abstract class Node {
     } 
   }
 
+
   /** Node constructor. */
   public Node() {
-    try {
-      this.pos = new Position(0, 0);
-    } catch(MaxPosNotInitializedException e) {
-      e.printStackTrace();
-    }
+    this.pos = null;
   }
   
   /** Constructs the Node with the specified position. */
@@ -86,23 +84,19 @@ abstract class Node {
         throw new UnknownNodeTypeException(); 
     }
   }
+
+  public abstract Triplet<Node, Node, Integer> merge(Node node) throws UnknownNodeTypeException;
+  public abstract boolean hasMerged() throws NoMergeFlagException; 
+  public abstract boolean hasMoved() throws NoMoveFlagException;
   
   public abstract NodeType getType();
+  public abstract String toString();
+  public abstract int hashCode();
+  
   public abstract int getOldValue() throws NoValueException;
   public abstract int getValue() throws NoValueException;
-  public abstract void setValue(int value) throws NoValueException;
-  public abstract String toString();
-  public abstract boolean getMergeFlag() throws NoMergeFlagException;
-  public abstract void onMergeFlag() throws NoMergeFlagException;
-  public abstract void offMergeFlag() throws NoMergeFlagException;
-  public abstract boolean getMoveFlag() throws NoMoveFlagException;
-  public abstract int hashCode();
-  public abstract void setOldPos(Position pos) throws CantMoveException;
   public abstract Position getOldPos() throws CantMoveException;
-  public abstract void moveTo(Position pos) throws CantMoveException;
   public abstract boolean canMove(Grid grid) throws CantMoveException;
-
-  
 } 
 
 
