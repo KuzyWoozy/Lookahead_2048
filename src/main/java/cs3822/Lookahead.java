@@ -18,9 +18,9 @@ class Lookahead implements Algorithm {
 
   final private ModelStorage db;
 
-
+ 
   private float rewardFunc(Grid grid) {
-    return grid.getEmptyNodesCopy().size() + 1;
+    return grid.getScore();
   }
 
   public Lookahead(float reward_max, long depth_max) {
@@ -76,7 +76,7 @@ class Lookahead implements Algorithm {
                 }
 
                 if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, reward_max, Action.SWIPE_RIGHT);
+                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT);
         history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
                   
                   manager.undo();
@@ -104,7 +104,7 @@ class Lookahead implements Algorithm {
                 }
 
                 if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, reward_max, Action.SWIPE_DOWN);
+                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN);
                   history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
                   
                   manager.undo();
@@ -132,7 +132,7 @@ class Lookahead implements Algorithm {
                 }
 
                 if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, reward_max, Action.SWIPE_LEFT);
+                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT);
                   // For consistencies sake
                   history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
                   manager.undo();
@@ -205,9 +205,21 @@ class Lookahead implements Algorithm {
             node = new TreeDFSNode(node, 1 - grid.getTwoProb(), node.getRestPossibilities());
           }
           float expectedReward = node.getExpectedReward();
+
           TreeDFSNode nodeAbove = history.pop();
-          history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
           
+          /*
+          if (expectedReward >= reward_max) {
+            // Early cutting
+            TreeDFSNode temp = new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction());
+            history.push(new TreeDFSNode(temp, Action.SWIPE_LEFT));
+          } else {
+            history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
+          }
+          */
+
+          history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
+
           
         } else {
           // Update next possibility
@@ -285,7 +297,7 @@ class Lookahead implements Algorithm {
 
       if (manager.show().won()) {
         // I cant tell if im enlightened or fucking stupid
-        TreeDFSNode node = new TreeDFSNode(peek, reward_max, Action.SWIPE_UP);
+        TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP);
         history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
 
         manager.undo();
