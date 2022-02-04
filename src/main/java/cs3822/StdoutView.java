@@ -56,7 +56,10 @@ class StdoutView implements View {
         break;
       }
       List<Action> action = algo.move(grid);
-      manager.process(action);
+      if (!GridManager.hasMoved(manager.process(action))) {
+        stat.lost();
+        break;
+      }
     }
     display(manager.show());
 

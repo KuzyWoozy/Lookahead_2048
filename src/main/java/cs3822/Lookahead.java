@@ -12,7 +12,7 @@ class Lookahead implements Algorithm {
   private long depth = 0;
   
   final private long depth_max;
-  final private float eward_max;
+  final private float reward_max;
 
   private Stack<TreeDFSNode> history;
 
