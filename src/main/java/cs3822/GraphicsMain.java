@@ -33,7 +33,7 @@ public class GraphicsMain extends Application {
           }
           break;
         case "lookahead":
-          algo = new Lookahead(17f, 4);
+          algo = new Lookahead(4);
           break;
         case "uniform":
           algo = new UniformRandomPlay();

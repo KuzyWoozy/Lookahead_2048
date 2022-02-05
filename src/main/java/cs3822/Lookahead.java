@@ -12,8 +12,7 @@ class Lookahead implements Algorithm {
   private long depth = 0;
   
   final private long depth_max;
-  final private float reward_max;
-
+  
   private Stack<TreeDFSNode> history;
 
   final private ModelStorage db;
@@ -23,23 +22,24 @@ class Lookahead implements Algorithm {
     return grid.getScore();
   }
 
-  public Lookahead(float reward_max, long depth_max) {
+  public Lookahead(long depth_max) {
     this.depth_max = depth_max;
-    this.reward_max = reward_max;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
     this.db = new MapStorage(new HashMap<Integer, Pair<Float, Action>>());
   }
 
-  public Lookahead(ModelStorage db, float reward_max, long depth_max) {
+  public Lookahead(ModelStorage db, long depth_max) {
     this.depth_max = depth_max;
-    this.reward_max = reward_max;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
     this.db = db;
   }
  
   private void move_pure(Grid grid) {
+    final long depth_max;
+    int emptyCount = grid.getEmptyNodesCount();
+    depth_max = this.depth_max;
 
     GridManager manager = new GridManager(grid);
 
@@ -83,11 +83,9 @@ class Lookahead implements Algorithm {
                   continue;
                 } 
 
-                depth++;
-                if (depth == depth_max) {
+                if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT));
                   manager.undo();
-                  depth--;
                   continue;
                 }
                 history.push(new TreeDFSNode(peek, Action.SWIPE_RIGHT));
@@ -110,12 +108,10 @@ class Lookahead implements Algorithm {
                   manager.undo();
                   continue;
                 } 
-
-                depth++;
-                if (depth == depth_max) {
+                
+                if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN));
                   manager.undo();
-                  depth--;
                   continue;
                 }
 
@@ -138,12 +134,10 @@ class Lookahead implements Algorithm {
                   manager.undo();
                   continue;
                 } 
-
-                depth++;
-                if (depth == depth_max) {
+                
+                if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT));
                   manager.undo();
-                  depth--;
                   continue;
                 }
 
@@ -169,6 +163,7 @@ class Lookahead implements Algorithm {
           }
           
           TreeDFSNode node = new TreeDFSNode(manager.show());
+          depth++;
           manager.insertValue(node.getNextPossibility());
 
 
@@ -195,8 +190,8 @@ class Lookahead implements Algorithm {
         if (node.noMorePossibilities()) { 
           // Go up a level in the tree
           
-          manager.undo();
           depth--;
+          manager.undo();
 
           // Commit latest rewards
           if (node.getNextPossibility().getValue() == 2) {
@@ -208,18 +203,7 @@ class Lookahead implements Algorithm {
 
           TreeDFSNode nodeAbove = history.pop();
           
-          /*
-          if (expectedReward >= reward_max) {
-            // Early cutting
-            TreeDFSNode temp = new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction());
-            history.push(new TreeDFSNode(temp, Action.SWIPE_LEFT));
-          } else {
-            history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
-          }
-          */
-
           history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
-
           
         } else {
           // Update next possibility
@@ -245,7 +229,6 @@ class Lookahead implements Algorithm {
       e.printStackTrace();
       System.exit(1);
     }
-
   }
 
   @Override
@@ -253,7 +236,6 @@ class Lookahead implements Algorithm {
     db.clear();
     
     move_pure(grid);
-
     LinkedList<Action> list = new LinkedList<Action>();
     list.add(db.fetch(grid.hashCode()).getSecond()); 
     return list;
@@ -305,17 +287,16 @@ class Lookahead implements Algorithm {
       } 
 
       
-      depth++;
-      if (depth == depth_max) {
+      if ((depth + 1) == depth_max) {
         history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP));
         manager.undo();
-        depth--;
         return;
       }
 
       history.push(peek);
 
       TreeDFSNode node = new TreeDFSNode(manager.show());
+      depth++;
       manager.insertValue(node.getNextPossibility());
 
       if (manager.show().lost()) {

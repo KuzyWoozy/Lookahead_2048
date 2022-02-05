@@ -584,6 +584,16 @@ class Grid {
     return twoProb;
   }
 
+  public int getEmptyNodesCount() {
+    int count = 0;
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   /** Return list of empty nodes within the grid. */
   public List<EmptyNode> getEmptyNodesCopy() {
     LinkedList<EmptyNode> list = new LinkedList<EmptyNode>();

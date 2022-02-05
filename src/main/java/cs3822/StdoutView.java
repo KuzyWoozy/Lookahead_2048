@@ -52,11 +52,13 @@ class StdoutView implements View {
         stat.won();
         break;
       } else if (grid.lost()) {
+        System.out.println("Lost: \n" + manager.initial().stringify());
         stat.lost();
         break;
       }
       List<Action> action = algo.move(grid);
       if (!GridManager.hasMoved(manager.process(action))) {
+        System.out.println("Lost: \n" + manager.initial().stringify());
         stat.lost();
         break;
       }

@@ -252,7 +252,6 @@ class GraphicsView implements View {
   }
 
   
-  
   public GraphicsView(Grid grid, Stage stage, float width, float height) {
     this.stage = stage;
 
