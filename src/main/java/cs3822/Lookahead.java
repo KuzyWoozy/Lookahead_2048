@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.LinkedList;
 import java.util.List;
-import java.lang.Math;
 
 
 class Lookahead implements Algorithm {
@@ -14,7 +13,6 @@ class Lookahead implements Algorithm {
   final private long depth_max;
   
   private Stack<TreeDFSNode> history;
-
   final private ModelStorage db;
 
  
@@ -36,11 +34,10 @@ class Lookahead implements Algorithm {
     this.db = db;
   }
  
-  private void move_pure(Grid grid) {
-    final long depth_max;
-    int emptyCount = grid.getEmptyNodesCount();
-    depth_max = this.depth_max;
-
+  @Override
+  public List<Action> move(Grid grid) {
+    db.clear();
+    
     GridManager manager = new GridManager(grid);
 
     depth = 0;
@@ -48,7 +45,7 @@ class Lookahead implements Algorithm {
 
     history.push(new TreeDFSNode());
     // Initial dive
-    dive(manager, history, db);
+    dive(manager);
     try {
       while(true) {
         loop:  
@@ -75,14 +72,6 @@ class Lookahead implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT);
-        history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  
-                  manager.undo();
-                  continue;
-                } 
-
                 if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT));
                   manager.undo();
@@ -101,14 +90,6 @@ class Lookahead implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN);
-                  history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  
-                  manager.undo();
-                  continue;
-                } 
-                
                 if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN));
                   manager.undo();
@@ -127,14 +108,6 @@ class Lookahead implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT);
-                  // For consistencies sake
-                  history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  manager.undo();
-                  continue;
-                } 
-                
                 if ((depth + 1) == depth_max) {
                   history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT));
                   manager.undo();
@@ -173,7 +146,7 @@ class Lookahead implements Algorithm {
           }
 
           history.push(node);
-          dive(manager, history, db);
+          dive(manager);
         }
         
         // TIME TO PROCESS NEXT POSSIBILITY
@@ -221,7 +194,7 @@ class Lookahead implements Algorithm {
           } else {
             // Need to dive if we have a new possibility
             history.push(node);
-            dive(manager, history, db);
+            dive(manager);
           }
         }
       };
@@ -229,24 +202,12 @@ class Lookahead implements Algorithm {
       e.printStackTrace();
       System.exit(1);
     }
-  }
 
-  @Override
-  public List<Action> move(Grid grid) {
-    db.clear();
-    
-    move_pure(grid);
     LinkedList<Action> list = new LinkedList<Action>();
     list.add(db.fetch(grid.hashCode()).getSecond()); 
     return list;
   }
 
-  public float move_reward(Grid grid) {
-    move_pure(grid);
-    
-    return db.fetch(grid.hashCode()).getFirst(); 
-  }
-  
   /**
    * Performs shifts upwards until a terminal is reached, 
    * a loss, win or no more possible moves upwards. 
@@ -257,8 +218,8 @@ class Lookahead implements Algorithm {
    * @param history Stack manager for processing in a DFS manner
    * @param db Table of optimal solutions
    */
-  private void dive(GridManager manager, Stack<TreeDFSNode> history, ModelStorage db) {
-
+  private void dive(GridManager manager) {
+    List<Grid> frames;
     while(true) {
       TreeDFSNode peek = history.pop();
       
@@ -268,8 +229,46 @@ class Lookahead implements Algorithm {
           peek = new TreeDFSNode(peek, item.getFirst(), Action.NONE);
         }
       }
+
+      // Check if we are about to win optimization
+      frames = manager.slideRight(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideDown(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideLeft(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
        
-      List<Grid> frames = manager.slideUp(false);
+      frames = manager.slideUp(false);
       instancesProcessed++;
 
       if (!GridManager.hasMoved(frames)) {

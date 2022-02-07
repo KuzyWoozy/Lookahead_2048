@@ -107,9 +107,9 @@ public class GraphicsMain extends Application {
         }
 
         GameStats stats = new GameStats();
-        for (int x = 0; x < 300; x++) {
+        for (int x = 0; x < 100; x++) {
           stats.merge(view.play(manager, algo));
-          manager.restart();
+          manager.reset();
         }
         System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
 

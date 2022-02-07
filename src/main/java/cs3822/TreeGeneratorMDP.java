@@ -15,10 +15,11 @@ import java.lang.Math;
  */
 class TreeGeneratorMDP implements Algorithm {
   
-  private Stack<TreeDFSNode> history;
-  private long depth;
-  private long instancesProcessed;
+  private long instancesProcessed = 0;
+  private long depth = 0;
   
+  private Stack<TreeDFSNode> history;
+
   final private ModelStorage db;
 
   /** Initialize class with initial node and probability of generating a 2. */
@@ -26,13 +27,16 @@ class TreeGeneratorMDP implements Algorithm {
     this.history = new Stack<TreeDFSNode>();
     this.db = db;
 
-    move_pure(grid);
+    move(grid);
 
     System.out.println("-----------------\nUnique nodes in DAG: " + String.valueOf(db.getElemCount()) + "\nInitial state:\n" + grid.stringify() + "\nDepth: " + String.valueOf(depth) + "\nStates processed: " + String.valueOf(instancesProcessed) + "\nExpected win rate (%): " + String.valueOf(db.fetch(grid.hashCode()).getFirst() * 100));
   
   }
   
-  private void move_pure(Grid grid) {
+  @Override
+  public List<Action> move(Grid grid) {
+    db.clear();
+    
     GridManager manager = new GridManager(grid);
 
     depth = 0;
@@ -40,12 +44,11 @@ class TreeGeneratorMDP implements Algorithm {
 
     history.push(new TreeDFSNode());
     // Initial dive
-    dive(manager, history, db);
+    dive(manager);
     try {
       while(true) {
         loop:  
           while(true)  {
-            
             TreeDFSNode peek = history.pop();
             
             if (peek.getAction() != Action.NONE) {
@@ -67,15 +70,6 @@ class TreeGeneratorMDP implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_RIGHT);
-        history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  
-                  manager.undo();
-                  continue;
-                } 
-                
-                depth++;
                 history.push(new TreeDFSNode(peek, Action.SWIPE_RIGHT));
                 break;
 
@@ -89,15 +83,6 @@ class TreeGeneratorMDP implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_DOWN);
-                  history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  
-                  manager.undo();
-                  continue;
-                } 
-
-                depth++;
                 history.push(new TreeDFSNode(peek, Action.SWIPE_DOWN));
                 break;
 
@@ -110,15 +95,6 @@ class TreeGeneratorMDP implements Algorithm {
                   continue;
                 }
 
-                if (manager.show().won()) {
-                  TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_LEFT);
-                  // For consistencies sake
-                  history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-                  manager.undo();
-                  continue;
-                } 
-                
-                depth++;
                 history.push(new TreeDFSNode(peek, Action.SWIPE_LEFT));
                 break;
 
@@ -139,10 +115,10 @@ class TreeGeneratorMDP implements Algorithm {
               default:
                 throw new InvalidActionException();
           }
-         
+          
           TreeDFSNode node = new TreeDFSNode(manager.show());
-          manager.insertValue(node.getNextPossibility());
           depth++;
+          manager.insertValue(node.getNextPossibility());
 
 
           if (manager.show().lost()) {
@@ -151,7 +127,7 @@ class TreeGeneratorMDP implements Algorithm {
           }
 
           history.push(node);
-          dive(manager, history, db);
+          dive(manager);
         }
         
         // TIME TO PROCESS NEXT POSSIBILITY
@@ -168,8 +144,8 @@ class TreeGeneratorMDP implements Algorithm {
         if (node.noMorePossibilities()) { 
           // Go up a level in the tree
           
-          manager.undo();
           depth--;
+          manager.undo();
 
           // Commit latest rewards
           if (node.getNextPossibility().getValue() == 2) {
@@ -180,15 +156,15 @@ class TreeGeneratorMDP implements Algorithm {
           float expectedReward = node.getExpectedReward();
 
           TreeDFSNode nodeAbove = history.pop();
-          
-          if (Math.abs(expectedReward - 1f) >= 0.00001) {
-            // Early cutting
+         
+          if (Math.abs(expectedReward - 1f) < 0.00001) {
             TreeDFSNode temp = new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction());
             history.push(new TreeDFSNode(temp, Action.SWIPE_LEFT));
           } else {
+
             history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
           }
-
+          
         } else {
           // Update next possibility
           
@@ -205,7 +181,7 @@ class TreeGeneratorMDP implements Algorithm {
           } else {
             // Need to dive if we have a new possibility
             history.push(node);
-            dive(manager, history, db);
+            dive(manager);
           }
         }
       };
@@ -214,8 +190,10 @@ class TreeGeneratorMDP implements Algorithm {
       System.exit(1);
     }
 
+    LinkedList<Action> list = new LinkedList<Action>();
+    list.add(db.fetch(grid.hashCode()).getSecond()); 
+    return list;
   }
-
 
   /**
    * Performs shifts upwards until a terminal is reached, 
@@ -227,19 +205,58 @@ class TreeGeneratorMDP implements Algorithm {
    * @param history Stack manager for processing in a DFS manner
    * @param db Table of optimal solutions
    */
-  private void dive(GridManager manager, Stack<TreeDFSNode> history, ModelStorage db) {
-
+  private void dive(GridManager manager) {
+    List<Grid> frames;
     while(true) {
       TreeDFSNode peek = history.pop();
-      
+       
       if (peek.getAction() != Action.NONE) {
         Pair<Float, Action> item = db.fetch(manager.show().hashCode());
         if (item != null) {
           peek = new TreeDFSNode(peek, item.getFirst(), Action.NONE);
         }
       }
-       
-      List<Grid> frames = manager.slideUp(false);
+      
+      
+      // Check if we are about to win optimization
+      frames = manager.slideRight(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_RIGHT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideDown(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_DOWN);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideLeft(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, 1f, Action.SWIPE_LEFT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+
+      frames = manager.slideUp(false);
       instancesProcessed++;
 
       if (!GridManager.hasMoved(frames)) {
@@ -255,28 +272,20 @@ class TreeGeneratorMDP implements Algorithm {
         manager.undo();
         return;
       } 
+
       
-      depth++;
       history.push(peek);
 
       TreeDFSNode node = new TreeDFSNode(manager.show());
+      depth++;
       manager.insertValue(node.getNextPossibility());
 
       if (manager.show().lost()) {
         history.push(new TreeDFSNode(node, Action.NONE));
         return;
       }
-      
       history.push(node);
     }
-  }
-
-
-  @Override 
-  public List<Action> move(Grid grid) {
-    LinkedList<Action> list = new LinkedList<Action>();
-    list.add(db.fetch(grid.hashCode()).getSecond());
-    return list;
   }
   
 }

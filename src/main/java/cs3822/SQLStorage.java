@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 
 class SQLStorage implements ModelStorage {
-  private int subBatch = 10000;
+  final private int subBatch = 10000;
 
   private Connection con;
   private long count;
