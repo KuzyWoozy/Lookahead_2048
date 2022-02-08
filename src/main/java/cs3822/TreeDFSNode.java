@@ -2,6 +2,7 @@ package cs3822;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Arrays;
 
 /**
  * A node in the abstract DAG of instances.
@@ -9,128 +10,137 @@ import java.util.LinkedList;
  * @author Daniil Kuznetsov
  */
 class TreeDFSNode {
+  final private Action action;
+
   // Per possibility attr
-  private Action bestAction;
-  private float bestReward;
-  private Action action;
+  final private float bestReward;
+  final private Action bestAction;
+
+  final private float expSum;
   
-  // Per collection of possibility attr
-  private float expSumReward;
-  private LinkedList<ValueNode> posi;
-  private int posiNum;
+  final private List<ValueNode> posi;
+  final private int posiNum;
 
-  private float twoProb;
-  private float fourProb;
 
-  private int currentNodeValue;
-
-  /** Initial state constructor. */
-  public TreeDFSNode(float twoProb) {
-    this.bestAction = Action.SWIPE_UP;
+  private List<ValueNode> cloneNodes(List<ValueNode> nodes) {
+    List<ValueNode> nodeCopy = Arrays.asList(new ValueNode[nodes.size()]);
+    for (int i = 0; i < nodes.size(); i++) {
+      nodeCopy.set(i, nodes.get(i));
+    }
+    return nodeCopy;
+  }
+  
+  public TreeDFSNode() {
     this.bestReward = 0;
+    this.bestAction = Action.SWIPE_UP;
+
     this.action = Action.SWIPE_UP;
 
-    this.expSumReward = 0;
-    
+    this.expSum = 0;
+
     this.posi = new LinkedList<ValueNode>();
     this.posiNum = 0;
-
-    this.twoProb = twoProb;
-    this.fourProb = 1 - twoProb;
   }
 
 
   /** Constructs a node with the given grid and probability of generating a 2.*/
   public TreeDFSNode(Grid grid) {
-    this(grid.getTwoProb());
+    this.bestReward = 0;
+    this.bestAction = Action.SWIPE_UP;
 
+    this.action = Action.SWIPE_UP;
+
+    this.expSum = 0;
+    
     List<EmptyNode> emptyNodes = grid.getEmptyNodesCopy();
     this.posiNum = emptyNodes.size();
+
+    this.posi = new LinkedList<ValueNode>();
     // Update grid with the given possibility
     for (EmptyNode node : emptyNodes) { 
       this.posi.add(new ValueNode(node, 2));
       this.posi.add(new ValueNode(node, 4));
     }
-    
-    ValueNode node = posi.remove(0);
-    this.currentNodeValue = node.getValue();
-    grid.setValueNode(node, true);
   }
 
-  /** Set the maximal reward obtained. */
-  public void setMaxReward(float reward) {
-    bestReward = reward;
+  public TreeDFSNode(TreeDFSNode node, Action action) {
+    this.bestReward = node.bestReward;
+    this.bestAction = node.bestAction;
+
+    this.action = action;
+
+    this.expSum = node.expSum;
+   
+    this.posi = cloneNodes(node.posi);
+    this.posiNum = node.posiNum;
   }
 
-  /** Updates maximal reward obtained. */
-  public void updateMaxReward(float reward) {
-    if (bestReward < reward) {
-      bestReward = reward;
-      bestAction = action;
-    }
-  }
- 
-  public void commitReward(Grid grid) throws InvalidValueException {
-    // Remove the previous possibility insertion
-    grid.undo();
 
-    // Now that we processed the previous node, we can delete it
-    if (currentNodeValue == 2) {
-      expSumReward += twoProb * bestReward; 
-    } else if (currentNodeValue == 4) {
-      expSumReward += fourProb * bestReward;
+  public TreeDFSNode(TreeDFSNode node, float reward, Action action) {
+    if (reward > node.bestReward) {
+      this.bestReward = reward;
+      this.bestAction = action;
     } else {
-      throw new InvalidValueException();
+      this.bestReward = node.bestReward;
+      this.bestAction = node.bestAction;
     }
+
+    this.action = action;
+
+    this.expSum = node.expSum;
+   
+    this.posi = cloneNodes(node.posi);
+    this.posiNum = node.posiNum;
   }
 
-  /** Process the next possibility, updating the grid accordingly. */
-  public void setNextPosi(Grid grid) {
-    try { 
-      commitReward(grid);
-    } catch(InvalidValueException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+  public TreeDFSNode(TreeDFSNode node, float prob, List<ValueNode> rest) {
+    this.bestReward = 0;
+    this.bestAction = Action.SWIPE_UP;
 
-    // Init for next possibility
-    bestReward = 0;
-    action = Action.SWIPE_UP;
-    bestAction = Action.SWIPE_UP;
+    this.action = Action.SWIPE_UP;
 
-    ValueNode node = posi.remove(0);
-    currentNodeValue = node.getValue();
-    grid.setValueNode(node, true); 
-  } 
-  
-  /** Return current set action. */
+    this.expSum = node.expSum + prob * node.bestReward;
+    
+    this.posi = cloneNodes(rest); 
+    
+    this.posiNum = node.posiNum;
+  }
+
+
+  public Action getBestAction() {
+    return bestAction;
+  }
+
   public Action getAction() {
     return action;
   }
 
-  /** Return best found so far action. */
-  public Action getBestAction() {
-    return bestAction;
-  }
- 
-  /** Return best found so far reward. */
   public float getBestReward() {
     return bestReward;
   }
 
-  /** Set action. */
-  public void setAction(Action action) {
-    this.action = action;
+  public List<ValueNode> getPossibilities() {
+    return posi;
   }
 
-  /** Return expected reward from this node. */
+  public ValueNode getNextPossibility() {
+    return posi.get(0); 
+  }
+
+  public List<ValueNode> getRestPossibilities() {
+    return posi.subList(1, posi.size());
+  }
+
+  public boolean noMorePossibilities() {
+    // We always assume we processed first possibility
+    if (this.posi.size() == 1) {
+      return true;
+    }
+    return false;
+  }
+
   public float getExpectedReward() {
-    return (1f / this.posiNum) * expSumReward;
-  }
-
-  /** Return true if every possibility has been processed. */
-  public boolean isPosiEmpty() {
-    return posi.isEmpty();
+    return (1f / this.posiNum) * expSum;
   }
 
 } 

@@ -55,5 +55,5 @@ interface View {
   public List<Action> getInput();
 
   /** Update the interface with the new grid state. */
-  public GameStats play(Grid grid, Algorithm algo);
+  public GameStats play(GridManager manager, Algorithm algo);
 }

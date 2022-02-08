@@ -4,23 +4,19 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.LinkedList;
 import java.util.List;
-import java.lang.Math;
 
 
 class Lookahead implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
   
-  private long depth_max;
-  private float reward_max;
-
-  private Stack<TreeDFSNode> history;
-
-  private ModelStorage db;
-
+  final private long depth_max;
   
+  private Stack<TreeDFSNode> history;
+  final private ModelStorage db;
+
   private float rewardFunc(Grid grid) {
-    return grid.getEmptyNodesCopy().size() + 1;
+    return grid.getScore();
   }
   
   /*
@@ -29,149 +25,181 @@ class Lookahead implements Algorithm {
   }
   */
 
-  public Lookahead(float reward_max, long depth_max) {
+  public Lookahead(long depth_max) {
     this.depth_max = depth_max;
-    this.reward_max = reward_max;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
-    this.db = new MapStorage(new HashMap<Integer, SolTableItem>());
+    this.db = new MapStorage(new HashMap<Integer, Pair<Float, Action>>());
   }
 
-  public Lookahead(ModelStorage db, float reward_max, long depth_max) {
+  public Lookahead(ModelStorage db, long depth_max) {
     this.depth_max = depth_max;
-    this.reward_max = reward_max;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
     this.db = db;
   }
  
-  private void move_pure(Grid grid) {
+  @Override
+  public List<Action> move(Grid grid) {
+    db.clear();
+    
+    GridManager manager = new GridManager(grid);
+
     depth = 0;
     instancesProcessed = 0;
 
-    depth++;
-    history.push(new TreeDFSNode(grid.getTwoProb()));
+    history.push(new TreeDFSNode());
     // Initial dive
-    dive(grid, history, db);
+    dive(manager);
     try {
       while(true) {
         loop:  
           while(true)  {
-            TreeDFSNode peek = history.peek();
-
+            
+            TreeDFSNode peek = history.pop();
+            
             if (peek.getAction() != Action.NONE) {
-              SolTableItem item = db.fetch(grid.hashCode());
+              Pair<Float, Action> item = db.fetch(manager.show().hashCode());
               if (item != null) {
-                peek.setMaxReward(item.getReward());
-                peek.setAction(Action.NONE);
+                peek = new TreeDFSNode(peek, item.getFirst(), Action.NONE);
               }
             }
-        
+            
+            List<Grid> frames;
             switch(peek.getAction()) {
               // If the previous action was UP, do a right
               case SWIPE_UP:
-                peek.setAction(Action.SWIPE_RIGHT); 
-
-                grid.slideRight(false);
-
-                if (!grid.getMove()) {
-                  peek.updateMaxReward(0f);
+                frames = manager.slideRight(false);
+                instancesProcessed++;
+                
+                if (!GridManager.hasMoved(frames)) {
+                  history.push(new TreeDFSNode(peek, Action.SWIPE_RIGHT));
                   continue;
                 }
+
+                if ((depth + 1) == depth_max) {
+                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT));
+                  manager.undo();
+                  continue;
+                }
+                history.push(new TreeDFSNode(peek, Action.SWIPE_RIGHT));
                 break;
 
               case SWIPE_RIGHT:
-                peek.setAction(Action.SWIPE_DOWN);
+                frames = manager.slideDown(false);
 
-                grid.slideDown(false);
-
-                if (!grid.getMove()) {
-                  peek.updateMaxReward(0f);
+                instancesProcessed++;
+                
+                if (!GridManager.hasMoved(frames)) {
+                  history.push(new TreeDFSNode(peek, Action.SWIPE_DOWN));
                   continue;
                 }
+
+                if ((depth + 1) == depth_max) {
+                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN));
+                  manager.undo();
+                  continue;
+                }
+
+                history.push(new TreeDFSNode(peek, Action.SWIPE_DOWN));
                 break;
 
               case SWIPE_DOWN:
-                peek.setAction(Action.SWIPE_LEFT);
-                grid.slideLeft(false);
-                if (!grid.getMove()) {
-                  peek.updateMaxReward(0f);
-                  continue;
-                }
-                break;
-               
-              case SWIPE_LEFT:
-                // Debug info
+                frames = manager.slideLeft(false);
                 instancesProcessed++;
 
-                db.insert(grid.hashCode(), peek.getBestAction(), peek.getBestReward());
+                if (!GridManager.hasMoved(frames)) {
+                  history.push(new TreeDFSNode(peek, Action.SWIPE_LEFT));
+                  continue;
+                }
 
+                if ((depth + 1) == depth_max) {
+                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT));
+                  manager.undo();
+                  continue;
+                }
+
+                history.push(new TreeDFSNode(peek, Action.SWIPE_LEFT));
+                break;
+
+              case SWIPE_LEFT:
+                // Debug info
+                db.insert(manager.show().hashCode(), peek.getBestAction(), peek.getBestReward());
+                
+                history.push(peek);
                 break loop;
 
               // Part of caching optimization
               case NONE:
                 // Debug info
-                instancesProcessed++;
+                
+                history.push(peek);
                 break loop;
               
               default:
                 throw new InvalidActionException();
           }
           
-          if (grid.won()) {
-            peek.updateMaxReward(reward_max);
-            grid.undo();
-            peek.setAction(Action.SWIPE_LEFT);
-            continue;
-          } 
-
+          TreeDFSNode node = new TreeDFSNode(manager.show());
           depth++;
-          if (depth == depth_max) {
-            peek.setMaxReward(rewardFunc(grid));
-            grid.undo();
-            peek.setAction(Action.NONE);
-            depth--;
+          manager.insertValue(node.getNextPossibility());
+
+
+          if (manager.show().lost()) {
+            history.push(new TreeDFSNode(node, Action.NONE));
             continue;
-          } 
-          history.push(new TreeDFSNode(grid));      
-          
-          if (grid.lost()) {
-            history.peek().updateMaxReward(0f);
-            history.peek().setAction(Action.NONE);
-            continue;
-          }
-          
-          dive(grid, history, db);
-        }
-       
-        TreeDFSNode node = history.peek();
-        if (node.isPosiEmpty()) {
-          history.pop();
-          depth--;
-          if (history.isEmpty()) {
-            break;
-          }
-          try {
-            node.commitReward(grid);
-          } catch (InvalidValueException e) {
-            e.printStackTrace();
-            System.exit(1);
           }
 
-          // One to go up a level in the tree
-          grid.undo();
+          history.push(node);
+          dive(manager);
+        }
+        
+        // TIME TO PROCESS NEXT POSSIBILITY
+        
+        // Undo the previous insert
+        manager.undo();
+
+        TreeDFSNode node = history.pop();
+        if (history.isEmpty()) {
+          instancesProcessed++;
+          break;
+        }
+        
+        if (node.noMorePossibilities()) { 
+          // Go up a level in the tree
           
+          depth--;
+          manager.undo();
+
+          // Commit latest rewards
+          if (node.getNextPossibility().getValue() == 2) {
+            node = new TreeDFSNode(node, grid.getTwoProb(), node.getRestPossibilities());
+          } else {
+            node = new TreeDFSNode(node, 1 - grid.getTwoProb(), node.getRestPossibilities());
+          }
           float expectedReward = node.getExpectedReward();
+
+          TreeDFSNode nodeAbove = history.pop();
           
-          history.peek().updateMaxReward(expectedReward);
+          history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));
+          
         } else {
-          node.setNextPosi(grid);
-          if (grid.lost()) { 
-            node.updateMaxReward(0f);
-            node.setAction(Action.NONE);
+          // Update next possibility
+          
+          if (node.getNextPossibility().getValue() == 2) {
+            node = new TreeDFSNode(node, grid.getTwoProb(), node.getRestPossibilities());
+          } else {
+            node = new TreeDFSNode(node, 1 - grid.getTwoProb(), node.getRestPossibilities());
+          }
+
+          manager.insertValue(node.getNextPossibility());
+          
+          if (manager.show().lost()) { 
+            history.push(new TreeDFSNode(node, Action.NONE));
           } else {
             // Need to dive if we have a new possibility
-            dive(grid, history, db);
+            history.push(node);
+            dive(manager);
           }
         }
       };
@@ -180,25 +208,11 @@ class Lookahead implements Algorithm {
       System.exit(1);
     }
 
-  }
-
-  @Override
-  public List<Action> move(Grid grid) {
-    db.clear();
-    
-    move_pure(grid);
-
     LinkedList<Action> list = new LinkedList<Action>();
-    list.add(db.fetch(grid.hashCode()).getAction()); 
+    list.add(db.fetch(grid.hashCode()).getSecond()); 
     return list;
   }
 
-  public float move_reward(Grid grid) {
-    move_pure(grid);
-    
-    return db.fetch(grid.hashCode()).getReward(); 
-  }
-  
   /**
    * Performs shifts upwards until a terminal is reached, 
    * a loss, win or no more possible moves upwards. 
@@ -209,55 +223,102 @@ class Lookahead implements Algorithm {
    * @param history Stack manager for processing in a DFS manner
    * @param db Table of optimal solutions
    */
-  private void dive(Grid grid, Stack<TreeDFSNode> history, ModelStorage db) {
-
+  private void dive(GridManager manager) {
+    List<Grid> frames;
     while(true) {
-      // Hash caching
-      SolTableItem item = db.fetch(grid.hashCode());
-      if (item != null) {
-        TreeDFSNode node = history.peek();
-        node.setMaxReward(item.getReward());
-        node.setAction(Action.NONE);
+      TreeDFSNode peek = history.pop();
+      
+      if (peek.getAction() != Action.NONE) {
+        Pair<Float, Action> item = db.fetch(manager.show().hashCode());
+        if (item != null) {
+          peek = new TreeDFSNode(peek, item.getFirst(), Action.NONE);
+        }
+      }
+
+      // Check if we are about to win optimization
+      frames = manager.slideRight(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideDown(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+      frames = manager.slideLeft(false);
+      if (GridManager.hasMoved(frames)) {
+        if (manager.show().won()) {
+          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT);
+          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
+          manager.undo();
+          return;
+
+        }
+        manager.undo();
+      }
+
+       
+      frames = manager.slideUp(false);
+      instancesProcessed++;
+
+      if (!GridManager.hasMoved(frames)) {
+        history.push(new TreeDFSNode(peek, Action.SWIPE_UP));
         return;
       }
 
-      // Move the state upwards
-      grid.slideUp(false);
+      if (manager.show().won()) {
+        // I cant tell if im enlightened or fucking stupid
+        TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP);
+        history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
 
-      // Check if the state is stuck  
-      if (!grid.getMove()) {
-        history.peek().updateMaxReward(0f);
-        return;
-      }
-      
-      // Check if the game is beat
-      if (grid.won()) {
-        history.peek().updateMaxReward(reward_max);
-        grid.undo();
-        // Can skip other alternatives if we won
-        history.peek().setAction(Action.SWIPE_LEFT);
-        return;
-      }
-      
-      depth++;
-      if (depth == depth_max) {
-        TreeDFSNode node = history.peek();
-        node.setMaxReward(rewardFunc(grid));
-        grid.undo();
-        node.setAction(Action.NONE);
-        depth--;
+        manager.undo();
         return;
       } 
-      // Create a new node in the DAG 
-      history.push(new TreeDFSNode(grid));
 
-      // Need to check if we lost AFTER instantiating
-      if (grid.lost()) {
-        history.peek().updateMaxReward(0f);
-        history.peek().setAction(Action.NONE);
+      
+      if ((depth + 1) == depth_max) {
+        history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP));
+        manager.undo();
         return;
       }
+
+      history.push(peek);
+
+      TreeDFSNode node = new TreeDFSNode(manager.show());
+      depth++;
+      manager.insertValue(node.getNextPossibility());
+
+      if (manager.show().lost()) {
+        history.push(new TreeDFSNode(node, Action.NONE));
+        return;
+      }
+      
+      history.push(node);
     }
   }
+
+  public long getDepth() {
+    return depth;
+  }
+
+  public long getInstancesProcessed() {
+    return instancesProcessed;
+  }
+
 }
 

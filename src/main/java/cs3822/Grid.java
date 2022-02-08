@@ -12,132 +12,131 @@ import java.util.Arrays;
  * @author Daniil Kuznetsov
  */
 class Grid {
-  private String map;
+  final private String map;
 
-  private List<Node> nodes;
-  private GridHistory history;
-  private List<List<Node>> frames;
+  final private List<Node> nodes;
 
-  private float twoProb;
-  private int winCondition;
+  final private int score;
 
-  private int columnSize;
-  private int rowSize;
+  final private float twoProb;
+  final private int winCondition;
 
-  private boolean hasMoved = false;
+  final private int columnSize;
+  final private int rowSize;
 
-  private Random rand = new Random();
-
-  private Node generatedNode = null;
- 
-  private int score;
+  final private Node generatedNode;
   
-  public void restart(boolean generate) {
-    List<String> rows = Arrays.asList(map.strip().split("\\|"));
-    nodes = Arrays.asList(new Node[rowSize * columnSize]);
-    Position pos = null;
-    this.score = 0;
-    
-    // Initialize Node list
-    for (int y = 0; y < rowSize; y++) {
-      for (int x = 0; x < columnSize; x++) {
-        try {
-          pos = new Position(x, y);
-          nodes.set(index(pos), createNode(rows.get(y).charAt(x), pos)); 
-        } catch(MaxPosNotInitializedException e) {
-          e.printStackTrace();
-          System.exit(1);
-        } catch(InvalidMapSymbolException e) {
-          nodes.set(index(pos), new EmptyNode(pos));
-        }
-      } 
-    } 
-    // Generate the initial nodes
-    if (generate) {
-      generateNewNode();
-      generateNewNode();
-    }
-   
+  final private Random rand = new Random();
+ 
 
-    this.frames = new LinkedList<List<Node>>();
-    try {
-      this.frames.add(cloneNodes());
-      // Start keeping track of history
-      this.history = new GridHistory(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-
-  }
-
-  /**
-   * Grid constructor.
-   *
-   * @param map Grid map string representation
-   * @param win_condition Target value to be reached to win the game
-   * @param twoProb Probability of generating a node with the value 2
-   */
   public Grid(String map, int winCondition, float twoProb, boolean generate) throws InvalidMapSizeException {
     this.map = map;
-
     this.twoProb = twoProb;
     this.winCondition = winCondition;
+    this.score = 0;
 
     List<String> rows = Arrays.asList(map.strip().split("\\|"));
     this.columnSize = rows.get(0).length();
     this.rowSize = rows.size();
-    // Set the boundaries for Position
-    Position.setMax(columnSize, rowSize);
     
     // Quick verification for shape of map correctness
     for (String row : rows.subList(1, rowSize)) {
       if (row.length() != columnSize) throw new InvalidMapSizeException();
     }
 
-    restart(generate);
+    this.nodes = Arrays.asList(new Node[columnSize * rowSize]);
+    Position pos = null;
+    // Initialize Node list
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = 0; x < columnSize; x++) {
+        try {
+          pos = new Position(x, y);
+          this.nodes.set(index(pos), createNode(rows.get(y).charAt(x), pos)); 
+        } catch(InvalidMapSymbolException e) {
+          this.nodes.set(index(pos), new EmptyNode(pos));
+        }
+      } 
+    } 
+    // Generate the initial nodes
+    if (generate) {
+      generateNewNode(this.nodes);
+      generateNewNode(this.nodes);
+    }
+    this.generatedNode = null; 
   }
 
   /** Grid copy constructor. */
   public Grid(Grid grid) {
+    this.map = new String(grid.map);
+    this.twoProb = grid.twoProb;
+    this.winCondition = grid.winCondition;
+    this.score = grid.score;
+    this.nodes = grid.cloneNodes(grid.nodes); 
+    this.rowSize = grid.rowSize;
+    this.columnSize = grid.columnSize;
+    
+    this.generatedNode = null;
+  }
 
+
+  /** Grid copy constructor. */
+  private Grid(Grid grid, List<Node> nodes, int score) {
     this.map = new String(grid.map);
     this.twoProb = grid.twoProb;
     this.winCondition = grid.winCondition;
 
-    this.history = new GridHistory(grid.history);
-    this.nodes = Arrays.asList(new Node[grid.rowSize * grid.columnSize]);
+    this.nodes = cloneNodes(nodes);
+    this.score = score;
+    this.rowSize = grid.rowSize;
+    this.columnSize = grid.columnSize;
+
+    this.generatedNode = null;
+  }
+
+  /** Grid copy constructor. */
+  private Grid(Grid grid, List<Node> nodes, int score, Node generated) {
+    this.map = new String(grid.map);
+    this.twoProb = grid.twoProb;
+    this.winCondition = grid.winCondition;
+
+    this.nodes = cloneNodes(nodes);
+    
+    this.score = score;
+    this.rowSize = grid.rowSize;
+    this.columnSize = grid.columnSize;
+    this.generatedNode = generated;
+  }
+
+
+  /** 
+   * Copies and returns the Grid representation.
+   *
+   * @return Copy of the grid state
+   * @throws UnknownNodeTypeException Discovered node with no lnown corresponding type
+   */
+  private List<Node> resetNodes() {
+    List<Node> copyNode = Arrays.asList(new Node[nodes.size()]);
     try {
-      for (int i = 0; i < grid.nodes.size(); i++) {
-        this.nodes.set(i, Node.copyNode(grid.nodes.get(i)));
+      for (int i = 0; i < nodes.size(); i++) {
+        copyNode.set(i, Node.copyNode(nodes.get(i)));
       }
     } catch(UnknownNodeTypeException e) {
       e.printStackTrace();
       System.exit(1);
     }
-    this.frames = new LinkedList<List<Node>>();
-    List<Node> frameCopy;
-    for (List<Node> frame : grid.frames) {
-      frameCopy = Arrays.asList(new Node[grid.rowSize * grid.columnSize]);
-      for (int i = 0; i < frame.size(); i++) {
-        try {
-          frameCopy.set(i, Node.copyNode(frame.get(i)));
-        } catch(UnknownNodeTypeException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-      this.frames.add(frameCopy);
-    }
-
-    this.rowSize = grid.rowSize;
-    this.columnSize = grid.columnSize;
-    this.rand = new Random();
-    this.hasMoved = grid.hasMoved;
-    this.generatedNode = grid.generatedNode;
-    this.score = grid.score;
-  }
   
+    return copyNode;
+  }
+
+  private List<Node> cloneNodes(List<Node> nodes) {
+    List<Node> copyNodes = Arrays.asList(new Node[nodes.size()]);
+    for (int i = 0; i < nodes.size(); i++) {
+      copyNodes.set(i, nodes.get(i));
+    }
+    return copyNodes;
+  }
+
+
   /** 
    * Computes the node represented by the specified symbol and position
    *
@@ -171,79 +170,24 @@ class Grid {
     }
   }
 
-  /** 
-   * Copies and returns the Grid representation.
-   *
-   * @return Copy of the grid state
-   * @throws UnknownNodeTypeException Discovered node with no lnown corresponding type
-   */
-  private List<Node> cloneNodes() throws UnknownNodeTypeException {
-    List<Node> nodeCopy = Arrays.asList(new Node[nodes.size()]);
-    for (int i = 0; i < nodes.size(); i++) {
-      nodeCopy.set(i, Node.copyNode(nodes.get(i)));
-    }
-    return nodeCopy;
-  }
-
-  private void swap(Node node1, Node node2) throws CantMoveException {
-    Node temp = null;
-    try {
-      temp = Node.copyNode(node1);
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    } 
-    temp.moveTo(node2.getPos());
-
-    node2.moveTo(node1.getPos());
-    nodes.set(index(node2.getPos()), node2);
-
-    nodes.set(index(temp.getPos()), temp);
-  }
- 
-  private boolean moved() {
-    try {
-      for (Node node : nodes) {
-        if (node.getType() == NodeType.VALUE && node.getMoveFlag()) {
-          return true;
+  private boolean moved(List<Node> nodes) {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.VALUE) {
+        try {
+          if (node.hasMoved()) {
+            return true;
+          }
+        } catch(NoMoveFlagException e) {
+          e.printStackTrace();
+          System.exit(1);
         }
       }
-    } catch(NoMoveFlagException e) {
-      e.printStackTrace();
-      System.exit(1);
     }
     return false;
-  }
-
-  /** Resets the merge flags for each approxpriate node. */
-  private void clearMergeFlags() {
-    try {
-      for (Node node : nodes) {
-        if (node.getType() == NodeType.VALUE) {
-          node.offMergeFlag();
-        }
-      }
-    } catch(NoMergeFlagException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
   } 
 
-  private void clearGeneratedNode() {
-    generatedNode = null;
-  }
-
-  private void addFrame() {
-    try {
-      this.frames.add(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
-
   /** Generates a new node within the grid. */
-  public void generateNewNode() {
+  private Node generateNewNode(List<Node> nodes) {
     LinkedList<Position> availablePos = new LinkedList<Position>();
     // Find the available slots in the grid
     for (Node node : nodes) {
@@ -254,401 +198,321 @@ class Grid {
     
     // Abort if there is no available space
     if (availablePos.size() == 0) {
-      return;
+      return null;
     }
 
     Node newNode = new ValueNode(availablePos.get(rand.nextInt(availablePos.size())), rand.nextFloat() <= twoProb ? 2 : 4);
-    // Insert the new node into the grid
+    
     nodes.set(index(newNode.getPos()), newNode);
 
-    generatedNode = newNode;
+    return newNode;
   }
 
- 
+  private int slideUpIteration(List<Node> nodes, int score) {
+
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = 0; x < columnSize; x++) {
+        Position nodePos = new Position(x, y);
+
+        Node nodeUp = fetchUp(nodes, nodePos);
+        Node node = fetch(nodes, nodePos);
+        
+        Triplet<Node, Node, Integer> newNodes = null;
+        try {
+          newNodes = node.merge(nodeUp);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        
+        if (newNodes.getSecond().getPos() != null) {
+          nodes.set(index(newNodes.getSecond().getPos()), newNodes.getSecond());
+        }
+        nodes.set(index(newNodes.getFirst().getPos()), newNodes.getFirst());
+        
+        score += newNodes.getThird();
+      }
+    }
+
+    return score;
+  }
+
+  public List<Grid> slideUp(boolean generate) {
+    List<Node> cloned = resetNodes(); 
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(new Grid(this));
+    
+    int scoreCumSum = slideUpIteration(cloned, this.score);
+    
+    if (moved(cloned)) {
+      do {
+        frames.add(new Grid(this, cloned, scoreCumSum));
+        scoreCumSum = slideUpIteration(cloned, scoreCumSum);
+      } while(moved(cloned));
+
+      if (generate) {
+        Node generated = generateNewNode(cloned);
+        frames.add(new Grid(this, cloned, scoreCumSum, generated));
+      }
+    } 
+    
+    return frames;
+  }
+
   /** Slide every node upwards. */
-  public void slideUp() {
-    slideUp(true);
-  }
-
-  private void slideUpIteration() {
-    for (int y = 0; y < rowSize; y++) {
-      for (int x = 0; x < columnSize; x++) {
-        Node node = getNode(x, y);
-
-        if (node.getType() == NodeType.VALUE) {
-          if (node.getPos().canMoveUp()) {
-            Node upNode = nodes.get(indexUp(node.getPos()));
-            try {
-              if (upNode.getType() == NodeType.BRICK) {
-                node.moveTo(node.getPos());
-                continue;
-              } else if (upNode.getType() == NodeType.EMPTY) {
-                swap(node, upNode);
-              } else if (upNode.getType() == NodeType.VALUE && node.getValue() == upNode.getValue() && !node.getMergeFlag() && !upNode.getMergeFlag()) {
-                // Merge 
-                node.setValue(node.getValue() * 2);
-                score += node.getValue();
-
-                node.onMergeFlag();
-
-                swap(node, upNode);
-
-                nodes.set(index(upNode.getPos()), new EmptyNode(new Position(upNode.getPos())));
-              } else {
-                node.moveTo(node.getPos());
-              }
-            } catch (NoValueException | CantMoveException | NoMergeFlagException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-          } else {
-            try {
-              node.moveTo(node.getPos());
-            } catch(CantMoveException e) {
-              e.printStackTrace();
-              System.exit(1);
-            }
-          }
-        } 
-      }
-    }
-  }
-
-  /** Slide every node upwards, specifying whenever to generate a new node. */
-  public void slideUp(boolean genNewNode) {
-    // Clear flags before movement
-    clearMergeFlags();
-    clearGeneratedNode();
-
-    hasMoved = false;
-    slideUpIteration();
-    if (moved()) {
-      hasMoved = true;
-     
-      clearFrames();
-
-      do {
-        addFrame();
-        slideUpIteration(); 
-      } while (moved());
-      
-
-      if (genNewNode) {
-        generateNewNode();
-        addFrame();
-      }
-      // Make a back-up 
-      try {
-        history.add(cloneNodes());
-      } catch(UnknownNodeTypeException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }
-  }
-
-
-  /** Slide every node rightwards. */
-  public void slideRight() {
-    slideRight(true);
-  }
-
-  /** Slide every node rightwards, specifying if a new node should be generated. */
-  private void slideRightIteration() {
-    for (int y = 0; y < rowSize; y++) {
-      for (int x = (columnSize-1); x >= 0; x--) {
-        Node node = getNode(x, y);
-
-        if (node.getType() == NodeType.VALUE) {
-          if (node.getPos().canMoveRight()) {
-            Node rightNode = nodes.get(indexRight(node.getPos()));
-            try {
-              if (rightNode.getType() == NodeType.BRICK) {
-                node.moveTo(node.getPos());
-                continue;
-              } else if (rightNode.getType() == NodeType.EMPTY) {
-                swap(node, rightNode);
-              } else if (rightNode.getType() == NodeType.VALUE && node.getValue() == rightNode.getValue() && !node.getMergeFlag() && !rightNode.getMergeFlag()) {
-                // Merge 
-                node.setValue(node.getValue() * 2);
-                score += node.getValue();
-                node.onMergeFlag();
-
-                swap(node, rightNode);
-
-                nodes.set(index(rightNode.getPos()), new EmptyNode(new Position(rightNode.getPos())));
-              } else {
-                node.moveTo(node.getPos());
-              }
-            } catch (NoValueException | CantMoveException | NoMergeFlagException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-          } else {
-            try {
-              node.moveTo(node.getPos());
-            } catch(CantMoveException e) {
-              e.printStackTrace();
-              System.exit(1);
-            }
-          }
-        } 
-      }
-    }
-  }
-
-  /** Slide every node rightwards, specifying whenever to generate a new node. */
-  public void slideRight(boolean genNewNode) {
-    // Clear flags before movement
-    clearMergeFlags();
-    clearGeneratedNode();
-
-    hasMoved = false;
-    slideRightIteration();
-    if (moved()) {
-      hasMoved = true;
-     
-      clearFrames();
-
-      do {
-        addFrame();
-        slideRightIteration(); 
-      } while (moved());
-      
-
-      if (genNewNode) {
-        generateNewNode();
-        addFrame();
-      }
-      // Make a back-up 
-      try {
-        history.add(cloneNodes());
-      } catch(UnknownNodeTypeException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }
-  }
-
-  /** Slide every node downwards. */
-  public void slideDown() {
-    slideDown(true);
-  }
-
-  /** Slide every node downwards, specifying if a new node should be generated. */
-   private void slideDownIteration() {
-    for (int y = (rowSize-1); y >= 0; y--) {
-      for (int x = 0; x < columnSize; x++) {
-        Node node = getNode(x, y);
-
-        if (node.getType() == NodeType.VALUE) {
-          if (node.getPos().canMoveDown()) {
-            Node downNode = nodes.get(indexDown(node.getPos()));
-            try {
-              if (downNode.getType() == NodeType.BRICK) {
-                node.moveTo(node.getPos());
-                continue;
-              } else if (downNode.getType() == NodeType.EMPTY) {
-                swap(node, downNode);
-              } else if (downNode.getType() == NodeType.VALUE && node.getValue() == downNode.getValue() && !node.getMergeFlag() && !downNode.getMergeFlag()) {
-                // Merge 
-                node.setValue(node.getValue() * 2);
-                score += node.getValue();
-                
-                node.onMergeFlag();
-
-                swap(node, downNode);
-
-                nodes.set(index(downNode.getPos()), new EmptyNode(new Position(downNode.getPos())));
-              } else {
-                node.moveTo(node.getPos());
-              }
-            } catch (NoValueException | CantMoveException | NoMergeFlagException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-          } else {
-            try {
-              node.moveTo(node.getPos());
-            } catch(CantMoveException e) {
-              e.printStackTrace();
-              System.exit(1);
-            }
-          }
-        } 
-      }
-    }
-  }
-
-  /** Slide every node downwards, specifying whenever to generate a new node. */
-  public void slideDown(boolean genNewNode) {
-    // Clear flags before movement
-    clearMergeFlags();
-    clearGeneratedNode();
-
-    hasMoved = false;
-    slideDownIteration();
-    if (moved()) {
-      hasMoved = true;
-     
-      clearFrames();
-
-      do {
-        addFrame();
-        slideDownIteration(); 
-      } while (moved());
-      
-
-      if (genNewNode) {
-        generateNewNode();
-        addFrame();
-      }
-      // Make a back-up 
-      try {
-        history.add(cloneNodes());
-      } catch(UnknownNodeTypeException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }
-  }
-
-  /** Slide every node leftwards. */
-  public void slideLeft() {
-    slideLeft(true);
+  public List<Grid> slideUp() {
+    return slideUp(true);
   }
   
+  private int slideRightIteration(List<Node> nodes, int score) {
 
-  /** Slide every node leftwards, specifying if a new node should be generated. */
-  private void slideLeftIteration() {
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = columnSize - 1; x >= 0; x--) {
+        Position nodePos = new Position(x, y);
+
+        Node nodeRight = fetchRight(nodes, nodePos);
+        Node node = fetch(nodes, nodePos);
+        
+        Triplet<Node, Node, Integer> newNodes = null;
+        try {
+          newNodes = node.merge(nodeRight);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        
+        if (newNodes.getSecond().getPos() != null) {
+          nodes.set(index(newNodes.getSecond().getPos()), newNodes.getSecond());
+        }
+        nodes.set(index(newNodes.getFirst().getPos()), newNodes.getFirst());
+        
+        score += newNodes.getThird();
+      }
+    }
+
+    return score;
+  }
+
+  public List<Grid> slideRight(boolean generate) {
+    List<Node> cloned = resetNodes(); 
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(new Grid(this));
+
+    int scoreCumSum = slideRightIteration(cloned, this.score);
+    if (moved(cloned)) {
+      do {
+        frames.add(new Grid(this, cloned, scoreCumSum));
+        scoreCumSum = slideRightIteration(cloned, scoreCumSum);
+      } while(moved(cloned));
+
+      if (generate) {
+        Node generated = generateNewNode(cloned);
+        frames.add(new Grid(this, cloned, scoreCumSum, generated));
+      }
+    }
+    
+    return frames;
+  }
+
+  /** Slide every node upwards. */
+  public List<Grid> slideRight() {
+    return slideRight(true);
+  }
+
+  private int slideDownIteration(List<Node> nodes, int score) {
+    for (int y = rowSize - 1; y >= 0; y--) {
+      for (int x = 0; x < columnSize; x++) {
+        Position nodePos = new Position(x, y);
+
+        Node nodeDown = fetchDown(nodes, nodePos);
+        Node node = fetch(nodes, nodePos);
+        
+        Triplet<Node, Node, Integer> newNodes = null;
+        try {
+          newNodes = node.merge(nodeDown);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        
+        if (newNodes.getSecond().getPos() != null) {
+          nodes.set(index(newNodes.getSecond().getPos()), newNodes.getSecond());
+        }
+        nodes.set(index(newNodes.getFirst().getPos()), newNodes.getFirst());
+        
+        score += newNodes.getThird();
+      }
+    }
+
+    return score;
+  }
+
+  public List<Grid> slideDown(boolean generate) {
+    List<Node> cloned = resetNodes(); 
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(new Grid(this));
+    
+    int scoreCumSum = slideDownIteration(cloned, this.score);
+    if (moved(cloned)) {
+      do {
+        frames.add(new Grid(this, cloned, scoreCumSum));
+        scoreCumSum = slideDownIteration(cloned, scoreCumSum);
+      } while(moved(cloned));
+
+      if (generate) {
+        Node generated = generateNewNode(cloned);
+        frames.add(new Grid(this, cloned, scoreCumSum, generated));
+      }
+    } 
+    
+    return frames;
+  }
+
+  /** Slide every node upwards. */
+  public List<Grid> slideDown() {
+    return slideDown(true);
+  }
+
+  private int slideLeftIteration(List<Node> nodes, int score) {
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
-        Node node = getNode(x, y);
-
-        if (node.getType() == NodeType.VALUE) {
-          if (node.getPos().canMoveLeft()) {
-            Node leftNode = nodes.get(indexLeft(node.getPos()));
-            try {
-              if (leftNode.getType() == NodeType.BRICK) {
-                node.moveTo(node.getPos());
-                continue;
-              } else if (leftNode.getType() == NodeType.EMPTY) {
-                swap(node, leftNode);
-              } else if (leftNode.getType() == NodeType.VALUE && node.getValue() == leftNode.getValue() && !node.getMergeFlag() && !leftNode.getMergeFlag()) {
-                // Merge 
-                node.setValue(node.getValue() * 2);
-                score += node.getValue();
-                
-                node.onMergeFlag();
-
-                swap(node, leftNode);
-
-                nodes.set(index(leftNode.getPos()), new EmptyNode(new Position(leftNode.getPos())));
-              } else {
-                node.moveTo(node.getPos());
-              }
-            } catch (NoValueException | CantMoveException | NoMergeFlagException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-          } else {
-            try {
-              node.moveTo(node.getPos());
-            } catch(CantMoveException e) {
-              e.printStackTrace();
-              System.exit(1);
-            }
-          }
-        } 
+        Position nodePos = new Position(x, y);
+        Node nodeLeft = fetchLeft(nodes, nodePos);
+        Node node = fetch(nodes, nodePos);
+        
+        Triplet<Node, Node, Integer> newNodes = null;
+        try {
+          newNodes = node.merge(nodeLeft);
+        } catch(UnknownNodeTypeException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        
+        if (newNodes.getSecond().getPos() != null) {
+          nodes.set(index(newNodes.getSecond().getPos()), newNodes.getSecond());
+        }
+        nodes.set(index(newNodes.getFirst().getPos()), newNodes.getFirst());
+        
+        score += newNodes.getThird();
       }
     }
+
+    return score;
   }
 
-  /** Slide every node leftwards, specifying whenever to generate a new node. */
-  public void slideLeft(boolean genNewNode) {
-    // Clear flags before movement
-    clearMergeFlags();
-    clearGeneratedNode();
-
-    hasMoved = false;
-    slideLeftIteration();
-    if (moved()) {
-      hasMoved = true;
-     
-      clearFrames();
-
+  public List<Grid> slideLeft(boolean generate) {
+    List<Node> cloned = resetNodes(); 
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(new Grid(this));
+    
+    int scoreCumSum = slideLeftIteration(cloned, this.score);
+    if (moved(cloned)) {
       do {
-        addFrame();
-        slideLeftIteration(); 
-      } while (moved());
-      
-      if (genNewNode) {
-        generateNewNode();
-        addFrame();
-      }
-      // Make a back-up 
-      try {
-        history.add(cloneNodes());
-      } catch(UnknownNodeTypeException e) {
-        e.printStackTrace();
-        System.exit(1);
+        frames.add(new Grid(this, cloned, scoreCumSum));
+        scoreCumSum = slideLeftIteration(cloned, scoreCumSum);
+      } while(moved(cloned));
+
+      if (generate) {
+        Node generated = generateNewNode(cloned);
+        frames.add(new Grid(this, cloned, scoreCumSum, generated));
       }
     }
+    
+    return frames;
+  }
+
+  /** Slide every node upwards. */
+  public List<Grid> slideLeft() {
+    return slideLeft(true);
   }
   
-  public boolean getMove() {
-    return hasMoved;
-  }
-
   public Node getGeneratedNode() {
     return generatedNode;
   }
 
-  /** Undo the most recent action. */
-  public void undo() {
-    this.nodes = history.undo();
-  }
-
-  /** Redo the last undone action. */
-  public void redo() { 
-    List<Node> list = null;
-    try {
-      list = history.redo();
-    } catch(NoFutureGridException e) {
-      // Do nothing if we have no future
-    }
-    if (list != null) {
-      this.nodes = list;
-    }
-  }
-  
-  /** Return array index of position. */
   public int index(Position pos) {
     return pos.getY() * columnSize + pos.getX();
   }
 
-  /** Return array index of position, above the specified position. */
-  public int indexUp(Position pos) {
-    return (pos.getY()-1) * columnSize + pos.getX();
+  public Node fetch(Position pos) {
+    return nodes.get(pos.getY() * columnSize + pos.getX());
   }
 
-  /** Return array index of position, to the right of the specified position. */
-  public int indexRight(Position pos) {
-    return pos.getY() * columnSize + pos.getX() + 1;
+  /** Return array fetch of position. */
+  public Node fetch(List<Node> nodes, Position pos) {
+    return nodes.get(pos.getY() * columnSize + pos.getX());
   }
 
-  /** Return array index of position, below the specified position. */
-  public int indexDown(Position pos) {
-    return (pos.getY()+1) * columnSize + pos.getX();
+  public Node fetchUp(Position pos) {
+    if (pos.getY() - 1 < 0) {
+      return new BrickNode();
+    } else {
+      return nodes.get((pos.getY() - 1) * columnSize + pos.getX());
+    }
   }
 
-  /** Return array index of position, to the left of the specified position. */
-  public int indexLeft(Position pos) {
-    return (pos.getY() * columnSize) + pos.getX() - 1;
+  /** Return array fetch of position, above the specified position. */
+  public Node fetchUp(List<Node> nodes, Position pos) {
+    if (pos.getY() - 1 < 0) {
+      return new BrickNode();
+    } else {
+      return nodes.get((pos.getY() - 1) * columnSize + pos.getX());
+    }
+  }
+  
+  /** Return array fetch of position, to the right of the specified position. */
+  public Node fetchRight(Position pos) {
+    if (pos.getX() + 1 >= columnSize) {
+      return new BrickNode();
+    } else {
+      return nodes.get(pos.getY() * columnSize + (pos.getX() + 1));
+    }
   }
 
-  private Node getNode(int x, int y) {
-    return nodes.get(y * columnSize + x);
+  /** Return array fetch of position, to the right of the specified position. */
+  public Node fetchRight(List<Node> nodes, Position pos) {
+    if (pos.getX() + 1 >= columnSize) {
+      return new BrickNode();
+    } else {
+      return nodes.get(pos.getY() * columnSize + (pos.getX() + 1));
+    }
+  }
+
+  /** Return array fetch of position, below the specified position. */
+  public Node fetchDown(Position pos) {
+    if (pos.getY() + 1 >= rowSize) {
+      return new BrickNode();
+    } else {
+      return nodes.get((pos.getY() + 1) * columnSize + pos.getX());
+    }
+  }
+
+
+  /** Return array fetch of position, below the specified position. */
+  public Node fetchDown(List<Node> nodes, Position pos) {
+    if (pos.getY() + 1 >= rowSize) {
+      return new BrickNode();
+    } else {
+      return nodes.get((pos.getY() + 1) * columnSize + pos.getX());
+    }
+  }
+
+  /** Return array fetch of position, to the left of the specified position. */
+  public Node fetchLeft(Position pos) {
+    if (pos.getX() - 1 < 0) {
+      return new BrickNode();
+    } else {
+      return nodes.get(pos.getY() * columnSize + (pos.getX() - 1));
+    }
+  }
+
+  /** Return array fetch of position, to the left of the specified position. */
+  public Node fetchLeft(List<Node> nodes, Position pos) {
+    if (pos.getX() - 1 < 0) {
+      return new BrickNode();
+    } else {
+      return nodes.get(pos.getY() * columnSize + (pos.getX() - 1));
+    }
   }
 
   /** Return grid state. */
@@ -656,11 +520,6 @@ class Grid {
     return nodes;
   }
 
-  /** Return history object. */
-  public GridHistory getHistory() {
-    return history;
-  }
-  
   /** Return number of rows in the grid. */
   public int getRows() {
     return rowSize;
@@ -669,23 +528,6 @@ class Grid {
   /** Return number of columns in the grid. */
   public int getCols() {
     return columnSize;
-  }
-
-  public int getScore() {
-    return score;
-  }
-
-  public List<List<Node>> getFrames() {
-    return frames;
-  }
-
-  public void clearFrames() {
-    frames.clear();
-  } 
-
-  public void setDefaultFrame() {
-    clearFrames();
-    addFrame();
   }
 
   /** Return true if the game is lost. */
@@ -709,29 +551,29 @@ class Grid {
   
   /** Return true if the win condition is satisfied. */
   public boolean won() {
-    try {
-      for (Node node : nodes) {
-        if (node.getType() == NodeType.VALUE) {
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.VALUE) {
+        try {
           if (node.getValue() >= winCondition) {
             return true;
           }
+        } catch(NoValueException e) {
+          e.printStackTrace();
+          System.exit(1);
         }
       }
-    } catch(NoValueException e) {
-      e.printStackTrace();
-      System.exit(1);
     }
     return false;
   }
   
   /** Return true if grids are equal. */
   public boolean equals(Grid grid) {
-
     if (this.rowSize != grid.rowSize || this.columnSize != grid.columnSize) {
       return false;
     }
 
     for (int i = 0; i < grid.nodes.size(); i++) {
+
       if (!this.nodes.get(i).equals(grid.nodes.get(i))) {
         return false;
       }
@@ -741,6 +583,16 @@ class Grid {
 
   public float getTwoProb() {
     return twoProb;
+  }
+
+  public int getEmptyNodesCount() {
+    int count = 0;
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.EMPTY) {
+        count++;
+      }
+    }
+    return count;
   }
 
   /** Return list of empty nodes within the grid. */
@@ -754,30 +606,16 @@ class Grid {
     return list;
   }
 
-  /** Set a value node within the grid. */
-  public void setValueNode(ValueNode node) {
-    setValueNode(node, true);
-  }
-
   /** 
    * Create a value node within the grid.
    *
    * @param pos Position of the node
    * @param value Value for the node to have
-   * @param flag Will add this change to history if true
    */
-  public void setValueNode(ValueNode node, boolean flag) {
-    if (flag) {
-      nodes.set(index(node.getPos()), new ValueNode(node));
-      try {
-        history.add(cloneNodes());
-      } catch(UnknownNodeTypeException e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    } else {
-      nodes.set(index(node.getPos()), new ValueNode(node));
-    }
+  public Grid setValueNode(ValueNode node) {
+    List<Node> cloned = cloneNodes(this.nodes); 
+    cloned.set(index(node.getPos()), new ValueNode(node));
+    return new Grid(this, cloned, this.score);
   }
   
   /** Return the string representation of the grid. */
@@ -790,7 +628,7 @@ class Grid {
       for (int y = 0; y < this.getRows()-1; y++) {
         innerStringBuffer.clear();
         for (int x = 0; x < this.getCols(); x++) {
-          innerStringBuffer.add(this.getNodes().get(this.index(new Position(x, y))).stringify());
+          innerStringBuffer.add(this.fetch(new Position(x, y)).stringify());
         }
 
         str = String.join("|", innerStringBuffer);
@@ -805,13 +643,13 @@ class Grid {
   
       innerStringBuffer.clear();
       for (int x = 0; x < this.getCols(); x++) {
-        innerStringBuffer.add(this.getNodes().get(this.index(new Position(x, this.getRows()-1))).stringify());
+        innerStringBuffer.add(this.fetch(new Position(x, this.getRows()-1)).stringify());
       }
 
       str = String.join("|", innerStringBuffer);
       output.add(str);
 
-    } catch(MaxPosNotInitializedException | UnknownNodeTypeException e) {
+    } catch(UnknownNodeTypeException e) {
       e.printStackTrace();
       System.exit(1);
     }
@@ -825,59 +663,17 @@ class Grid {
     return nodes.hashCode();
   }
 
-  public void reset() {
-    nodes = history.initialInstanceCopy();
-    try {
-      this.history = new GridHistory(cloneNodes());
-    } catch(UnknownNodeTypeException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+  public String getMapString() {
+    return map;
   }
 
-  public void process(Action action) throws InvalidActionException {
-    switch(action) {
-      case SWIPE_UP:
-        slideUp();
-        break;
-      case SWIPE_RIGHT:
-        slideRight();
-        break;
-      case SWIPE_DOWN:
-        slideDown();
-        break;
-      case SWIPE_LEFT:
-        slideLeft();
-        break;
-      case UNDO:
-        undo();
-        break;
-      case REDO:
-        redo();
-        break;
-      case RESET:
-        reset();
-        break;
-      case NONE:
-        break;
-      case EXIT:
-        System.exit(0);
-      default:
-        throw new InvalidActionException();
-    }
+  public int getWinCondition() {
+    return winCondition;
   }
 
-  /** 
-   * Iterate over the sequence of actions, calling each corresponding function in turn.
-   * @param actions Sequence of actions to process
-   * @throws InvalidActionException Action does not exist
-   * */
-  public void process(List<Action> actions) throws InvalidActionException {
-    for (Action action : actions) {
-      process(action);      
-    }
+  public int getScore() {
+    return score;
   }
-
 
 }
 
