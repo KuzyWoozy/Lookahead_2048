@@ -98,9 +98,9 @@ class TreeDFSNode {
     this.bestAction = Action.SWIPE_UP;
 
     this.action = Action.SWIPE_UP;
-
-    this.expSum = node.expSum + prob * node.bestReward;
     
+    this.expSum = node.expSum + prob * node.bestReward;
+   
     this.posi = cloneNodes(rest); 
     
     this.posiNum = node.posiNum;

@@ -106,7 +106,7 @@ public class GraphicsMain extends Application {
         }
 
         GameStats stats = new GameStats();
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < 1; x++) {
           stats.merge(view.play(manager, algo));
           manager.reset();
         }

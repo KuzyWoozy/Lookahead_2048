@@ -177,8 +177,9 @@ class Lookahead implements Algorithm {
           } else {
             node = new TreeDFSNode(node, 1 - grid.getTwoProb(), node.getRestPossibilities());
           }
+          
           float expectedReward = node.getExpectedReward();
-
+          
           TreeDFSNode nodeAbove = history.pop();
           
           history.push(new TreeDFSNode(nodeAbove, expectedReward, nodeAbove.getAction()));

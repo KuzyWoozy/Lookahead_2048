@@ -65,6 +65,21 @@ class Grid {
     this.generatedNode = null; 
   }
 
+  public Grid(List<Node> nodes, int columnSize, int rowSize, int winCondition, float twoProb) {
+    this.map = "";
+
+    this.twoProb = twoProb;
+    this.winCondition = winCondition;
+    this.score = 0;
+
+    this.columnSize = columnSize;
+    this.rowSize = rowSize;
+    
+    this.nodes = nodes;
+
+    this.generatedNode = null;
+  }
+
   /** Grid copy constructor. */
   public Grid(Grid grid) {
     this.map = new String(grid.map);
