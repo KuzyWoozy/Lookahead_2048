@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Arrays;
 
+import org.ejml.simple.SimpleMatrix;
 
 /**
  * Representation of the 2048 grid, in which nodes reside.
@@ -688,6 +689,25 @@ class Grid {
 
   public int getScore() {
     return score;
+  }
+
+  public SimpleMatrix toVector() {
+    
+    SimpleMatrix vector = new SimpleMatrix(nodes.size(), 1);
+    for (int i = 0; i < nodes.size(); i++) {
+      if (nodes.get(i).getType() == NodeType.VALUE) {
+        try {
+          vector.set(i, nodes.get(i).getValue());
+        } catch(NoValueException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+      } else {
+        // Assuming brick nodes do not exist for now
+        vector.set(i, 0);
+      }
+    }
+    return vector;
   }
 
 }

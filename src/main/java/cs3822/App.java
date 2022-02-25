@@ -13,12 +13,22 @@ import java.util.List;
 public class App {
   public static void main( String[] args ) {
     //GraphicsMain.main(args);
-   
-    FFN network = new FFN(2, 2, 2, 0.9d, 2);
+    
+    /*
+    StdoutView view = new StdoutView(System.in);
+      
+    Grid grid = null;
+    try {
+      grid = new Grid("####|####|####|####", 2048, 0.9f, true);
+    } catch(InvalidMapSizeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
 
-    SimpleMatrix matMat = new SimpleMatrix(2, 1, true, new float[] {1, 1});
-    SimpleMatrix label = new SimpleMatrix(2, 1, true, new float[] {2, 2});
+    view.play(new GridManager(grid), new ReinLearn(grid, 100, 0.01d, 0d, 0d, 2));
+    */
+    FFN neural = new FFN(3, 10, 4, 0.01d, 0d, 0d, 2);
 
-    network.backprop(matMat, label);
+      
   }
 }

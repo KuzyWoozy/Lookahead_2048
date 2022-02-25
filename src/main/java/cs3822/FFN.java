@@ -1,17 +1,19 @@
 package cs3822;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import org.ejml.simple.SimpleMatrix;
 
 
 class FFN {
 
-  private List<Layer> layers = new ArrayList<Layer>();
+  private List<Layer> layers = new LinkedList<Layer>();
   final private int layers_num; 
 
 
   final private double alpha;
+  final private double beta;
+  final private double lambda;
 
   final private int inputSize;
   final private int middleSize;
@@ -91,7 +93,7 @@ class FFN {
     return output;
   }
 
-  public FFN(int inputSize, int middleSize, int outputSize, double alpha, int layers_num) {
+  public FFN(int inputSize, int middleSize, int outputSize, double alpha, double beta, double lambda, int layers_num) {
 
     this.layers.add(new Layer(new SimpleMatrix(middleSize, inputSize)));
 
@@ -102,6 +104,8 @@ class FFN {
 
     
     this.alpha = alpha;
+    this.beta = beta;
+    this.lambda = lambda;
     this.inputSize = inputSize;
     this.middleSize = middleSize;
     this.outputSize = outputSize;
@@ -127,7 +131,7 @@ class FFN {
    
     error_wrt_y = layers.get(layers_num).getWeights().transpose().mult(error_wrt_z);
   
-    layers.set(layers_num, layers.get(layers_num).gradientStep(error_wrt_weight, error_wrt_bias, alpha));
+    layers.set(layers_num, layers.get(layers_num).gradientStep(error_wrt_weight, error_wrt_bias, alpha, beta, lambda));
 
 
     for (int i = layers_num - 1; i > 0; i--) {
@@ -144,7 +148,7 @@ class FFN {
      
       error_wrt_y = layers.get(i).getWeights().transpose().mult(error_wrt_z);
      
-      layers.set(i, layers.get(i).gradientStep(error_wrt_weight, error_wrt_bias, alpha));
+      layers.set(i, layers.get(i).gradientStep(error_wrt_weight, error_wrt_bias, alpha, beta, lambda));
     }
 
     y_wrt_z = middleFunc_derv(layers.get(0).get_Z());
@@ -160,7 +164,7 @@ class FFN {
    
     error_wrt_y = layers.get(0).getWeights().transpose().mult(error_wrt_z);
    
-    layers.set(0, layers.get(0).gradientStep(error_wrt_weight, error_wrt_bias, alpha));    
+    layers.set(0, layers.get(0).gradientStep(error_wrt_weight, error_wrt_bias, alpha, beta, lambda));    
   
     return output;
   }
@@ -181,6 +185,26 @@ class FFN {
     // Just so we don't output 'input'
     SimpleMatrix output = input; 
     return output;
+  }
+
+  public List<LayerCache> saveCache() {
+    List<LayerCache> list = new LinkedList<LayerCache>();
+
+    for (Layer layer : layers) {
+      list.add(layer.saveCache());
+    }
+
+    return list;
+  }
+
+  public void loadCache(List<LayerCache> layers_cache) {
+    for (int i = 0; i < layers.size(); i++) {
+      layers.set(i, layers.get(i).loadCache(layers_cache.get(i)));
+    }
+  }
+
+  public List<Layer> getLayers() {
+    return layers;
   }
 
 }

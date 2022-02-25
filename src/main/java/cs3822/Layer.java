@@ -85,12 +85,21 @@ final class Layer {
     return z_cache;
   }
 
-  public Layer gradientStep(SimpleMatrix error_wrt_weight, SimpleMatrix error_wrt_bias, double alpha) {
+  public Layer gradientStep(SimpleMatrix error_wrt_weight, SimpleMatrix error_wrt_bias, double alpha, double beta, double lambda) {
     
-    SimpleMatrix weight_momentum_new = weight_momentum.scale(0.9).plus(error_wrt_weight.scale(0.1)); 
-    SimpleMatrix bias_momentum_new = bias_momentum.scale(0.9).plus(error_wrt_bias.scale(0.1)); 
+    // Note the L2 regularization
+    SimpleMatrix weight_momentum_new = weight_momentum.scale(beta).plus(error_wrt_weight.scale(1 - beta)).plus(this.weights.scale(2).scale(lambda)); 
+    SimpleMatrix bias_momentum_new = bias_momentum.scale(beta).plus(error_wrt_bias.scale(1 - beta)); 
 
     return new Layer(weights.minus(weight_momentum_new.scale(alpha)), bias.minus(bias_momentum_new.scale(alpha)), weight_momentum_new, bias_momentum_new);
+  }
+
+  public LayerCache saveCache() {
+    return new LayerCache(x_cache, z_cache);
+  }
+
+  public Layer loadCache(LayerCache cache) {
+    return new Layer(this, cache.get_X(), cache.get_Z());
   }
 
 }

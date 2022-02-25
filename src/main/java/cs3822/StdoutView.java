@@ -48,6 +48,7 @@ class StdoutView implements View {
     while (true) {
       Grid grid = manager.show();
       display(grid);
+
       if (grid.won()) {
         stat.won();
         break;
