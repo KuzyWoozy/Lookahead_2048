@@ -622,6 +622,27 @@ class Grid {
     return list;
   }
 
+  public int getMaxValue() {
+    int max = Integer.MIN_VALUE;
+    int val = 0;
+
+    for (Node node : nodes) {
+      if (node.getType() == NodeType.VALUE) {
+        try {
+          val = node.getValue();
+        } catch(NoValueException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+        if (val > max) {
+          max = val;
+        }
+      }
+    }
+
+    return max;
+  }
+
   /** 
    * Create a value node within the grid.
    *
@@ -708,6 +729,32 @@ class Grid {
       }
     }
     return vector;
+  }
+
+  public float getImmediateWeightedScore() {
+    SimpleMatrix weights = new SimpleMatrix(rowSize, columnSize);
+    weights.fill(1d);
+    
+    
+    weights.set(0, 0, 5);
+    weights.set(0, 1, 4);
+    weights.set(0, 2, 3);
+    weights.set(0, 3, 2);
+    weights.set(1, 0, 3);
+    weights.set(1, 1, 2);
+    weights.set(1, 2, 1);
+    
+    
+    /*
+    weights.set(0, 0, 5);
+    weights.set(0, 1, 4);
+    weights.set(0, 2, 3);
+    weights.set(0, 3, 2);
+    */
+
+
+    weights.reshape(rowSize * columnSize, 1);
+    return (float)(toVector().transpose().mult(weights).get(0));
   }
 
 }

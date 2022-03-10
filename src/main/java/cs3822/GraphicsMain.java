@@ -32,7 +32,7 @@ public class GraphicsMain extends Application {
           }
           break;
         case "lookahead":
-          algo = new Lookahead(4);
+          algo = new Lookahead(3);
           break;
         case "uniform":
           algo = new UniformRandomPlay();
@@ -106,7 +106,7 @@ public class GraphicsMain extends Application {
         }
 
         GameStats stats = new GameStats();
-        for (int x = 0; x < 1; x++) {
+        for (int x = 0; x < 300; x++) {
           stats.merge(view.play(manager, algo));
           manager.reset();
         }

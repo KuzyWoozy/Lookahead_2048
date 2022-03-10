@@ -9,8 +9,10 @@ final class Layer {
   final private SimpleMatrix weights;
   final private SimpleMatrix bias;
   
+
   final private SimpleMatrix x_cache;
   final private SimpleMatrix z_cache;
+  final private SimpleMatrix y_cache;
 
 
   final private SimpleMatrix weight_momentum;
@@ -43,6 +45,7 @@ final class Layer {
 
     this.x_cache = null;
     this.z_cache = null;
+    this.y_cache = null;
   }
 
   
@@ -55,10 +58,11 @@ final class Layer {
 
     this.x_cache = null;
     this.z_cache = null;
+    this.y_cache = null;
   }
 
 
-  public Layer(Layer layer, SimpleMatrix x_cache, SimpleMatrix z_cache) {
+  public Layer(Layer layer, SimpleMatrix x_cache, SimpleMatrix z_cache, SimpleMatrix y_cache) {
     this.weights = layer.weights;
     this.bias = layer.bias;
 
@@ -67,6 +71,7 @@ final class Layer {
 
     this.x_cache = x_cache;
     this.z_cache = z_cache;
+    this.y_cache = y_cache;
   }
 
   public SimpleMatrix getWeights() {
@@ -85,21 +90,24 @@ final class Layer {
     return z_cache;
   }
 
-  public Layer gradientStep(SimpleMatrix error_wrt_weight, SimpleMatrix error_wrt_bias, double alpha, double beta, double lambda) {
-    
-    // Note the L2 regularization
-    SimpleMatrix weight_momentum_new = weight_momentum.scale(beta).plus(error_wrt_weight.scale(1 - beta)).plus(this.weights.scale(2).scale(lambda)); 
-    SimpleMatrix bias_momentum_new = bias_momentum.scale(beta).plus(error_wrt_bias.scale(1 - beta)); 
+  public SimpleMatrix get_Y() {
+    return y_cache;
+  }
 
-    return new Layer(weights.minus(weight_momentum_new.scale(alpha)), bias.minus(bias_momentum_new.scale(alpha)), weight_momentum_new, bias_momentum_new);
+  public Layer gradientStep(SimpleMatrix error_wrt_weight, SimpleMatrix error_wrt_bias, double alpha, double beta, double lambda) {
+    // Note the L2 regularization
+    SimpleMatrix weight_momentum_new = weight_momentum.scale(beta).plus(error_wrt_weight.plus(this.weights.scale(2).scale(lambda)).scale(alpha)); 
+    SimpleMatrix bias_momentum_new = bias_momentum.scale(beta).plus(error_wrt_bias.scale(alpha)); 
+
+    return new Layer(weights.minus(weight_momentum_new), bias.minus(bias_momentum_new), weight_momentum_new, bias_momentum_new);
   }
 
   public LayerCache saveCache() {
-    return new LayerCache(x_cache, z_cache);
+    return new LayerCache(x_cache, z_cache, y_cache);
   }
 
   public Layer loadCache(LayerCache cache) {
-    return new Layer(this, cache.get_X(), cache.get_Z());
-  }
+    return new Layer(this, cache.get_X(), cache.get_Z(), cache.get_Y());
+  } 
 
 }

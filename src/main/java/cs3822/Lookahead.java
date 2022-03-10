@@ -15,9 +15,16 @@ class Lookahead implements Algorithm {
   private Stack<TreeDFSNode> history;
   final private ModelStorage db;
 
+  /*
   private float rewardFunc(Grid grid) {
     return grid.getScore();
   }
+  */
+
+  private float rewardFunc(Grid grid) {
+    return grid.getScore() + grid.getImmediateWeightedScore();
+  }
+
   
   /*
   private float rewardFunc(Grid grid) {

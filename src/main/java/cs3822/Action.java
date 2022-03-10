@@ -2,8 +2,9 @@ package cs3822;
 
 import java.util.ArrayList;
 
+
 /**
- * Representation of actions a player can take.
+ * Representation of actions an agent can take.
  *
  * @author Daniil Kuznetsov
  */
@@ -22,7 +23,7 @@ enum Action {
    * Convert a character into an Action enum.
    *
    * @param chr Character to be converted into an Action
-   * @return Action corresponding to the provided character
+   * @return Action corresponding to the input character
    * @throws InvalidActionException Character has no translation into an Action
    */
   public static Action convertCharToAction(char chr) throws InvalidActionException {
@@ -54,8 +55,8 @@ enum Action {
    * Convert Action enum into an integer.
    *
    * @param action Action to be converted into an integer
-   * @return Integer corresponding to the provided Action
-   * @throws InvalidActionException Character has no translation into an Action
+   * @return Integer corresponding to the input Action
+   * @throws InvalidActionException Character has no translation into an integer
    */
   public static int convertActionToInt(Action action) throws InvalidActionException { 
     switch(action) {
@@ -83,11 +84,11 @@ enum Action {
   }
   
   /**
-   * Convert Integer into an Action enum.
+   * Convert integer into an Action enum.
    *
    * @param val Integer to be converted into an Action
    * @return Integer to be converted into a corresponding Action
-   * @throws InvalidActionException Character has no translation into an Action
+   * @throws InvalidActionException Character has no translation into an integer
    */
   public static Action convertIntToAction(int val) throws InvalidActionException {
     switch(val) {
@@ -114,6 +115,7 @@ enum Action {
     }
   }
 
+  /** Return all possible movement actions. */
   public static ArrayList<Action> getMoveActions() {
     ArrayList<Action> list = new ArrayList<Action>();
     
@@ -123,6 +125,28 @@ enum Action {
     list.add(SWIPE_LEFT);
 
     return list;
+  }
+  
+  /**
+   * Return the next action around the clock.
+   *
+   * @param action Current action
+   * @return Next action with respect to input
+   * @throws InvalidActionException Movement action not specified
+   */
+  public static Action nextSwipe(Action action) throws InvalidActionException {
+    switch(action) {
+      case SWIPE_UP:
+        return SWIPE_RIGHT;
+      case SWIPE_RIGHT:
+        return SWIPE_DOWN;
+      case SWIPE_DOWN:
+        return SWIPE_LEFT;
+      case SWIPE_LEFT:
+        return SWIPE_UP;
+      default:
+        throw new InvalidActionException();
+    }
   }
 
 }

@@ -15,6 +15,16 @@ final class ValueNode extends Node {
   final private boolean moveFlag;
   final private Position oldPos;
 
+  /**
+   * Constructor for value node.
+   *
+   * @param pos Position of the node
+   * @param value Value of the node
+   * @param mergeFlag Merge flag
+   * @param oldValue Node's old value
+   * @param oldPos Node's old position
+   * @param moveFlag Move flag
+   */
   private ValueNode(Position pos, int value, boolean mergeFlag, int oldValue, Position oldPos, boolean moveFlag) {
     super(pos);
     this.value = value;
@@ -205,31 +215,29 @@ final class ValueNode extends Node {
     }
   }
 
-  /** Return the merge flag. */
   @Override
   public boolean hasMerged() {
     return mergeFlag;
   }
   
-  /** Return the merge flag. */
+  
   @Override
   public boolean hasMoved() {
     return moveFlag;
   }
 
-  /** Return the type of the node. */
+  
   @Override
   public NodeType getType() {
     return NodeType.VALUE;
   }
 
-  /** Return node as a string. */
+  
   @Override
   public String toString() {
     return "[" + pos + " " + String.valueOf(value) + "]";
   }
 
-  /** Return hash of node. */
   @Override
   public int hashCode() {
     return Objects.hash(pos, NodeType.VALUE, value);
@@ -240,7 +248,7 @@ final class ValueNode extends Node {
     return oldValue;
   }
 
-  /** Return the value of the node. */
+  
   @Override
   public int getValue() {
     return value;
@@ -251,7 +259,6 @@ final class ValueNode extends Node {
     return oldPos;
   }
 
-  /** Return true if the node can move within the specified grid. */
   @Override
   public boolean canMove(Grid grid) {
     try { 

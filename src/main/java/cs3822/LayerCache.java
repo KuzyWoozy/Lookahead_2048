@@ -7,10 +7,12 @@ final class LayerCache {
 
   final private SimpleMatrix x;
   final private SimpleMatrix z;
+  final private SimpleMatrix y;
 
-  public LayerCache(SimpleMatrix x, SimpleMatrix z) {
+  public LayerCache(SimpleMatrix x, SimpleMatrix z, SimpleMatrix y) {
     this.x = new SimpleMatrix(x);
     this.z = new SimpleMatrix(z);
+    this.y = new SimpleMatrix(y);
   }
 
   public SimpleMatrix get_X() {
@@ -19,6 +21,10 @@ final class LayerCache {
 
   public SimpleMatrix get_Z() {
     return z;
+  }
+
+  public SimpleMatrix get_Y() {
+    return y;
   }
 
 }

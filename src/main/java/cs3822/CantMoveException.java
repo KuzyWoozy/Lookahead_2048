@@ -1,6 +1,6 @@
 package cs3822;
 
-/** Raised if the node does not have a move flag. */
+/** Raised if the node cannot move. */
 class CantMoveException extends Exception {
   public CantMoveException() {
     super();

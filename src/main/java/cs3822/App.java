@@ -12,9 +12,20 @@ import java.util.List;
  */
 public class App {
   public static void main( String[] args ) {
-    //GraphicsMain.main(args);
+    // Call the javafx supported main method
+    GraphicsMain.main(args);
     
     /*
+    Grid grid = null;
+    try {
+      grid = new Grid("8##2|####|####|#4##", 2048, 0.9f, false);
+    } catch(InvalidMapSizeException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    System.out.println(grid.getImmediateWeightedScore());
+    */
+    /* 
     StdoutView view = new StdoutView(System.in);
       
     Grid grid = null;
@@ -24,11 +35,13 @@ public class App {
       e.printStackTrace();
       System.exit(1);
     }
+   
+    ReinLearn rein = new ReinLearn(grid, 70, 0.0000001d, 0.9d, 0.1d, 5);
+    
+    rein.train(100000);
 
-    view.play(new GridManager(grid), new ReinLearn(grid, 100, 0.01d, 0d, 0d, 2));
+    view.play(new GridManager(grid), rein);
     */
-    FFN neural = new FFN(3, 10, 4, 0.01d, 0d, 0d, 2);
-
-      
+    
   }
 }
