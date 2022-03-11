@@ -24,7 +24,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.animation.SequentialTransition;
 
-
+/**
+ * GUI representation of the game.
+ *
+ * @author Daniil Kuznetsov
+ */
 class GraphicsView implements View {
   private Stage stage;
 

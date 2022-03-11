@@ -20,7 +20,12 @@ public class GraphicsMain extends Application {
     private static View view;
     private static Algorithm algo;
 
-
+    /**
+     * Initialize the specified algorithm.
+     *
+     * @param name Algorithm name
+     * @throws UnknownAlgorithmException Unknown algorithm specified
+     */
     private static void processAlgo(String name) throws UnknownAlgorithmException {
       switch(name.toLowerCase()) {
         case "optimal":
@@ -45,6 +50,14 @@ public class GraphicsMain extends Application {
       }
     }
 
+    /**
+     * Process a single argument from the args.
+     *
+     * @param i Current position in the args array
+     * @param args Args array
+     * @return New position after processing
+     * @throws UnknownArgumentException Unknown argument specified
+     */
     private static int processArg(int i, String[] args) throws UnknownArgumentException {
       switch(args[i]) {
         case "--gui":
@@ -71,6 +84,7 @@ public class GraphicsMain extends Application {
       return i;
     }
 
+    /** Main class method. */
     public static void main(String[] args) {
       int i = 0;
       try {
@@ -87,6 +101,7 @@ public class GraphicsMain extends Application {
       }
       
       try {
+        // Create the grid specified or the default one
         grid = new Grid(map, winCondition, twoProb, generate);
         manager = new GridManager(grid);
       } catch(InvalidMapSizeException e) {
@@ -95,6 +110,7 @@ public class GraphicsMain extends Application {
       }
 
       if (guiFlag) {
+        // Initialize javafx graphics window
         launch(args);
       } else {
         view = new StdoutView(System.in);
@@ -106,7 +122,8 @@ public class GraphicsMain extends Application {
         }
 
         GameStats stats = new GameStats();
-        for (int x = 0; x < 300; x++) {
+        // Loop can be altered to increase number of games played
+        for (int x = 0; x < 1; x++) {
           stats.merge(view.play(manager, algo));
           manager.reset();
         }
