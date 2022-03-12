@@ -55,7 +55,6 @@ final class Position {
     return new Position(x - 1, y);
   }
 
-  /** Return string representation. */
   @Override
   public String toString() {
     return String.format("(%d, %d)", x, y);
@@ -66,7 +65,6 @@ final class Position {
     return x == pos.x && y == pos.y;
   }
 
-  /** Return hash of position. */
   @Override
   public int hashCode() {
     return Objects.hash(x, y);

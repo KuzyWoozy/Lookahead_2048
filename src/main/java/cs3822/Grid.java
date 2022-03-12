@@ -29,7 +29,14 @@ class Grid {
   
   final private Random rand = new Random();
  
-
+  /**
+   * Constructor for the grid object.
+   *
+   * @param map String representation of the grid to construct
+   * @param winCondition Target value for the game to achieve
+   * @param twoProb Probability of generating a 2, the rest is probability of generating a 4
+   * @param generate True if the two starting nodes should be generated
+   */
   public Grid(String map, int winCondition, float twoProb, boolean generate) throws InvalidMapSizeException {
     this.map = map;
     this.twoProb = twoProb;
@@ -65,7 +72,16 @@ class Grid {
     }
     this.generatedNode = null; 
   }
-
+  
+  /**
+   * Alternate grid copy constructor.
+   *
+   * @param nodes Array of Node objects
+   * @param columnSize Width of the grid
+   * @param rowSize Height of the grid
+   * @param winCondition Target value for the game to achieve
+   * @param twoProb Probability of generating a 2, the rest is probability of generating a 4
+   */
   public Grid(List<Node> nodes, int columnSize, int rowSize, int winCondition, float twoProb) {
     this.map = "";
 
@@ -95,7 +111,7 @@ class Grid {
   }
 
 
-  /** Grid copy constructor. */
+  /** Grid copy constructor, with new score. */
   private Grid(Grid grid, List<Node> nodes, int score) {
     this.map = new String(grid.map);
     this.twoProb = grid.twoProb;
@@ -109,7 +125,7 @@ class Grid {
     this.generatedNode = null;
   }
 
-  /** Grid copy constructor. */
+  /** Grid copy constructor, with new score and generated node. */
   private Grid(Grid grid, List<Node> nodes, int score, Node generated) {
     this.map = new String(grid.map);
     this.twoProb = grid.twoProb;
@@ -123,13 +139,7 @@ class Grid {
     this.generatedNode = generated;
   }
 
-
-  /** 
-   * Copies and returns the Grid representation.
-   *
-   * @return Copy of the grid state
-   * @throws UnknownNodeTypeException Discovered node with no lnown corresponding type
-   */
+  /** Reset the nodes to the original initial state. */
   private List<Node> resetNodes() {
     List<Node> copyNode = Arrays.asList(new Node[nodes.size()]);
     try {
@@ -143,7 +153,8 @@ class Grid {
   
     return copyNode;
   }
-
+  
+  /** Clone grid's Node objects. */
   private List<Node> cloneNodes(List<Node> nodes) {
     List<Node> copyNodes = Arrays.asList(new Node[nodes.size()]);
     for (int i = 0; i < nodes.size(); i++) {
@@ -185,7 +196,8 @@ class Grid {
         throw new InvalidMapSymbolException();
     }
   }
-
+  
+  /** Return true if any of the nodes have moved. */
   private boolean moved(List<Node> nodes) {
     for (Node node : nodes) {
       if (node.getType() == NodeType.VALUE) {
@@ -223,7 +235,8 @@ class Grid {
 
     return newNode;
   }
-
+  
+  /** Shift the nodes one step upwards. */
   private int slideUpIteration(List<Node> nodes, int score) {
 
     for (int y = 0; y < rowSize; y++) {
@@ -252,14 +265,15 @@ class Grid {
 
     return score;
   }
-
+  
+  /** Shift the nodes upwards. */
   public List<Grid> slideUp(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
     frames.add(new Grid(this));
     
     int scoreCumSum = slideUpIteration(cloned, this.score);
-    
+    // Make sure a node was shifted to constitue a move 
     if (moved(cloned)) {
       do {
         frames.add(new Grid(this, cloned, scoreCumSum));
@@ -275,11 +289,12 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node upwards. */
+  /** Shift every node upwards. */
   public List<Grid> slideUp() {
     return slideUp(true);
   }
   
+  /** Shift the nodes one step rightwards. */
   private int slideRightIteration(List<Node> nodes, int score) {
 
     for (int y = 0; y < rowSize; y++) {
@@ -308,7 +323,8 @@ class Grid {
 
     return score;
   }
-
+  
+  /** Shift the nodes rightwards. */
   public List<Grid> slideRight(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -330,11 +346,12 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node upwards. */
+  /** Slide every node rightwards. */
   public List<Grid> slideRight() {
     return slideRight(true);
   }
-
+  
+  /** Shift the nodes one step downwards. */
   private int slideDownIteration(List<Node> nodes, int score) {
     for (int y = rowSize - 1; y >= 0; y--) {
       for (int x = 0; x < columnSize; x++) {
@@ -362,7 +379,8 @@ class Grid {
 
     return score;
   }
-
+  
+  /** Shift the nodes downwards. */
   public List<Grid> slideDown(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -384,11 +402,12 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node upwards. */
+  /** Shift the nodes downwards. */
   public List<Grid> slideDown() {
     return slideDown(true);
   }
-
+  
+  /** Shift the nodes one step leftwards. */
   private int slideLeftIteration(List<Node> nodes, int score) {
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
@@ -415,7 +434,8 @@ class Grid {
 
     return score;
   }
-
+  
+  /** Shift the nodes leftwards. */
   public List<Grid> slideLeft(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -437,19 +457,22 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node upwards. */
+  /** Slide every node leftwards. */
   public List<Grid> slideLeft() {
     return slideLeft(true);
   }
   
+  /** Return the latest generated node. */
   public Node getGeneratedNode() {
     return generatedNode;
   }
-
+  
+  /** Convert position into nodes array index. */
   public int index(Position pos) {
     return pos.getY() * columnSize + pos.getX();
   }
 
+  /** Fetch the node at the specified positon. */
   public Node fetch(Position pos) {
     return nodes.get(pos.getY() * columnSize + pos.getX());
   }
@@ -459,6 +482,7 @@ class Grid {
     return nodes.get(pos.getY() * columnSize + pos.getX());
   }
 
+  /** Return node, one up above the specified position. */
   public Node fetchUp(Position pos) {
     if (pos.getY() - 1 < 0) {
       return new BrickNode();
@@ -531,7 +555,7 @@ class Grid {
     }
   }
 
-  /** Return grid state. */
+  /** Return grid array state. */
   public List<Node> getNodes() {
     return nodes;
   }
@@ -597,10 +621,12 @@ class Grid {
     return true;
   }
 
+  /** Return probability of generating a 2. */
   public float getTwoProb() {
     return twoProb;
   }
 
+  /** Return how many empty nodes are in the grid. */
   public int getEmptyNodesCount() {
     int count = 0;
     for (Node node : nodes) {
@@ -622,6 +648,7 @@ class Grid {
     return list;
   }
 
+  /** Return biggest node value in the grid. */
   public int getMaxValue() {
     int max = Integer.MIN_VALUE;
     int val = 0;
@@ -694,24 +721,27 @@ class Grid {
     return String.join("\n", output);
   }
   
-  /** Return hash code for the grid. */
   @Override
   public int hashCode() {
     return nodes.hashCode();
   }
 
+  /** Return string map. */
   public String getMapString() {
     return map;
   }
 
+  /** Return win target value. */
   public int getWinCondition() {
     return winCondition;
   }
 
+  /** Return score. */
   public int getScore() {
     return score;
   }
 
+  /** Return vector representation of the grid. */
   public SimpleMatrix toVector() {
     
     SimpleMatrix vector = new SimpleMatrix(nodes.size(), 1);
@@ -731,6 +761,7 @@ class Grid {
     return vector;
   }
 
+  /** Return weighted matrix element sum. */
   public float getImmediateWeightedScore() {
     SimpleMatrix weights = new SimpleMatrix(rowSize, columnSize);
     weights.fill(1d);

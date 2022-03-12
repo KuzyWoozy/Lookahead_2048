@@ -29,6 +29,35 @@ class FFN {
   // Output layer network size
   final private int outputSize;
 
+  /**
+   * Neural Network constructor.  
+   *
+   * @param inputSize Input layer network size 
+   * @param middleSize Deep layer network size
+   * @param outputSize Output layer network size
+   * @param alpha Learning rate
+   * @param beta Momentum
+   * @param lambda Regularization
+   * @param layers_num Number of hidden layers
+   */
+  public FFN(int inputSize, int middleSize, int outputSize, double alpha, double beta, double lambda, int layers_num) {
+
+    this.layers.add(new Layer(new SimpleMatrix(middleSize, inputSize)));
+
+    for (int i = 1; i < layers_num; i++) {
+      this.layers.add(new Layer(new SimpleMatrix(middleSize, middleSize)));
+    }
+    this.layers.add(new Layer(new SimpleMatrix(outputSize, middleSize)));
+
+    this.alpha = alpha;
+    this.beta = beta;
+    this.lambda = lambda;
+    this.inputSize = inputSize;
+    this.middleSize = middleSize;
+    this.outputSize = outputSize;
+    this.layers_num = layers_num;
+  }
+
   
   /** LeakyRelu deep layer activation function. */ 
   private SimpleMatrix middleFunc(SimpleMatrix input) {
@@ -110,37 +139,7 @@ class FFN {
   public SimpleMatrix cost_derv(SimpleMatrix output, SimpleMatrix label) {
     return output.minus(label).scale(2);
   }
-
-
-  /**
-   * Neural Network constructor.  
-   *
-   * @param inputSize Input layer network size 
-   * @param middleSize Deep layer network size
-   * @param outputSize Output layer network size
-   * @param alpha Learning rate
-   * @param beta Momentum
-   * @param lambda Regularization
-   * @param layers_num Number of hidden layers
-   */
-  public FFN(int inputSize, int middleSize, int outputSize, double alpha, double beta, double lambda, int layers_num) {
-
-    this.layers.add(new Layer(new SimpleMatrix(middleSize, inputSize)));
-
-    for (int i = 1; i < layers_num; i++) {
-      this.layers.add(new Layer(new SimpleMatrix(middleSize, middleSize)));
-    }
-    this.layers.add(new Layer(new SimpleMatrix(outputSize, middleSize)));
-
-    this.alpha = alpha;
-    this.beta = beta;
-    this.lambda = lambda;
-    this.inputSize = inputSize;
-    this.middleSize = middleSize;
-    this.outputSize = outputSize;
-    this.layers_num = layers_num;
-  }
-
+ 
   /** 
    * Compute gradients for the parameters of each network layer.
    *

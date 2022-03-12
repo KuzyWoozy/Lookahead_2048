@@ -24,6 +24,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.animation.SequentialTransition;
 
+
 /**
  * GUI representation of the game.
  *
@@ -54,30 +55,119 @@ class GraphicsView implements View {
 
   private boolean canPressFlag = true;
 
+  
+  /** Constructor. */ 
+  public GraphicsView(Grid grid, Stage stage, float width, float height) {
+    this.stage = stage;
 
+    // Parent group
+    this.group = new Group();
+    // Node to group together nodes
+    this.nodes = new Group();
+
+    this.canvas = new Canvas(width, height);
+    this.group.getChildren().add(this.canvas);
+    this.group.getChildren().add(this.nodes);
+
+    this.grid_rows = grid.getRows();
+    this.grid_cols = grid.getCols();
+
+    this.scene = new Scene(this.group, Color.WHITE);
+    this.stage.setScene(this.scene);
+    
+    this.gc = canvas.getGraphicsContext2D();
+
+    this.input = new ArrayList<String>();
+
+    gc.setTextBaseline(VPos.CENTER);
+    gc.setTextAlign(TextAlignment.CENTER);
+    
+    stage.show();
+
+    List<Grid> frames = new LinkedList<Grid>();
+    frames.add(grid);
+    display(frames);
+
+    // Register a callback event on key press
+    this.scene.setOnKeyPressed(
+        new EventHandler<KeyEvent>() {
+          public void handle(KeyEvent e) {
+            if (canPressFlag) {
+              // Simple boolean lock
+              canPressFlag = false;
+              String code = e.getCode().toString();
+              if (!input.contains(code)) {
+                input.add(code);
+              }
+            }
+          }
+        });
+
+    // Register a callback even on key release
+    this.scene.setOnKeyReleased(
+        new EventHandler<KeyEvent>() {
+          public void handle(KeyEvent e) {
+            canPressFlag = true;
+            String code = e.getCode().toString();
+            input.remove(code);
+          }
+        });
+  }
+
+
+  /** 
+   * Draw a rectangle of given size and colour. 
+   *
+   * @param gc Javafx GraphicsContext object
+   * @param x Top left x coordinate of the rectangle
+   * @param y Top left y coordinate of the rectangle
+   * @param width Width of the rectangle
+   * @param height Height of the rectangle
+   * @param color Colour of the rectangle
+   */
   private void drawRect(GraphicsContext gc, float x, float y, float width, float height, Color color) {
     gc.setFill(color);
     gc.fillRect(x, y, width, height);
   }
 
+  /** 
+   * Draw a round rectangle of given size and colour. 
+   *
+   * @param gc Javafx GraphicsContext object
+   * @param x Top left x coordinate of the round rectangle
+   * @param y Top left y coordinate of the round rectangle
+   * @param width Width of the round rectangle
+   * @param height Height of the round rectangle
+   * @param arc_width Width radius of the corners
+   * @param arc_height Height radius of the corners
+   * @param color Colour of the round rectangle
+   */
   private void drawRoundRect(GraphicsContext gc, float x, float y, float width, float height, float arc_width, float arc_height, Color color) {
     gc.setFill(color); 
     gc.fillRoundRect(x, y, width, height, arc_width, arc_height);
   }
-
-  private void drawText(GraphicsContext gc, String text, float x, float y, float node_width, float node_height, Color color) {
-    gc.setFill(color);
-    gc.fillText(text, x + node_width / 2, y + node_height / 2);
-  }
-
+  
+  
+  /** Computes x coordinate with respect to pad width. */
   private float node_canvas_x(int x, float node_width, float pad_width) {
     return ((x+1) * pad_width) + (x * node_width);
   }
-
+  
+  /** Computes y coordinate with respect to pad height. */
   private float node_canvas_y(int y, float node_height, float pad_height) {
     return ((y+1) * pad_height) + (y * node_height);
   }
-  
+ 
+  /** 
+   * Create a rectangle object of given size and colour. 
+   *
+   * @param node_width Width of the rectangle
+   * @param node_height Height of the rectangle
+   * @param arc_width Width radius of the corners
+   * @param arc_height Height radius of the corners
+   * @param color Colour of the rectangle
+   * @return Rectangle object
+   */
   private Rectangle createRect(float node_width, float node_height, float node_arc_width, float node_arc_height, Color color) {
     Rectangle rect = new Rectangle(node_width, node_height);
     rect.setFill(color);
@@ -89,7 +179,16 @@ class GraphicsView implements View {
 
     return rect;
   }
-
+  
+  /** 
+   * Draw text of given size and colour. 
+   *
+   * @param value Value of node
+   * @param node_width Width of the text block
+   * @param node_height Height of the text block
+   * @param color Colour of the round rectangle
+   * @return Text block
+   */
   private Text createText(int value, float node_width, float node_height, Color color) {
     Text text = new Text(String.valueOf(value));
     text.setFill(color);
@@ -102,7 +201,20 @@ class GraphicsView implements View {
 
     return text;
   }
-  
+ 
+  /**
+   * Generates a movement animation to play out.
+   * 
+   * @param rect Node to animate
+   * @param text Text to animate 
+   * @param fromX Starting x coordinate
+   * @param fromY Starting y coordinate
+   * @param toX Destination x coordinate
+   * @param toY Destination y coordinate
+   * @param node_width Node width
+   * @param node_height Node height
+   * @return Animation object
+   */
   private ParallelTransition createTranslateAnimation(Rectangle rect, Text text, float fromX, float fromY, float toX, float toY, float node_width, float node_height) {
        
     rect.setX(fromX);
@@ -140,15 +252,17 @@ class GraphicsView implements View {
     return trans; 
   }
 
+  /** Lock the animation loop. */
   private void lock() {
     animate = true;
   }
   
+  /** Unlock the animation loop. */
   private void unlock() {
     animate = false;
   }
 
-  
+  /** Render and animate the grid frames. */
   private void display(List<Grid> frames) {
 
     float width = (float)stage.getWidth();
@@ -182,9 +296,10 @@ class GraphicsView implements View {
     float x;
     float y;
 
-
+    // Refresh screen
     drawRect(gc, 0, 0, width, height, Color.WHITE);
 
+    // Clear out the old rectangle objects
     this.nodes.getChildren().clear();
           
     SequentialTransition animation = new SequentialTransition();
@@ -255,63 +370,11 @@ class GraphicsView implements View {
     lock();
   }
 
-  
-  public GraphicsView(Grid grid, Stage stage, float width, float height) {
-    this.stage = stage;
-
-    this.group = new Group();
-    this.nodes = new Group();
-
-    this.canvas = new Canvas(width, height);
-    this.group.getChildren().add(this.canvas);
-    this.group.getChildren().add(this.nodes);
-
-    this.grid_rows = grid.getRows();
-    this.grid_cols = grid.getCols();
-
-    this.scene = new Scene(this.group, Color.WHITE);
-    this.stage.setScene(this.scene);
     
-    this.gc = canvas.getGraphicsContext2D();
-
-    this.input = new ArrayList<String>();
-
-    gc.setTextBaseline(VPos.CENTER);
-    gc.setTextAlign(TextAlignment.CENTER);
-    
-    stage.show();
-
-    List<Grid> frames = new LinkedList<Grid>();
-    frames.add(grid);
-    display(frames);
-
-
-    this.scene.setOnKeyPressed(
-        new EventHandler<KeyEvent>() {
-          public void handle(KeyEvent e) {
-            if (canPressFlag) {
-              canPressFlag = false;
-              String code = e.getCode().toString();
-              if (!input.contains(code)) {
-                input.add(code);
-              }
-            }
-          }
-        });
-
-    this.scene.setOnKeyReleased(
-        new EventHandler<KeyEvent>() {
-          public void handle(KeyEvent e) {
-            canPressFlag = true;
-            String code = e.getCode().toString();
-            input.remove(code);
-          }
-        });
-  }
-  
   @Override
   public List<Action> getInput() {
     List<Action> actions = null;
+    // Default action
     if (input.isEmpty()) {
       actions = new ArrayList<Action>();
       actions.add(Action.NONE);
@@ -326,6 +389,7 @@ class GraphicsView implements View {
   public GameStats play(GridManager manager, Algorithm algo) {
     GameStats stat = new GameStats();
     
+    // Create and start the animation loop
     new AnimationTimer() {
       public void handle(long nanoTime) {
         if (!animate) {
@@ -340,12 +404,13 @@ class GraphicsView implements View {
             stop();
             return;
           }
-          
+          // Pass the frames into the renderer 
           display(manager.process(algo.move(grid)));
         }
       }
     }.start();
     
+    // Return post game stats
     return stat;
   }
 

@@ -12,7 +12,8 @@ import java.util.LinkedList;
 class GridManager {
   private Stack<Grid> instances;
   private Stack<Grid> temp;
-
+  
+  /** Evaluate if throughout the sequence of frames, a node shifted. */
   public static boolean hasMoved(List<Grid> frames) {
     if (frames.size() == 1) {
       return false;
@@ -39,7 +40,8 @@ class GridManager {
       this.temp.push(instance);
     }
   }
-
+  
+  /** Return true if history is empty. */
   public boolean isHistoryEmpty() {
     return instances.isEmpty();
   }
@@ -76,10 +78,12 @@ class GridManager {
     temp.clear();
   }
 
+  /** Return the initial grid. */
   public Grid initial() {
     return instances.get(0);
   }
 
+  /** Clear history and play the game again, with the original initial state. */
   public Grid reset() {
     Grid grid = instances.get(0);
     instances.clear();
@@ -87,7 +91,8 @@ class GridManager {
     instances.push(grid);
     return grid;
   }
-
+  
+  /** Clear history and play the game again with a new initial state. */
   public Grid restart() {
     Grid first = instances.get(0);
     Grid grid = null;
@@ -103,11 +108,12 @@ class GridManager {
     return grid;
   }
 
+  /** Return the latest grid in history. */
   public Grid show() {
     return instances.peek();
   }
 
-
+  /** Process an action and perform the corresponding effect on the grid. */
   public List<Grid> process(Action action) throws InvalidActionException {
     List<Grid> frames;
     switch(action) {
@@ -149,7 +155,8 @@ class GridManager {
 
     return null;
   }
-
+  
+  /** Process a list of actions. */
   public List<Grid> process(List<Action> actions) {
     List<Grid> frames = new LinkedList<Grid>();
     try {
@@ -162,7 +169,8 @@ class GridManager {
     }
     return frames;
   }
-
+  
+  /** Slide upwards, pass in true to generate a new node after each move. */ 
   public List<Grid> slideUp(boolean generate) {
     List<Grid> frames = instances.peek().slideUp(generate);
     if (GridManager.hasMoved(frames)) {
@@ -170,11 +178,13 @@ class GridManager {
     }
     return frames;
   }
-
+  
+  /** Slide upwards. */ 
   public List<Grid> slideUp() {
     return slideUp(true);
   }
-
+  
+  /** Slide rightwards, pass in true to generate a new node after each move. */ 
   public List<Grid> slideRight(boolean generate) {
     List<Grid> frames = instances.peek().slideRight(generate);
     if (GridManager.hasMoved(frames)) {
@@ -182,11 +192,13 @@ class GridManager {
     }
     return frames;
   }
-
+  
+  /** Slide rightwards. */ 
   public List<Grid> slideRight() {
     return slideRight(true);
   }
 
+  /** Slide downwards, pass in true to generate a new node after each move. */ 
   public List<Grid> slideDown(boolean generate) {
     List<Grid> frames = instances.peek().slideDown(generate);
     if (GridManager.hasMoved(frames)) {
@@ -194,11 +206,13 @@ class GridManager {
     }
     return frames;
   }
-
+  
+  /** Slide downwards. */ 
   public List<Grid> slideDown() {
     return slideDown(true);
   }
 
+  /** Slide leftwards, pass in true to generate a new node after each move. */ 
   public List<Grid> slideLeft(boolean generate) {
     List<Grid> frames = instances.peek().slideLeft(generate);
     if (GridManager.hasMoved(frames)) {
@@ -206,11 +220,13 @@ class GridManager {
     }
     return frames;
   }
-
+  
+  /** Slide leftwards. */ 
   public List<Grid> slideLeft() {
     return slideLeft(true);
   }
-  
+ 
+  /** Insert node into the grid. */
   public Grid insertValue(ValueNode node) {
     Grid grid = instances.peek().setValueNode(node);
     save(grid);
