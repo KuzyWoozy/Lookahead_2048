@@ -4,11 +4,17 @@ import java.util.Random;
 import java.util.List;
 import java.util.LinkedList;
 
-
+/**
+ * Plays the game by performing random actions from a 
+ * uniform distribution.
+ *
+ * @author Daniil Kuznetsov
+ */
 class UniformRandomPlay implements Algorithm {
   
   private Random random;
 
+  /** Default constructor. */
   public UniformRandomPlay() {
     this.random = new Random();
   }

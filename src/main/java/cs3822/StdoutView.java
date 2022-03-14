@@ -29,19 +29,18 @@ class StdoutView implements View {
   private void display(Grid grid) {
     System.out.println(clear() + grid.stringify() + "\n\n\n");
   }
-
+  
+  /** Default constructor. */
   public StdoutView(InputStream stream) {
     this.scan = new Scanner(stream);
   }
   
-  /** Obtain the list of user Actions from the stdin. */
   @Override
   public List<Action> getInput() {
     System.out.print("\nEnter command(s): ");
     return View.convertStringToActions(scan.nextLine());
   }
    
-  /** Execute the game logic. */
   @Override
   public GameStats play(GridManager manager, Algorithm algo) {
     GameStats stat = new GameStats();

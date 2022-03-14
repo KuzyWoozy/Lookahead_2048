@@ -1,6 +1,4 @@
-/*
 package cs3822;
-
 
 
 class LookaheadStrand implements Runnable {
@@ -21,4 +19,3 @@ class LookaheadStrand implements Runnable {
   }
   
 }
-*/

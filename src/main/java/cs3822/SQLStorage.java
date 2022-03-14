@@ -12,6 +12,11 @@ import java.util.Map;
 import java.util.HashMap;
 
 
+/**
+ * SQL database model storage. 
+ *
+ * @author Daniil Kuznetsov
+ */
 class SQLStorage implements ModelStorage {
   final private int subBatch = 10000;
 
@@ -27,7 +32,13 @@ class SQLStorage implements ModelStorage {
 
   private PreparedStatement insertStmt;
   private PreparedStatement selectSolInfoStmt;
-
+  
+  /** 
+   * Standard constructor.
+   *
+   * @param location Location of the database
+   * @param bufferSize Size of the local hash table buffer
+   */
   public SQLStorage(String location, int bufferSize) {
     this.count = 0;
     this.buffer = new HashMap<Integer, Pair<Float, Action>>();

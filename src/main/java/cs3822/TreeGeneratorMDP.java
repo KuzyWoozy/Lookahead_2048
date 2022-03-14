@@ -22,7 +22,12 @@ class TreeGeneratorMDP implements Algorithm {
 
   final private ModelStorage db;
 
-  /** Initialize class with initial node and probability of generating a 2. */
+  /** 
+   * Standard constructor.
+   *
+   * @param grid Initial start state
+   * @param db Solution storage 
+   */
   public TreeGeneratorMDP(Grid grid, ModelStorage db) throws InvalidActionException {
     this.history = new Stack<TreeDFSNode>();
     this.db = db;
@@ -198,12 +203,8 @@ class TreeGeneratorMDP implements Algorithm {
   /**
    * Performs shifts upwards until a terminal is reached, 
    * a loss, win or no more possible moves upwards. 
-   * All of the processing information is recoded in 
-   * the specified Stack and Hash table.
    *
-   * @param grid Start point for the dive
-   * @param history Stack manager for processing in a DFS manner
-   * @param db Table of optimal solutions
+   * @param manager Starts the dive at latest item in manager history
    */
   private void dive(GridManager manager) {
     List<Grid> frames;

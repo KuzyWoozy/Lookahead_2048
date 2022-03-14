@@ -6,6 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+/**
+ * Lookahead 2048 algorithm.
+ *
+ * @author Daniil Kuznetsov
+ */
 class Lookahead implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
@@ -21,17 +26,12 @@ class Lookahead implements Algorithm {
   }
   */
 
+  /** Return heuristic reward of given grid. */
   private float rewardFunc(Grid grid) {
     return grid.getScore() + grid.getImmediateWeightedScore();
   }
-
   
-  /*
-  private float rewardFunc(Grid grid) {
-    return grid.getScore();
-  }
-  */
-
+  /** Standard constructor with lookahead depth. */
   public Lookahead(long depth_max) {
     this.depth_max = depth_max;
     // Initialize the Tree DFS stack
@@ -39,6 +39,12 @@ class Lookahead implements Algorithm {
     this.db = new MapStorage(new HashMap<Integer, Pair<Float, Action>>());
   }
 
+  /** 
+   * Standard constructor.
+   *
+   * @param db Solution storage 
+   * @param depth_max Max lookahead depth
+   */
   public Lookahead(ModelStorage db, long depth_max) {
     this.depth_max = depth_max;
     // Initialize the Tree DFS stack
@@ -224,12 +230,8 @@ class Lookahead implements Algorithm {
   /**
    * Performs shifts upwards until a terminal is reached, 
    * a loss, win or no more possible moves upwards. 
-   * All of the processing information is recoded in 
-   * the specified Stack and Hash table.
    *
-   * @param grid Start point for the dive
-   * @param history Stack manager for processing in a DFS manner
-   * @param db Table of optimal solutions
+   * @param manager Starts the dive at latest item in manager history
    */
   private void dive(GridManager manager) {
     List<Grid> frames;
@@ -319,11 +321,13 @@ class Lookahead implements Algorithm {
       history.push(node);
     }
   }
-
+  
+  /** Return current depth. */
   public long getDepth() {
     return depth;
   }
 
+  /** Return number of instances processed. */
   public long getInstancesProcessed() {
     return instancesProcessed;
   }

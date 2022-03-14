@@ -52,8 +52,15 @@ interface View {
       return list;
   }
   
+  /** Return user input in form of Actions. */
   public List<Action> getInput();
 
-  /** Update the interface with the new grid state. */
+  /**
+   * Play the game from the given start state and use the algorithm specified.
+   *
+   * @param manager Grid history, with the latest state used as the start state
+   * @param algo Algorithm used to play the game
+   * @return Post game statistics
+   */
   public GameStats play(GridManager manager, Algorithm algo);
 }

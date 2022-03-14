@@ -4,12 +4,22 @@ import java.util.List;
 import java.util.LinkedList;
 import org.ejml.simple.SimpleMatrix;
 
-
+/**
+ * Layer parameter derivitives. 
+ *
+ * @author Daniil Kuznetsov
+ */
 final class LayerGrad {
 
   final private SimpleMatrix weightGrad;
   final private SimpleMatrix biasGrad;
 
+  /**
+   * Aggregates array of network gradients.
+   *
+   * @param gradients Two dimensional LayerGrad matrix to aggregate
+   * @return Aggregated array
+   */
   public static List<LayerGrad> avgRows(List<List<LayerGrad>> gradients) {
     
     List<LayerGrad> grads = new LinkedList<LayerGrad>(); 
@@ -30,24 +40,33 @@ final class LayerGrad {
     return grads;
   }
 
-
+  /**
+   * Standard constructor.
+   *
+   * @param weightGrad Layer weight gradients
+   * @param biasGrad Layer bias gradients
+   */
   public LayerGrad(SimpleMatrix weightGrad, SimpleMatrix biasGrad) {
     this.weightGrad = new SimpleMatrix(weightGrad);
     this.biasGrad = new SimpleMatrix(biasGrad);
   }
-
+  
+  /** Return layer weight gradients. */
   public SimpleMatrix getWeightGrad() {
     return weightGrad;
   }
 
+  /** Return layer bias gradients. */
   public SimpleMatrix getBiasGrad() {
     return biasGrad;
   }
 
+  /** Return addition between two LayerGrad objects. */
   public LayerGrad add(LayerGrad layer_grad) {
     return new LayerGrad(weightGrad.plus(layer_grad.getWeightGrad()), biasGrad.plus(layer_grad.getBiasGrad()));
   }
 
+  /** Return elementwise division on LayerGrad by a double */
   public LayerGrad div(double magnitude) {
     return new LayerGrad(weightGrad.divide(magnitude), biasGrad.divide(magnitude));
   }

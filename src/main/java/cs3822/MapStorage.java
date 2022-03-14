@@ -6,10 +6,16 @@ import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
 
 
+/**
+ * Hash table model storage.
+ *
+ * @author Daniil Kuznetsov
+ */
 class MapStorage implements ModelStorage {
 
   private Map<Integer, Pair<Float, Action>> map;
 
+  /** Copy constructor. */
   public MapStorage(Map<Integer, Pair<Float, Action>> map) {
     this.map = map;
   }

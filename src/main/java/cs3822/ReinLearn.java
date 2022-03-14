@@ -5,16 +5,29 @@ import java.util.List;
 import java.util.LinkedList;
 import org.ejml.simple.SimpleMatrix;
 
-
+/**
+ * Reinforcement Algorithm.
+ *
+ * @author Daniil Kuznetsov
+ */
 class ReinLearn implements Algorithm {
 
   final private FFN neural;
   final private GridManager manager;
  
   private Random generator = new Random();
-  UniformRandomPlay explorer = new UniformRandomPlay();
+  private UniformRandomPlay explorer = new UniformRandomPlay();
 
-  
+  /**
+   * Standard constructor.
+   *
+   * @param instance Initial game grid 
+   * @param middleLayerSize Deep layer size
+   * @param alpha Learning rate
+   * @param beta Momentum
+   * @param lambda Regularization
+   * @param layers_num Number of deep layers in the network
+   */
   public ReinLearn(Grid instance, int middleLayerSize, double alpha, double beta, double lambda, int layers_num) {
     this.manager = new GridManager(instance);
     this.neural = new FFN(instance.getRows() * instance.getCols(), middleLayerSize, 4, alpha, beta, lambda, layers_num);
@@ -23,6 +36,7 @@ class ReinLearn implements Algorithm {
     this.explorer = new UniformRandomPlay();
   }
 
+  /** Return index of maximum value in the row vector. */
   private int argmax(SimpleMatrix vector) {
     int maxArg = 0;
     Double maxValue = Double.NEGATIVE_INFINITY;
@@ -37,6 +51,12 @@ class ReinLearn implements Algorithm {
     return maxArg;
   }
   
+  /**
+   * Learn by playing 2048.
+   *
+   * @param epsilon Chance of random action
+   * @return List of tuples of network cache, action taken, immediate reward obtained.
+   */
   private List<Triplet<List<LayerCache>, Action, Double>> play(double epsilon) {
     List<Triplet<List<LayerCache>, Action, Double>> neural_cache = new LinkedList<Triplet<List<LayerCache>, Action, Double>>();
 
@@ -66,6 +86,13 @@ class ReinLearn implements Algorithm {
     return neural_cache;
   }
 
+  /**
+   * Create the vector learning label.
+   *
+   * @param output Network output
+   * @param action Action taken at the specific instance
+   * @param reward Reward
+   */
   private SimpleMatrix createLabel(SimpleMatrix output, Action action, double reward) {
     SimpleMatrix label = new SimpleMatrix(output);
     
@@ -79,25 +106,28 @@ class ReinLearn implements Algorithm {
     return label;
   }
   
+  /** Train by playing the specified number of games. */
   public void train(int games) {
     List<Triplet<List<LayerCache>, Action, Double>> cache = null;
     List<List<LayerGrad>> gradients = null;
 
     for (int i = 0; i < games; i++) {
-      
+      // Play the game with 10% of randomness 
       cache = play(0.1d);
       
       gradients = new LinkedList<List<LayerGrad>>();
       double futureReward = 0;
       for (Triplet<List<LayerCache>, Action, Double> neural_cache : cache) {
         neural.loadCache(neural_cache.getFirst());
-
+        
+        // Compute the new reward, 1 for maximum confidence
         double immediateReward = neural_cache.getThird() + 1 * futureReward;
         gradients.add(neural.grad(neural.getLastLayer().get_Y(), createLabel(neural.getLastLayer().get_Y(), neural_cache.getSecond(), immediateReward)));
         
         futureReward = immediateReward;
       }
-
+      
+      // Debug information
       String printable = "";
       for (Layer layer : neural.getLayers()) {
         printable += layer.getWeights().elementSum() + "\n";
@@ -108,7 +138,8 @@ class ReinLearn implements Algorithm {
       printable += cache.get(0).getFirst().get(cache.get(0).getFirst().size() - 1).get_Y() + "\n";
       
       System.out.println(printable);
-
+      
+      // Update the neural network
       neural.backprop(LayerGrad.avgRows(gradients));
 
       manager.restart();
@@ -117,11 +148,12 @@ class ReinLearn implements Algorithm {
     }
   }
   
-
+  /** Use neural network to take an action, with epsilon randomness. */
   private List<Action> moveEpsilon(Grid instance, double epsilon) {
     List<Action> actions = null;
     try {
       SimpleMatrix y = neural.prop(instance.toVector());
+      // Check if epsilon algorithm need to be executed
       if (epsilon <= generator.nextDouble()) {
         actions = new LinkedList<Action>();
         actions.add(Action.convertIntToAction(argmax(y)));
@@ -134,7 +166,8 @@ class ReinLearn implements Algorithm {
     }
     return actions;
   }
-
+  
+  /** Use the neural network to select an action to take based on game state. */
   public List<Action> move(Grid instance) {
     List<Action> actions = new LinkedList<Action>();
     try {
