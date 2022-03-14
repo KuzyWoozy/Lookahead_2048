@@ -20,16 +20,7 @@ class TreeDFSNode {
   final private float expSum;
   
   final private List<ValueNode> posi;
-  final private int posiNum;
-
-  /** Return a copy of the specified list of value nodes. */
-  private List<ValueNode> cloneNodes(List<ValueNode> nodes) {
-    List<ValueNode> nodeCopy = Arrays.asList(new ValueNode[nodes.size()]);
-    for (int i = 0; i < nodes.size(); i++) {
-      nodeCopy.set(i, nodes.get(i));
-    }
-    return nodeCopy;
-  }
+  final private int posiNum; 
   
   /** Default constructor. */
   public TreeDFSNode() {
@@ -108,6 +99,15 @@ class TreeDFSNode {
     this.posi = cloneNodes(rest); 
     
     this.posiNum = node.posiNum;
+  }
+
+  /** Return a copy of the specified list of value nodes. */
+  private List<ValueNode> cloneNodes(List<ValueNode> nodes) {
+    List<ValueNode> nodeCopy = Arrays.asList(new ValueNode[nodes.size()]);
+    for (int i = 0; i < nodes.size(); i++) {
+      nodeCopy.set(i, nodes.get(i));
+    }
+    return nodeCopy;
   }
 
   /** Return best action. */

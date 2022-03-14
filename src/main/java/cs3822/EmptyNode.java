@@ -9,11 +9,6 @@ import java.util.Objects;
  */
 final class EmptyNode extends Node {
 
-  /** Default constructor. */
-  public EmptyNode() {
-    super();
-  }
-
   /**
    * Instantiates the node at the specified position.
    *

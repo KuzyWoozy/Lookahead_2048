@@ -15,6 +15,11 @@ import java.io.InputStream;
 class StdoutView implements View {
  
   private Scanner scan;
+
+  /** Default constructor. */
+  public StdoutView(InputStream stream) {
+    this.scan = new Scanner(stream);
+  }
  
   /** Clear the stdout. */
   private String clear() {
@@ -28,12 +33,7 @@ class StdoutView implements View {
   /** Print the specified grid to stdout. */ 
   private void display(Grid grid) {
     System.out.println(clear() + grid.stringify() + "\n\n\n");
-  }
-  
-  /** Default constructor. */
-  public StdoutView(InputStream stream) {
-    this.scan = new Scanner(stream);
-  }
+  }  
   
   @Override
   public List<Action> getInput() {

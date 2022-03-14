@@ -105,6 +105,25 @@ class ReinLearn implements Algorithm {
 
     return label;
   }
+
+  /** Use neural network to take an action, with epsilon randomness. */
+  private List<Action> moveEpsilon(Grid instance, double epsilon) {
+    List<Action> actions = null;
+    try {
+      SimpleMatrix y = neural.prop(instance.toVector());
+      // Check if epsilon algorithm need to be executed
+      if (epsilon <= generator.nextDouble()) {
+        actions = new LinkedList<Action>();
+        actions.add(Action.convertIntToAction(argmax(y)));
+      } else {
+        actions = explorer.move(instance);
+      }
+    } catch(InvalidActionException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    return actions;
+  }
   
   /** Train by playing the specified number of games. */
   public void train(int games) {
@@ -146,26 +165,7 @@ class ReinLearn implements Algorithm {
       
       System.out.println("Game finished: " + String.valueOf(i));
     }
-  }
-  
-  /** Use neural network to take an action, with epsilon randomness. */
-  private List<Action> moveEpsilon(Grid instance, double epsilon) {
-    List<Action> actions = null;
-    try {
-      SimpleMatrix y = neural.prop(instance.toVector());
-      // Check if epsilon algorithm need to be executed
-      if (epsilon <= generator.nextDouble()) {
-        actions = new LinkedList<Action>();
-        actions.add(Action.convertIntToAction(argmax(y)));
-      } else {
-        actions = explorer.move(instance);
-      }
-    } catch(InvalidActionException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    return actions;
-  }
+  } 
   
   /** Use the neural network to select an action to take based on game state. */
   public List<Action> move(Grid instance) {

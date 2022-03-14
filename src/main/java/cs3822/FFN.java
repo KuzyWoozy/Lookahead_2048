@@ -6,7 +6,7 @@ import org.ejml.simple.SimpleMatrix;
 
 
 /**
- * Feedforward neural network
+ * Feedforward neural network.
  *
  * @author Daniil Kuznetsov
  */
