@@ -20,16 +20,19 @@ class Lookahead implements Algorithm {
   private Stack<TreeDFSNode> history;
   final private ModelStorage db;
 
+  
   /*
   private float rewardFunc(Grid grid) {
     return grid.getScore();
   }
   */
-
+  
   /** Return heuristic reward of given grid. */
+  
   private float rewardFunc(Grid grid) {
     return grid.getScore() + grid.getImmediateWeightedScore();
   }
+  
   
   /** Standard constructor with lookahead depth. */
   public Lookahead(long depth_max) {
@@ -51,10 +54,31 @@ class Lookahead implements Algorithm {
     history = new Stack<TreeDFSNode>();
     this.db = db;
   }
- 
+  
+
+  public float move_reward(Grid grid, boolean clear) {
+    move_pure(grid, clear);
+    
+    return db.fetch(grid.hashCode()).getFirst();
+  }
+
   @Override
   public List<Action> move(Grid grid) {
-    db.clear();
+    move_pure(grid);
+
+    LinkedList<Action> list = new LinkedList<Action>();
+    list.add(db.fetch(grid.hashCode()).getSecond()); 
+    return list;
+  }
+
+  public void move_pure(Grid grid) {
+    move_pure(grid, true);
+  }
+
+  public void move_pure(Grid grid, boolean clear) {
+    if (clear) {
+      db.clear();
+    }
     
     GridManager manager = new GridManager(grid);
 
@@ -220,11 +244,7 @@ class Lookahead implements Algorithm {
     } catch(InvalidActionException e) {
       e.printStackTrace();
       System.exit(1);
-    }
-
-    LinkedList<Action> list = new LinkedList<Action>();
-    list.add(db.fetch(grid.hashCode()).getSecond()); 
-    return list;
+    } 
   }
 
   /**

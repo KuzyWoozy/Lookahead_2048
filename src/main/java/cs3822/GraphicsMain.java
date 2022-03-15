@@ -39,6 +39,9 @@ public class GraphicsMain extends Application {
         case "lookahead":
           algo = new Lookahead(3);
           break;
+        case "threaded":
+          algo = new ThreadedLookahead(3); 
+          break;
         case "uniform":
           algo = new UniformRandomPlay();
           break;
@@ -123,12 +126,11 @@ public class GraphicsMain extends Application {
 
         GameStats stats = new GameStats();
         // Loop can be altered to increase number of games played
-        for (int x = 0; x < 1; x++) {
+        for (int x = 0; x < 100; x++) {
           stats.merge(view.play(manager, algo));
           manager.reset();
+          System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
         }
-        System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
-
       }
     }
 

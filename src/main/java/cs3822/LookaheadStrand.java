@@ -7,15 +7,15 @@ class LookaheadStrand implements Runnable {
   private MutableFloat reward;
   private Lookahead algo;
 
-  public LookaheadStrand(Grid grid, ModelStorage db, MutableFloat reward, float reward_max, long depth_max) {
+  public LookaheadStrand(Grid grid, ModelStorage db, MutableFloat reward, long depth_max) {
     this.grid = grid;
     this.reward = reward;
-    this.algo = new Lookahead(db, reward_max, depth_max);
+    this.algo = new Lookahead(db, depth_max);
   }
 
   @Override
   public void run() {
-    this.reward.set(algo.move_reward(grid));
+    this.reward.set(algo.move_reward(grid, false));
   }
   
 }

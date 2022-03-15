@@ -1,4 +1,3 @@
-/*
 package cs3822;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,10 +11,13 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Threaded lookahead.
+ *
+ * @author Daniil Kuznetsov
+ */
 class ThreadedLookahead implements Algorithm {
 
-  private final float reward_max;
   private final long depth_max;
 
   private List<Callable<Object>> jobs = new LinkedList<Callable<Object>>();
@@ -25,15 +27,18 @@ class ThreadedLookahead implements Algorithm {
 
   private ModelStorage db;
 
-  public ThreadedLookahead(float reward_max, long depth_max) {
-    this.db = new MapStorage(new ConcurrentHashMap<Integer, SolTableItem>());
-    this.reward_max = reward_max;
+  /** Standard constructor with max depth of the lookahead. */
+  public ThreadedLookahead(long depth_max) {
+    this.db = new MapStorage(new ConcurrentHashMap<Integer, Pair<Float, Action>>());
     this.depth_max = depth_max;
   }
-
+  
+  /** Use the threading pool to process all the jobs. */
   private void processJobs() {
     try {
+      // Begin processing the necessary jobs
       List<Future<Object>> futures = pool.invokeAll(jobs);
+      // Wait for the jobs to terminate
       for (Future<Object> future : futures) {
         future.get();
       }
@@ -42,7 +47,8 @@ class ThreadedLookahead implements Algorithm {
       System.exit(1);
     }
   }
-
+  
+  /** Compute rewards for each jobs. */
   private Action processRewards(float twoProb) {
     ArrayList<Action> actions = Action.getMoveActions();
     ArrayList<Float> expRewards = new ArrayList<Float>();
@@ -60,6 +66,7 @@ class ThreadedLookahead implements Algorithm {
       }
     }
 
+    // Find best action based on maximal reward
     Action bestAction = null;
     float maxReward = 0;
     for (int i = 0; i < actions.size(); i++) {
@@ -70,61 +77,63 @@ class ThreadedLookahead implements Algorithm {
     }
     return bestAction;
   }
-
-  private void fillUpJobs(Grid grid) {
+  
+  /** Create jobs for the thread pool to process. */
+  private void fillUpJobs(GridManager manager) {
     jobs.clear();
     rewards.clear();
+    List<Grid> frames;
 
-    grid.slideUp(false);
-    if (grid.getMove()) {
-      addJobs(grid); 
-      grid.undo();
+    frames = manager.slideUp(false);
+    if (manager.hasMoved(frames)) {
+      addJobs(manager.show()); 
+      manager.undo();
     } else {
       rewards.add(new LinkedList<MutableFloat>());
     }
     
-    grid.slideRight(false);
-    if (grid.getMove()) {
-      addJobs(grid); 
-      grid.undo();
+    frames = manager.slideRight(false);
+    if (manager.hasMoved(frames)) {
+      addJobs(manager.show()); 
+      manager.undo();
     } else {
       rewards.add(new LinkedList<MutableFloat>());
     }
 
-    grid.slideDown(false);
-    if (grid.getMove()) {
-      addJobs(grid); 
-      grid.undo();
+    frames = manager.slideDown(false);
+    if (manager.hasMoved(frames)) {
+      addJobs(manager.show()); 
+      manager.undo();
     } else {
       rewards.add(new LinkedList<MutableFloat>());
     }
 
-    grid.slideLeft(false);
-    if (grid.getMove()) {
-      addJobs(grid); 
-      grid.undo();
+    frames = manager.slideLeft(false);
+    if (manager.hasMoved(frames)) {
+      addJobs(manager.show()); 
+      manager.undo();
     } else {
       rewards.add(new LinkedList<MutableFloat>());
     }
   }
-
+  
+  /** Add possibilities as each independent job to process. */
   private void addJobs(Grid grid) {
     LinkedList<MutableFloat> localRewards = new LinkedList<MutableFloat>();
     for (EmptyNode node : grid.getEmptyNodesCopy()) {
+      // Create a job with generated 2
       MutableFloat reward1 = new MutableFloat();
-      Grid gridCopy1 = new Grid(grid);
-      gridCopy1.setValueNode(new ValueNode(node, 2));
+      Grid gridCopy1 = grid.setValueNode(new ValueNode(node, 2));
       
-      LookaheadStrand thread1 = new LookaheadStrand(gridCopy1, db, reward1, reward_max, depth_max - 1);
+      LookaheadStrand thread1 = new LookaheadStrand(gridCopy1, db, reward1, depth_max - 1);
       jobs.add(Executors.callable(thread1));
       localRewards.add(reward1);
 
-
+      // Create job with generated 4
       MutableFloat reward2 = new MutableFloat();
-      Grid gridCopy2 = new Grid(grid);
-      gridCopy2.setValueNode(new ValueNode(node, 4));
+      Grid gridCopy2 = grid.setValueNode(new ValueNode(node, 4));
       
-      LookaheadStrand thread2 = new LookaheadStrand(gridCopy2, db, reward2, reward_max, depth_max - 1);
+      LookaheadStrand thread2 = new LookaheadStrand(gridCopy2, db, reward2, depth_max - 1);
       jobs.add(Executors.callable(thread2));
       localRewards.add(reward2);
     }
@@ -133,11 +142,12 @@ class ThreadedLookahead implements Algorithm {
 
   @Override
   public List<Action> move(Grid grid) {
-    Grid gridz = new Grid(grid);
+
+    GridManager manager = new GridManager(grid);
 
     db.clear();
     
-    fillUpJobs(grid);
+    fillUpJobs(manager);
 
     processJobs();
     
@@ -145,12 +155,7 @@ class ThreadedLookahead implements Algorithm {
     List<Action> list = new LinkedList<Action>();
     list.add(bestAction);
     
-    if (!gridz.equals(grid)) {
-      System.exit(1);
-    }
-
     return list;
   }
 
 }
-*/

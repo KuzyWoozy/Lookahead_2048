@@ -766,24 +766,24 @@ class Grid {
     SimpleMatrix weights = new SimpleMatrix(rowSize, columnSize);
     weights.fill(1d);
     
-    
-    weights.set(0, 0, 5);
-    weights.set(0, 1, 4);
-    weights.set(0, 2, 3);
-    weights.set(0, 3, 2);
-    weights.set(1, 0, 3);
-    weights.set(1, 1, 2);
-    weights.set(1, 2, 1);
-    
-    
-    /*
-    weights.set(0, 0, 5);
-    weights.set(0, 1, 4);
-    weights.set(0, 2, 3);
-    weights.set(0, 3, 2);
-    */
 
-
+    int val = columnSize + 1;
+    int buf = val;
+    for (int y = 0; y < rowSize; y++) {
+      for (int x = 0; x < columnSize; x++) {
+        weights.set(y, x, buf);
+        buf -= 1;
+        if (buf <= 1) {
+          break;
+        }
+      }
+      val -= 2;
+      if (val <= 1) {
+        break;
+      }
+      buf = val;
+    } 
+    
     weights.reshape(rowSize * columnSize, 1);
     return (float)(toVector().transpose().mult(weights).get(0));
   }
