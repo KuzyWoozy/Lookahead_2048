@@ -236,7 +236,7 @@ class Grid {
     return newNode;
   }
   
-  /** Shift the nodes one step upwards. */
+  /** Returns new score after shifting the nodes one step upwards. */
   private int slideUpIteration(List<Node> nodes, int score) {
 
     for (int y = 0; y < rowSize; y++) {
@@ -266,7 +266,7 @@ class Grid {
     return score;
   }
   
-  /** Shift the nodes upwards. */
+  /** Return transition frames after shifting the nodes upwards. */
   public List<Grid> slideUp(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -289,12 +289,12 @@ class Grid {
     return frames;
   }
 
-  /** Shift every node upwards. */
+  /** Return transition frames after shifting the nodes upwards. */
   public List<Grid> slideUp() {
     return slideUp(true);
   }
   
-  /** Shift the nodes one step rightwards. */
+  /** Returns new score after shifting the nodes one step rightwards. */
   private int slideRightIteration(List<Node> nodes, int score) {
 
     for (int y = 0; y < rowSize; y++) {
@@ -324,7 +324,7 @@ class Grid {
     return score;
   }
   
-  /** Shift the nodes rightwards. */
+  /** Return transition frames after shifting the nodes rightwards. */
   public List<Grid> slideRight(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -346,12 +346,12 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node rightwards. */
+  /** Return transition frames after shifting the nodes rightwards. */
   public List<Grid> slideRight() {
     return slideRight(true);
   }
   
-  /** Shift the nodes one step downwards. */
+  /** Returns new score after shifting the nodes one step downwards. */
   private int slideDownIteration(List<Node> nodes, int score) {
     for (int y = rowSize - 1; y >= 0; y--) {
       for (int x = 0; x < columnSize; x++) {
@@ -380,7 +380,7 @@ class Grid {
     return score;
   }
   
-  /** Shift the nodes downwards. */
+  /** Return transition frames after shifting the nodes downwards. */
   public List<Grid> slideDown(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -402,12 +402,12 @@ class Grid {
     return frames;
   }
 
-  /** Shift the nodes downwards. */
+  /** Return transition frames after shifting the nodes downwards. */
   public List<Grid> slideDown() {
     return slideDown(true);
   }
   
-  /** Shift the nodes one step leftwards. */
+  /** Returns new score after shifting the nodes one step leftwards. */
   private int slideLeftIteration(List<Node> nodes, int score) {
     for (int y = 0; y < rowSize; y++) {
       for (int x = 0; x < columnSize; x++) {
@@ -435,7 +435,7 @@ class Grid {
     return score;
   }
   
-  /** Shift the nodes leftwards. */
+  /** Return transition frames after shifting the nodes leftwards. */
   public List<Grid> slideLeft(boolean generate) {
     List<Node> cloned = resetNodes(); 
     List<Grid> frames = new LinkedList<Grid>();
@@ -457,7 +457,7 @@ class Grid {
     return frames;
   }
 
-  /** Slide every node leftwards. */
+  /** Return transition frames after shifting the nodes leftwards. */
   public List<Grid> slideLeft() {
     return slideLeft(true);
   }

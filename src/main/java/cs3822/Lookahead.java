@@ -55,7 +55,12 @@ class Lookahead implements Algorithm {
     this.db = db;
   }
   
-
+  /** 
+   * Return reward of the given state.
+   *
+   * @param grid Initial grid to perform lookahead on
+   * @param clear Will clear model storage if true
+   */
   public float move_reward(Grid grid, boolean clear) {
     move_pure(grid, clear);
     
@@ -70,11 +75,18 @@ class Lookahead implements Algorithm {
     list.add(db.fetch(grid.hashCode()).getSecond()); 
     return list;
   }
-
+  
+  /** Lookahead algorithm, performed on the specified state. */
   public void move_pure(Grid grid) {
     move_pure(grid, true);
   }
-
+  
+  /** 
+   * Lookahead algorithm.
+   *
+   * @param grid Initial grid to perform lookahead on
+   * @param clear Will clear model storage if true
+   */
   public void move_pure(Grid grid, boolean clear) {
     if (clear) {
       db.clear();
