@@ -19,6 +19,7 @@ import java.util.List;
 class ThreadedLookahead implements Algorithm {
 
   private final long depth_max;
+  private Heuristic heuristic;
 
   private List<Callable<Object>> jobs = new LinkedList<Callable<Object>>();
   private List<List<MutableFloat>> rewards = new LinkedList<List<MutableFloat>>();
@@ -28,8 +29,9 @@ class ThreadedLookahead implements Algorithm {
   private ModelStorage db;
 
   /** Standard constructor with max depth of the lookahead. */
-  public ThreadedLookahead(long depth_max) {
+  public ThreadedLookahead(long depth_max, Heuristic heuristic) {
     this.db = new MapStorage(new ConcurrentHashMap<Integer, Pair<Float, Action>>());
+    this.heuristic = heuristic;
     this.depth_max = depth_max;
   }
   
@@ -125,7 +127,7 @@ class ThreadedLookahead implements Algorithm {
       MutableFloat reward1 = new MutableFloat();
       Grid gridCopy1 = grid.setValueNode(new ValueNode(node, 2));
       
-      LookaheadStrand thread1 = new LookaheadStrand(gridCopy1, db, reward1, depth_max - 1);
+      LookaheadStrand thread1 = new LookaheadStrand(gridCopy1, db, reward1, depth_max - 1, heuristic);
       jobs.add(Executors.callable(thread1));
       localRewards.add(reward1);
 
@@ -133,7 +135,7 @@ class ThreadedLookahead implements Algorithm {
       MutableFloat reward2 = new MutableFloat();
       Grid gridCopy2 = grid.setValueNode(new ValueNode(node, 4));
       
-      LookaheadStrand thread2 = new LookaheadStrand(gridCopy2, db, reward2, depth_max - 1);
+      LookaheadStrand thread2 = new LookaheadStrand(gridCopy2, db, reward2, depth_max - 1, heuristic);
       jobs.add(Executors.callable(thread2));
       localRewards.add(reward2);
     }

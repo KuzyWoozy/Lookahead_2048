@@ -104,9 +104,9 @@ class TreeGeneratorMDP implements Algorithm {
                 break;
 
               case SWIPE_LEFT:
-                // Debug info
                 db.insert(manager.show().hashCode(), peek.getBestAction(), peek.getBestReward());
-                
+
+                                
                 history.push(peek);
                 break loop;
 
@@ -124,7 +124,6 @@ class TreeGeneratorMDP implements Algorithm {
           TreeDFSNode node = new TreeDFSNode(manager.show());
           depth++;
           manager.insertValue(node.getNextPossibility());
-
 
           if (manager.show().lost()) {
             history.push(new TreeDFSNode(node, Action.NONE));

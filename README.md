@@ -7,11 +7,75 @@
 This chapter focuses on going over all of the components which make up the specification of 2048, as well as the impacts they will have on creating an algorithm that is able to solve the game.'*
 
 ## Dependencies:
-- Maven == 5.5.0
-- Java == 17
+- java >= 11
+- maven >= 3.8.3 (Only to recompile, not necessary to run anything)
+## Getting started:
 
-## Controls
-Each command is entered via stdin (ascii within single quotes below), either in turn or as a sequence of several commands.
+All the programs in this project are ran via a single .jar file called "2048", that accepts command line arguments.
+
+```java -jar 2048.jar --help```
+
+### Precompiled programs (Easiest to run)
+
+The 'precompiled/' folder contains .jar files that have been compiled with the following settings. These programs are meant to give a genera overview of the capabilities of the application, with further custom configuration available via command line arguments (See section below).
+
+precompiled/
+  lookahead_4x4_2steps_gui.jar
+    
+  threaded_lookahead_4x4_3steps_gui.jar
+    
+  optimal_2x2_16_gui.jar
+    
+  lookahead_4x4_2steps_text_100games.jar
+    
+  lookahead_5x5_circle_2steps_gui.jar
+
+Running each of the precompiled programs is as simple, as running a .jar file:
+
+  java -jar lookahead_4x4_2steps_gui.jar
+    
+
+
+### Command line configuration
+The above command will give an overview of all the basic configuration parameters that can be specified into the application.
+
+This project has two distinct interfaces, a text and a GUI. The GUI can be initialized by passing the --gui arguments to 2048.jar. The text interface works by passing in controls in a dynamic fashion, whilst the GUI directly executes the keypress. Note that one is able to pass sequences of commands into the text interface.
+
+Options:
+ all interfaces:
+  
+
+ text interface only:
+  
+
+
+Here are some example programs:
+1. optimal
+  
+2. lookahead
+  
+3. threaded
+
+4. player
+
+
+## Algorithms
+
+### optimal
+  The best, but the least practical algorithm. It is only feasible for 2x2 instances of 2048, with the maximal possible win condition being 32. A 3x3 grid will also work with win condition of 8, but 16 it becomes computatinally impractical.
+
+### lookahead
+  Achieves consistent 93% win rates for the base version of 2048, with 2 step lookahead and order heuristic. 3 step lookahead ahead does not seem to impact the average win rate, out of the samples that have been documented, and 4 steps ahead becomes computantionally impractical.
+
+### neural
+  The neural networks have not be successful in learning to play the game in a reinforcement learning environment, there are several potential factors attributing to this discussed in the report. The algorithm is able to train, but fails to learn to play well.
+  
+### player
+  Allows the player to play the game and make moves themselves.
+
+
+## Player controls
+Each command is entered via stdin (ascii within single quotes below) if using the text interface, or will be processed by the javafx UI thread if the GUI is used.
 
 #### Movement:
 - 'w' = Shift every node up
@@ -19,7 +83,7 @@ Each command is entered via stdin (ascii within single quotes below), either in 
 - 's' = Shift every node down
 - 'a' = Shift every node left
 
-#### Grid:
+#### Miscellaneous:
 - 'u' = Undo the most recent action, note that taking an                action after an undo will overwrite the redo buffer.
 - 'r' = Redo the most recent action
 - 'x' = Restart the game
@@ -27,19 +91,15 @@ Each command is entered via stdin (ascii within single quotes below), either in 
 #### System:
 - 'q' = Exit game
 
-## Getting started:
 
-- Play 2048 with the command line interface:
-  
-  ```java -jar cli_2048.jar```
+## Creating a custom game map:
 
-- Compute optimal model for 2x2 grid with a random initial state:
+## Youtube videos of program running:
 
-  ```java -jar optimal_2x2_16_algo.jar```
+## 
 
-- Compute optimal model for 3x3 grid with a random initial state:
-
-  ```java -jar optimal_3x3_256_algo.jar```
+## Small difference in text and GUI interface functionality:
+Because GUI is inteded to not be used during large scale experimentation, but as a pretty feedback to the user, it will keep playing past the number 2048. Meanwhile the text interface will terminate at 2048, as this interface was used predominantely to run experiments for the project and it was important to finish running each game as soon as possible for the sake of running time.
 
 ## Directory layout:
 

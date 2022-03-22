@@ -20,10 +20,10 @@ class LookaheadStrand implements Runnable {
    * @param reward Mutable reward to store the result in
    * @param depth_max Max depth for lookahead
    */
-  public LookaheadStrand(Grid grid, ModelStorage db, MutableFloat reward, long depth_max) {
+  public LookaheadStrand(Grid grid, ModelStorage db, MutableFloat reward, long depth_max, Heuristic heuristic) {
     this.grid = grid;
     this.reward = reward;
-    this.algo = new Lookahead(db, depth_max);
+    this.algo = new Lookahead(db, depth_max, heuristic);
   }
 
   @Override

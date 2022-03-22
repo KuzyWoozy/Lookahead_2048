@@ -14,29 +14,35 @@ import java.util.List;
 class Lookahead implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
+  private Heuristic heuristic;
   
   final private long depth_max;
   
   private Stack<TreeDFSNode> history;
   final private ModelStorage db;
+    
+  
+  /** Return heuristic reward metric of given grid. */
+  private float rewardFunc(Grid grid, Heuristic type) throws UnknownHeuristicException {
+    switch(type) {
+      case EMPTY_NODES:
+        return grid.getEmptyNodesCount();
+      
+      case HIGHSCORE:
+        return grid.getScore();
 
-  
-  /*
-  private float rewardFunc(Grid grid) {
-    return grid.getScore();
-  }
-  */
-  
-  /** Return heuristic reward of given grid. */
-  
-  private float rewardFunc(Grid grid) {
-    return grid.getScore() + grid.getImmediateWeightedScore();
+      case HIGHSCORE_ORDER:
+        return grid.getScore() + grid.getImmediateWeightedScore();
+      default:
+        throw new UnknownHeuristicException();
+    }
   }
   
   
   /** Standard constructor with lookahead depth. */
-  public Lookahead(long depth_max) {
+  public Lookahead(long depth_max, Heuristic heuristic) {
     this.depth_max = depth_max;
+    this.heuristic = heuristic;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
     this.db = new MapStorage(new HashMap<Integer, Pair<Float, Action>>());
@@ -48,8 +54,9 @@ class Lookahead implements Algorithm {
    * @param db Solution storage 
    * @param depth_max Max lookahead depth
    */
-  public Lookahead(ModelStorage db, long depth_max) {
+  public Lookahead(ModelStorage db, long depth_max, Heuristic heuristic) {
     this.depth_max = depth_max;
+    this.heuristic = heuristic;
     // Initialize the Tree DFS stack
     history = new Stack<TreeDFSNode>();
     this.db = db;
@@ -127,7 +134,12 @@ class Lookahead implements Algorithm {
                 }
 
                 if ((depth + 1) == depth_max) {
-                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT));
+                  try {
+                    history.push(new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_RIGHT));
+                  } catch(UnknownHeuristicException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                  }
                   manager.undo();
                   continue;
                 }
@@ -145,7 +157,12 @@ class Lookahead implements Algorithm {
                 }
 
                 if ((depth + 1) == depth_max) {
-                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN));
+                  try {
+                    history.push(new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_DOWN));
+                  } catch(UnknownHeuristicException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                  }
                   manager.undo();
                   continue;
                 }
@@ -163,7 +180,12 @@ class Lookahead implements Algorithm {
                 }
 
                 if ((depth + 1) == depth_max) {
-                  history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT));
+                  try {
+                    history.push(new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_LEFT));
+                  } catch(UnknownHeuristicException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                  }
                   manager.undo();
                   continue;
                 }
@@ -281,7 +303,13 @@ class Lookahead implements Algorithm {
       frames = manager.slideRight(false);
       if (GridManager.hasMoved(frames)) {
         if (manager.show().won()) {
-          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_RIGHT);
+          TreeDFSNode node = null;
+          try {
+            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_RIGHT);
+          } catch(UnknownHeuristicException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
           history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
           manager.undo();
           return;
@@ -293,7 +321,14 @@ class Lookahead implements Algorithm {
       frames = manager.slideDown(false);
       if (GridManager.hasMoved(frames)) {
         if (manager.show().won()) {
-          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_DOWN);
+          TreeDFSNode node = null;
+          try {
+            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_DOWN);
+          } catch(UnknownHeuristicException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+
           history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
           manager.undo();
           return;
@@ -305,7 +340,13 @@ class Lookahead implements Algorithm {
       frames = manager.slideLeft(false);
       if (GridManager.hasMoved(frames)) {
         if (manager.show().won()) {
-          TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_LEFT);
+          TreeDFSNode node = null;
+          try {
+            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_LEFT);
+          } catch(UnknownHeuristicException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
           history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
           manager.undo();
           return;
@@ -325,7 +366,13 @@ class Lookahead implements Algorithm {
 
       if (manager.show().won()) {
         // I cant tell if im enlightened or fucking stupid
-        TreeDFSNode node = new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP);
+        TreeDFSNode node = null;
+        try {
+          node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_UP);
+        } catch(UnknownHeuristicException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
         history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
 
         manager.undo();
@@ -334,7 +381,12 @@ class Lookahead implements Algorithm {
 
       
       if ((depth + 1) == depth_max) {
-        history.push(new TreeDFSNode(peek, rewardFunc(manager.show()), Action.SWIPE_UP));
+        try {
+          history.push(new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_UP));
+        } catch(UnknownHeuristicException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
         manager.undo();
         return;
       }

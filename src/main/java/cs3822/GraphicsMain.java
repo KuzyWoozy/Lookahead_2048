@@ -1,6 +1,8 @@
 package cs3822;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.LinkedList;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -15,6 +17,9 @@ public class GraphicsMain extends Application {
     private static String algoName = "player";
     private static boolean guiFlag = false;
     private static boolean generate = true;
+    private static int steps = 2;
+    private static int n = 1;
+    private static Heuristic heuristic = Heuristic.HIGHSCORE_ORDER;
     private static Grid grid;
     private static GridManager manager;
     private static View view;
@@ -37,10 +42,10 @@ public class GraphicsMain extends Application {
           }
           break;
         case "lookahead":
-          algo = new Lookahead(3);
+          algo = new Lookahead(steps+1, heuristic);
           break;
-        case "threaded":
-          algo = new ThreadedLookahead(3); 
+        case "lookahead_threaded":
+          algo = new ThreadedLookahead(steps+1, heuristic); 
           break;
         case "uniform":
           algo = new UniformRandomPlay();
@@ -81,6 +86,24 @@ public class GraphicsMain extends Application {
         case "--nogen":
           generate = false;
           break;
+        case "--s":
+          i++;
+          steps = Integer.valueOf(args[i]);
+          break;
+        case "--n":
+          i++;
+          n = Integer.valueOf(args[i]);
+          break;
+        case "--heuristic":
+          i++;
+          heuristic = null;
+          try {
+            heuristic = Heuristic.convertStringToHeuristic(args[i]);
+          } catch(UnknownHeuristicException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+          break;
         default:
           throw new UnknownArgumentException();
       }
@@ -106,6 +129,7 @@ public class GraphicsMain extends Application {
       try {
         // Create the grid specified or the default one
         grid = new Grid(map, winCondition, twoProb, generate);
+
         manager = new GridManager(grid);
       } catch(InvalidMapSizeException e) {
         e.printStackTrace();
@@ -126,10 +150,10 @@ public class GraphicsMain extends Application {
 
         GameStats stats = new GameStats();
         // Loop can be altered to increase number of games played
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < n; x++) {
           stats.merge(view.play(manager, algo));
           manager.reset();
-          System.out.println(String.valueOf(stats.getWon()) + " " + String.valueOf(stats.getLost()) + " " + String.valueOf(stats.getNumGames()));
+          System.out.println("Won: " + String.valueOf(stats.getWon()) + "\nLost: " + String.valueOf(stats.getLost()) + "\nPlayed: " + String.valueOf(stats.getNumGames()));
         }
       }
     }
@@ -142,6 +166,7 @@ public class GraphicsMain extends Application {
         e.printStackTrace();
         System.exit(1);
       }
+      
       GraphicsMain.view.play(manager, algo);
-    } 
+    }
 }

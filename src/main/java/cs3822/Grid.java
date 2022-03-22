@@ -766,7 +766,6 @@ class Grid {
     SimpleMatrix weights = new SimpleMatrix(rowSize, columnSize);
     weights.fill(1d);
     
-
     int val = columnSize + 1;
     int buf = val;
     for (int y = 0; y < rowSize; y++) {
@@ -783,7 +782,7 @@ class Grid {
       }
       buf = val;
     } 
-    
+
     weights.reshape(rowSize * columnSize, 1);
     return (float)(toVector().transpose().mult(weights).get(0));
   }

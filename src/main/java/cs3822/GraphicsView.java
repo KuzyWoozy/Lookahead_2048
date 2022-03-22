@@ -356,7 +356,7 @@ class GraphicsView implements View {
       }
       
       frameGroups.add(frameGroup);
-      transitions.setOnFinished(e -> {this.nodes.getChildren().clear(); this.nodes.getChildren().add(frameGroups.remove(0));});
+      transitions.setOnFinished(e -> {this.nodes.getChildren().clear(); if (!frameGroups.isEmpty()) this.nodes.getChildren().add(frameGroups.remove(0));});
       animation.getChildren().add(transitions);
     }
    
@@ -388,18 +388,15 @@ class GraphicsView implements View {
   @Override
   public GameStats play(GridManager manager, Algorithm algo) {
     GameStats stat = new GameStats();
-    
+    Boolean finished = false; 
+
     // Create and start the animation loop
     new AnimationTimer() {
       public void handle(long nanoTime) {
         if (!animate) {
           Grid grid = manager.show();
           
-          if (grid.won()) {
-            stat.won();
-            stop();
-            return;
-          } else if (grid.lost()) {
+          if (grid.lost()) {
             stat.lost();
             stop();
             return;
