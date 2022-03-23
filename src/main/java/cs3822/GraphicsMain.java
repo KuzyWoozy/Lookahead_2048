@@ -104,6 +104,65 @@ public class GraphicsMain extends Application {
             System.exit(1);
           }
           break;
+          
+        case "--help":
+          i++;
+          System.out.println(
+          """
+          Usage:
+            --ARGUMENT <TYPE> [DEFAULT VALUE] {SUPPORTED INTERFACE}
+
+          Options:
+            --map <STRING> ["####|####|####|####"]
+                  Construct a string map representation of the 
+                  grid, on which to play out the game.
+
+                  Symbols:
+                      | == Separator of grid rows
+                      # == Empty node
+                      x == Brick node
+                      2 == Value node 2
+                      4 == Value node 4
+                      8 == Value node 8
+
+                  Example:
+                    "####|2###|#2##|####"
+
+                        |    |    |
+                    -------------------
+                       2|    |    |
+                    -------------------
+                        |   2|    |
+                    -------------------
+                        |    |    |
+             
+
+            --algo <player|optimal|lookahead|lookahead_threaded> [player]
+                  The algorithm to use, note that 'player' simply
+                  allows the user to play the game themselves.
+
+            --win <INTEGER> [2048] {TEXT INTERFACE ONLY}
+                  The value of the victory node.
+
+            --nogen <BOOL> [false]
+                  If true, will not generate the two starting 
+                  nodes.
+
+            --s <INTEGER> [2]
+                  Lookahead steps, will only take effect if any 
+                  of the lookahead alrogrithms is specified.
+
+            --n <INTEGER> [1] {TEXT INTERFACE ONLY}
+                  Number of games to play out.
+
+            --heuristic <empty|highscore|order> [order]
+                  Lookahead heuristic to use when evaluating 
+                  leafe states.
+
+          """);
+          System.exit(0);
+          break;
+
         default:
           throw new UnknownArgumentException();
       }
@@ -126,6 +185,7 @@ public class GraphicsMain extends Application {
         System.exit(1);
       }
       
+
       try {
         // Create the grid specified or the default one
         grid = new Grid(map, winCondition, twoProb, generate);
@@ -135,6 +195,8 @@ public class GraphicsMain extends Application {
         e.printStackTrace();
         System.exit(1);
       }
+
+
 
       if (guiFlag) {
         // Initialize javafx graphics window

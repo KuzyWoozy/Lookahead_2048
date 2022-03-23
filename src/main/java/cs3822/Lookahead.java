@@ -297,64 +297,7 @@ class Lookahead implements Algorithm {
         if (item != null) {
           peek = new TreeDFSNode(peek, item.getFirst(), Action.NONE);
         }
-      }
-
-      // Check if we are about to win optimization
-      frames = manager.slideRight(false);
-      if (GridManager.hasMoved(frames)) {
-        if (manager.show().won()) {
-          TreeDFSNode node = null;
-          try {
-            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_RIGHT);
-          } catch(UnknownHeuristicException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-          manager.undo();
-          return;
-
-        }
-        manager.undo();
-      }
-
-      frames = manager.slideDown(false);
-      if (GridManager.hasMoved(frames)) {
-        if (manager.show().won()) {
-          TreeDFSNode node = null;
-          try {
-            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_DOWN);
-          } catch(UnknownHeuristicException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-
-          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-          manager.undo();
-          return;
-
-        }
-        manager.undo();
-      }
-
-      frames = manager.slideLeft(false);
-      if (GridManager.hasMoved(frames)) {
-        if (manager.show().won()) {
-          TreeDFSNode node = null;
-          try {
-            node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_LEFT);
-          } catch(UnknownHeuristicException e) {
-            e.printStackTrace();
-            System.exit(1);
-          }
-          history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-          manager.undo();
-          return;
-
-        }
-        manager.undo();
-      }
-
+      } 
        
       frames = manager.slideUp(false);
       instancesProcessed++;
@@ -364,22 +307,6 @@ class Lookahead implements Algorithm {
         return;
       }
 
-      if (manager.show().won()) {
-        // I cant tell if im enlightened or fucking stupid
-        TreeDFSNode node = null;
-        try {
-          node = new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_UP);
-        } catch(UnknownHeuristicException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-        history.push(new TreeDFSNode(node, Action.SWIPE_LEFT));
-
-        manager.undo();
-        return;
-      } 
-
-      
       if ((depth + 1) == depth_max) {
         try {
           history.push(new TreeDFSNode(peek, rewardFunc(manager.show(), heuristic), Action.SWIPE_UP));
