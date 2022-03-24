@@ -208,4 +208,10 @@ Because GUI is inteded to not be used during large scale experimentation, but as
 
 ## Directory layout:
 
+src/main/java/cs3822/
+    Code for every class within the project, annotated with code comments
+    
+javadoc/
+    Generated javadoc, use a webrowser to open index.html or simply navigate to the code to read the documentation
+
 This project uses the Maven Java Build Tool standard directory structure, whose documentation may be found here: https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
