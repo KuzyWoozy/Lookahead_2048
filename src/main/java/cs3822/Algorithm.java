@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @author Daniil Kuznetsov
  */
-interface Algorithm {
+public interface Algorithm {
 
   /**
    * Calculate the steps needed based on the algorithm used.

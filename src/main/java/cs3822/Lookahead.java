@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author Daniil Kuznetsov
  */
-class Lookahead implements Algorithm {
+public class Lookahead implements Algorithm {
   private long instancesProcessed = 0;
   private long depth = 0;
   private Heuristic heuristic;

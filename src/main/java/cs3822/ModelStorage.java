@@ -7,7 +7,7 @@ import java.io.IOException;
  *
  * @author Daniil Kuznetsov
  */
-interface ModelStorage {
+public interface ModelStorage {
   
   /**
    * Insert grid state into model.

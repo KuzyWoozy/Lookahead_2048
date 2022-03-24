@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * @author Daniil Kuznetsov
  */
-final class ValueNode extends Node {
+public final class ValueNode extends Node {
   
   final private int value;
   final private int oldValue;
@@ -62,7 +62,7 @@ final class ValueNode extends Node {
   /**
    * Create a corresponding value node.
    *
-   * @param node Position to create the node at
+   * @param pos Position to create the node at
    * @param value Value to assign to the node
    */
   public ValueNode(Position pos, int value) {

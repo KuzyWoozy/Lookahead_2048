@@ -8,7 +8,7 @@ import java.util.LinkedList;
  *
  * @author Daniil Kuznetsov
  */
-interface View {
+public interface View {
     /** Converts String object into a corresponding Action. */
     public static List<Action> convertStringToActions(String actionString) {
       actionString = actionString.toLowerCase();

@@ -13,7 +13,7 @@ import java.lang.Math;
  *
  * @author Daniil Kuznetsov
  */
-class TreeGeneratorMDP implements Algorithm {
+public class TreeGeneratorMDP implements Algorithm {
   
   private long instancesProcessed = 0;
   private long depth = 0;

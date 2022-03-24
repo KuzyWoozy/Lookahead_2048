@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @author Daniil Kuznetsov
  */
-class PlayerAlgo implements Algorithm {
+public class PlayerAlgo implements Algorithm {
   
   private View view;
 

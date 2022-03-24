@@ -12,7 +12,7 @@ import java.io.InputStream;
  *
  * @author Daniil Kuznetsov
  */
-class StdoutView implements View {
+public class StdoutView implements View {
  
   private Scanner scan;
 

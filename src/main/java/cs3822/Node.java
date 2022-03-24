@@ -5,7 +5,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-abstract class Node {
+public abstract class Node {
   
   final protected Position pos;
 

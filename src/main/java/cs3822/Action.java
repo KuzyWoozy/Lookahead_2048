@@ -8,7 +8,7 @@ import java.util.ArrayList;
  *
  * @author Daniil Kuznetsov
  */
-enum Action {
+public enum Action {
   SWIPE_UP,
   SWIPE_RIGHT,
   SWIPE_DOWN,

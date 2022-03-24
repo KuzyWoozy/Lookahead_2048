@@ -15,38 +15,31 @@ All the programs in this project are ran via a single .jar file called *'2048.ja
 
 ```java -jar 2048.jar --help```
 
-### Precompiled programs (Easiest to run):
-
-The *'precompiled/'* folder contains .jar files that have been compiled with built in settings. These programs are meant to give a genera overview of the capabilities of the application, with further custom configuration available via command line arguments (See section below).
-
+### Example programs:
 ```
-precompiled/
-  lookahead_4x4_2steps_gui.jar
-      'A good demonstration of the best algorithm created in this project solving the base 2048 game.'
-      
-  threaded_lookahead_4x4_3steps_gui.jar
-      'The threaded version that has an additional step of lookahead, should have slightly 
-      better performance but is slower in practise.'
-      
-  optimal_2x2_16_gui.jar
-      'Optimal algorithm executing on a very simple, downscaled version of 2048. 
-      Attempting to play at higher win conditions than 16 quickly becomes unfeasable.'
-  
-  lookahead_4x4_2steps_text_100games.jar
-      'Same as the first .jar file, but instead plays out the lookahead across 100 games on a 
-      text interface. Summary of wins and losses is provided at the end of the experiment.'
-      
-  lookahead_5x5_circle_2steps_gui.jar
-      'A more unorthodox game grid, notice how the highscore heuristic is used instead.'
-  
-  player_4x4.jar
-      'Simple iteration that allows the user to play the game'
+  1. java -jar 2048.jar --algo lookahead --map "####|####|####|####" --s 2 --gui --heuristic order
+        'A good demonstration of the best algorithm created in this project solving the 
+        base 2048 game.'
+
+  2. java -jar 2048.jar --algo lookahead_threaded --map "####|####|####|####" --s 3 --gui --heuristic order
+        'The threaded version that has an additional step of lookahead, should have 
+        slightly better performance but is slower in practise.'
+
+  3. java -jar 2048.jar --algo optimal --map "##|##" --win 16 --gui
+        'Optimal algorithm executing on a very simple, downscaled version of 2048. 
+        Attempting to play at higher win conditions than 16 quickly becomes unfeasable.'
+
+  4. java -jar 2048.jar --algo lookahead_threaded --s 2 --heuristic order --n 100
+        'Same as the first .jar file, but instead plays out the lookahead across 100 
+        games on a text interface. Summary of wins and losses is provided at the end 
+        of the experiment.'
+
+  5. java -jar 2048.jar --algo lookahead_threaded --map "xx#xx|x###x|#####|x###x|xx#xx" --s 2 --gui --heuristic highscore
+        'A more unorthodox game grid, notice how the highscore heuristic is used instead.'
+
+  6. java -jar 2048.jar --algo player
+        'Simple iteration that allows the user to play the game'
 ```
-
-Running each of the precompiled programs is as simple, as running a .jar file:
-
-  ```java -jar lookahead_4x4_2steps_gui.jar```
-   
 
 ### Command line configuration:
 The above command will give an overview of all the basic configuration parameters that can be specified into the application.
@@ -109,19 +102,6 @@ Options:
 
 ```
 
-#### Example programs:
-  
-  1. *java -jar 2048.jar --algo lookahead --map "####|####|####|####" --s 2 --gui --heuristic order*
-
-  2. *java -jar 2048.jar --algo lookahead_threaded --map "####|####|####|####" --s 3 --gui --heuristic order*
-
-  3. *java -jar 2048.jar --algo optimal --map "##|##" --win 16 --gui*
-  
-  4. *java -jar 2048.jar --algo lookahead_threaded --s 2 --heuristic order --n 100*
-
-  5. *java -jar 2048.jar --algo lookahead_threaded --map "xx#xx|x###x|#####|x###x|xx#xx" --s 2 --gui --heuristic highscore*
-
-  6. *java -jar 2048.jar --algo player*
   
 
 ## Algorithms:

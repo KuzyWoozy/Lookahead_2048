@@ -30,7 +30,7 @@ import javafx.animation.SequentialTransition;
  *
  * @author Daniil Kuznetsov
  */
-class GraphicsView implements View {
+public class GraphicsView implements View {
   private Stage stage;
 
   private Group group;

@@ -5,7 +5,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-class Pair<A, B> implements java.io.Serializable {
+public class Pair<A, B> implements java.io.Serializable {
 
   final private A item1;
   final private B item2;

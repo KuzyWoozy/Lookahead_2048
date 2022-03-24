@@ -10,7 +10,7 @@ import java.util.Arrays;
  *
  * @author Daniil Kuznetsov
  */
-class TreeDFSNode {
+public class TreeDFSNode {
   final private Action action;
 
   // Per possibility attr

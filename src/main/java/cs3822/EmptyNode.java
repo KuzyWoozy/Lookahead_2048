@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * @author Daniil Kuznetsov
  */
-final class EmptyNode extends Node {
+public final class EmptyNode extends Node {
 
   /**
    * Instantiates the node at the specified position.

@@ -185,7 +185,35 @@ public class GraphicsMain extends Application {
         System.exit(1);
       }
       
+      /* 
+      LinkedList<Node> nodes = new LinkedList<Node>();
 
+      nodes.add(new ValueNode(new Position(0, 0), 70));
+      nodes.add(new ValueNode(new Position(1, 0), 60));
+      nodes.add(new ValueNode(new Position(2, 0), 50));
+      nodes.add(new ValueNode(new Position(3, 0), 4));
+
+      nodes.add(new ValueNode(new Position(0, 1), 6));
+      nodes.add(new ValueNode(new Position(1, 1), 5));
+      nodes.add(new ValueNode(new Position(2, 1), 4));
+      nodes.add(new ValueNode(new Position(3, 1), 3));
+
+      nodes.add(new ValueNode(new Position(0, 2), 5));
+      nodes.add(new ValueNode(new Position(1, 2), 4));
+      nodes.add(new ValueNode(new Position(2, 2), 3));
+      nodes.add(new ValueNode(new Position(3, 2), 2));
+
+      nodes.add(new ValueNode(new Position(0, 3), 4));
+      nodes.add(new ValueNode(new Position(1, 3), 3));
+      nodes.add(new ValueNode(new Position(2, 3), 2));
+      nodes.add(new ValueNode(new Position(3, 3), 1));
+
+
+
+      grid = new Grid(nodes, 4, 4, 2048, 0.9f);
+      manager = new GridManager(grid);
+      */
+      
       try {
         // Create the grid specified or the default one
         grid = new Grid(map, winCondition, twoProb, generate);
@@ -195,8 +223,7 @@ public class GraphicsMain extends Application {
         e.printStackTrace();
         System.exit(1);
       }
-
-
+      
 
       if (guiFlag) {
         // Initialize javafx graphics window

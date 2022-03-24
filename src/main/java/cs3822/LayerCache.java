@@ -8,7 +8,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-final class LayerCache {
+public final class LayerCache {
 
   final private SimpleMatrix x;
   final private SimpleMatrix z;

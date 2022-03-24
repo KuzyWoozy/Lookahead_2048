@@ -5,7 +5,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-class Triplet<A, B, C> implements java.io.Serializable {
+public class Triplet<A, B, C> implements java.io.Serializable {
 
   final private A item1;
   final private B item2;

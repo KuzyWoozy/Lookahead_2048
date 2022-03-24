@@ -17,7 +17,7 @@ import java.util.HashMap;
  *
  * @author Daniil Kuznetsov
  */
-class SQLStorage implements ModelStorage {
+public class SQLStorage implements ModelStorage {
   final private int subBatch = 10000;
 
   private Connection con;

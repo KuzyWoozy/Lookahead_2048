@@ -6,7 +6,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-enum Heuristic {
+public enum Heuristic {
   EMPTY_NODES,
   HIGHSCORE,
   HIGHSCORE_ORDER;

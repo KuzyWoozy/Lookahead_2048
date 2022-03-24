@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
  *
  * @author Daniil Kuznetsov
  */
-class MapStorage implements ModelStorage {
+public class MapStorage implements ModelStorage {
 
   private Map<Integer, Pair<Float, Action>> map;
 

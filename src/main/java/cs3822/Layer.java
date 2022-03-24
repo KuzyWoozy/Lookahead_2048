@@ -9,7 +9,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-final class Layer {
+public final class Layer {
 
   final private SimpleMatrix weights;
   final private SimpleMatrix bias;

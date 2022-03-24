@@ -10,7 +10,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-class FFN {
+public class FFN {
 
   private List<Layer> layers = new LinkedList<Layer>();
   final private int layers_num; 

@@ -8,7 +8,7 @@ import java.util.Objects;
  *
  * @author Daniil Kuznetsov
  */
-final class BrickNode extends Node {
+public final class BrickNode extends Node {
   
   /** Default constructor. */
   public BrickNode() {

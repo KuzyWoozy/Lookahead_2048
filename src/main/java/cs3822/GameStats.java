@@ -6,7 +6,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-class GameStats {
+public class GameStats {
 
   private int lost;
   private int won;

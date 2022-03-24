@@ -12,7 +12,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-class Grid {
+public class Grid {
   final private String map;
 
   final private List<Node> nodes;
@@ -673,8 +673,8 @@ class Grid {
   /** 
    * Create a value node within the grid.
    *
-   * @param pos Position of the node
-   * @param value Value for the node to have
+   * @param node Value node to insert
+   * @return New immutable grid
    */
   public Grid setValueNode(ValueNode node) {
     List<Node> cloned = cloneNodes(this.nodes); 
@@ -767,58 +767,25 @@ class Grid {
     weights.fill(1d);
 
     /*
+     * 70 60 50 4
+     * 6 5 4 3
+     * 5 4 3 2
+     * 4 3 2 1
      *
-     * 4 5 6 7
-     * 3 4 5 6
-     * 2 3 4 5
-     * 1 2 3 4
      */
-
-    weights.set(0, 0, 4);
-    weights.set(0, 1, 5);
-    weights.set(0, 2, 6);
-    weights.set(0, 3, 7);
-
-    weights.set(1, 0, 3);
-    weights.set(1, 1, 4);
-    weights.set(1, 2, 5);
-    weights.set(1, 3, 6);
-
-    weights.set(2, 0, 2);
-    weights.set(2, 1, 3);
-    weights.set(2, 2, 4);
-    weights.set(2, 3, 5);
-
-    weights.set(3, 0, 1);
-    weights.set(3, 1, 2);
-    weights.set(3, 2, 3);
-    weights.set(3, 3, 4);
-
-
-    weights.set(0, 0, 70);
-    weights.set(0, 1, 60);
-    weights.set(0, 2, 50);
-
-
-
-    /*
-    int val = columnSize + 1;
-    int buf = val;
-    for (int y = 0; y < rowSize; y++) {
-      for (int x = 0; x < columnSize; x++) {
-        weights.set(y, x, buf);
-        buf -= 1;
-        if (buf <= 1) {
-          break;
-        }
+    
+    int i = 0;
+    for (int y = rowSize - 1; y >= 0; y--) {
+      for (int x = columnSize - 1; x >= 0; x--) {
+        weights.set(y, x, i + columnSize - x);
       }
-      val -= 2;
-      if (val <= 1) {
-        break;
-      }
-      buf = val;
-    } 
-    */
+      i++;
+    }
+
+    for (int x = 0; x < columnSize - 1; x++) {
+      weights.set(0, x, weights.get(0, x) * 10);
+    }
+    
     weights.reshape(rowSize * columnSize, 1);
     return (float)(toVector().transpose().mult(weights).get(0));
   }

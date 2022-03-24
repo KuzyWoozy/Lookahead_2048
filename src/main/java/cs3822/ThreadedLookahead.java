@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Daniil Kuznetsov
  */
-class ThreadedLookahead implements Algorithm {
+public class ThreadedLookahead implements Algorithm {
 
   private final long depth_max;
   private Heuristic heuristic;

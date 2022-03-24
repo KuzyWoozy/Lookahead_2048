@@ -6,7 +6,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-class LookaheadStrand implements Runnable {
+public class LookaheadStrand implements Runnable {
   
   private Grid grid;
   private MutableFloat reward;

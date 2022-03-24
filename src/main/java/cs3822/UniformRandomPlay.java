@@ -10,7 +10,7 @@ import java.util.LinkedList;
  *
  * @author Daniil Kuznetsov
  */
-class UniformRandomPlay implements Algorithm {
+public class UniformRandomPlay implements Algorithm {
   
   private Random random;
 

@@ -9,7 +9,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-final class LayerGrad {
+public final class LayerGrad {
 
   final private SimpleMatrix weightGrad;
   final private SimpleMatrix biasGrad;

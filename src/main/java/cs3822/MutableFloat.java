@@ -6,7 +6,7 @@ package cs3822;
  *
  * @author Daniil Kuznetsov
  */
-class MutableFloat {
+public class MutableFloat {
 
   private float value;
   

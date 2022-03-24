@@ -9,7 +9,7 @@ import java.util.LinkedList;
  * 
  * @author Daniil Kuznetsov
  */
-class GridManager {
+public class GridManager {
   private Stack<Grid> instances;
   private Stack<Grid> temp;
   

@@ -8,7 +8,7 @@ import java.util.Objects;
  *
  * @author Daniil Kuznetsov
  */
-final class Position {
+public final class Position {
 
   final private int x;
   final private int y;

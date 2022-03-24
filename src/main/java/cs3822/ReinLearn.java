@@ -10,7 +10,7 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author Daniil Kuznetsov
  */
-class ReinLearn implements Algorithm {
+public class ReinLearn implements Algorithm {
 
   final private FFN neural;
   final private GridManager manager;
