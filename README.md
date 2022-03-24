@@ -37,9 +37,21 @@ All the programs in this project are ran via a single .jar file called *'2048.ja
   5. java -jar 2048.jar --algo lookahead_threaded --map "xx#xx|x###x|#####|x###x|xx#xx" --s 2 --gui --heuristic highscore
         'A more unorthodox game grid, notice how the highscore heuristic is used instead.'
 
-  6. java -jar 2048.jar --algo player
+  6. java -jar 2048.jar --algo player --gui
         'Simple iteration that allows the user to play the game'
 ```
+
+### Video examples:
+
+#### Default, 2048, 2-step lookahead, GUI: https://youtu.be/HA_AGu2Lgzk 
+
+#### Unorthodox 1, 2048, 2-step lookahead, GUI: https://youtu.be/898grpU1WEY
+
+#### Unorthodox 2, 2048, 2-step lookahead, GUI: 
+
+#### Default, 2048, 2-step lookahead, 5 games, ASCII: https://youtu.be/eQnTdfLYIVQ
+
+
 
 ### Command line configuration:
 The above command will give an overview of all the basic configuration parameters that can be specified into the application.
@@ -190,12 +202,19 @@ Because GUI is inteded to not be used during large scale experimentation, but as
 
 **src/main/java/cs3822/**
 
-> Code for every class within the project, annotated with code comments
+> Code for every class within the project, annotated with code comments.
     
     
 **javadoc/**
 
-> Generated javadoc, use a webrowser to open index.html or simply navigate to the code to read the documentation
+> Generated javadoc, use a webrowser to open index.html or simply navigate to the code to read the documentation.
     
+*Documents/*
+> Contains all .pdf files, such as the user manual and the report.
+
+*misc/*
+> Contains UML image file, as well its corresponding UMLetino format.
 
 This project uses the Maven Java Build Tool standard directory structure, whose documentation may be found here: https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html
+
+

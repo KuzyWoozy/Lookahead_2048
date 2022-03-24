@@ -1,0 +1,705 @@
+<diagram program="umletino" version="14.3.0"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>2290</x><y>880</y><w>370</w><h>980</h></coordinates><panel_attributes>*Grid [IMMUTABLE]*
+--
+_*Attributes:*_
+-map : String final
+-nodes : List&lt;Node&gt; final
+-score : int final
+-twoProb : float final
+-winCondition : int final
+-columnSize : int final
+-rowSize : int final
+-generatedNode : Node final
+-rand : Random final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; Grid(String map, int win_condition, float twoProb, boolean generate)
++&lt;&lt;constructor&gt;&gt; Grid(List&lt;Node&gt; nodes, int columnSize, int rowSize, int winCondition, float twoProb)
+-&lt;&lt;constructor&gt;&gt; Grid(Grid grid)
+-&lt;&lt;constructor&gt;&gt; Grid(Grid grid, List&lt;Node&gt; nodes, int score)
+-&lt;&lt;constructor&gt;&gt; Grid(Grid grid, List&lt;Node&gt; nodes, int score, Node generated)
+
+-resetNodes() : List&lt;Node&gt;
+-cloneNodes(List&lt;Node&gt; nodes) : List&lt;Node&gt;
+-createNode(char symbol, Position pos) : Node
+-moved(List&lt;Node&gt; nodes) : bool
+-generateNewNode(List&lt;Node&gt; nodes) : Node
+
+-slideUpIteration(List&lt;Node&gt; nodes, int score) : int
++slideUp(boolean generate)
+-slideRightIteration(List&lt;Node&gt; nodes, int score) : int
++slideRight(boolean generate)
+-slideDownIteration(List&lt;Node&gt; nodes, int score) : int
++slideDown(boolean generate)
+-slideLeftIteration(List&lt;Node&gt; nodes, int score) : int
++slideLeft(boolean generate)
+
++getGeneratedNode() : Node
++index(Position pos) : int
++fetch(Position pos) : Node
++fetch(List&lt;Node&gt; nodes, Position pos) : Node
++fetchUp(List&lt;Node&gt; nodes, Position pos) : Node
++fetchRight(List&lt;Node&gt; nodes, Position pos) : Node
++fetchDown(List&lt;Node&gt; nodes, Position pos) : Node
++fetchLeft(List&lt;Node&gt; nodes, Position pos) : Node
++getNodes() : List&lt;Node&gt;
++getRows() : int
++getCols() : int
++lost() : boolean
++won() : boolean
++equals(Grid grid) : boolean
++getTwoProb() : float
++getEmptyNodesCount() : int
++getEmptyNodesCopy() : List&lt;EmptyNode&gt;
++getMaxValue() : int
++setValueNode(ValueNode node) : Grid
++stringify() : String
++hashCode() : int
++getMapString() : String
++getWinCondition() : int
++getScore() : int
++toVector() : SimpleMatrix
++getImmediateWeightedScore() : float
+
+
+style=wordwrap
+
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2730</x><y>880</y><w>350</w><h>530</h></coordinates><panel_attributes>&lt;&lt;ABC&gt;&gt;
+*Node [IMMUTABLE]*
+--
+_*Attributes:*_
+#pos : Position final
+--
+_*Functions:*_
++&lt;&lt;static&gt;&gt; copyNode(Node node) : Node
+
++&lt;&lt;constructor&gt;&gt; Node()
++&lt;&lt;constructor&gt;&gt; Node(Position pos)
+
++getPos() : Position
++equals(Node node) : bool
++stringify() : String
+
++&lt;&lt;abstract&gt;&gt; merge(Node node) : Triplet&lt;Node, Node, Integer&gt; 
+{exceptions=UnknownNodeTypeException}
++&lt;&lt;abstract&gt;&gt; hasMerged() : bool
+{exceptions=NoMergeFlagException}
++&lt;&lt;abstract&gt;&gt; hasMoved() : bool
+{exceptions=NoMoveFlagException}
++&lt;&lt;abstract&gt;&gt; getType() : NodeType
++&lt;&lt;abstract&gt;&gt; toString() : String
++&lt;&lt;abstract&gt;&gt; hashCode() : int
++&lt;&lt;abstract&gt;&gt; getOldValue() : int
+{exceptions=NoValueException}
++&lt;&lt;abstract&gt;&gt; getValue() : int
+{exceptions=NoValueException}
++&lt;&lt;abstract&gt;&gt; getOldPos() : Position
+{exceptions=CantMoveException}
++&lt;&lt;abstract&gt;&gt; canMove(Grid grid) : boolean
+{exceptions=CantMoveException}
+
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1760</x><y>1250</y><w>290</w><h>130</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+*Algorithm*
+--
+_*Attributes:*_
+--
+_*Functions:*_
++&lt;&lt;static&gt;&gt; move(Grid instance) : List&lt;Action&gt;
+
+bg=red
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1350</x><y>535</y><w>250</w><h>190</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+*View*
+--
+_*Attributes*_
+--
+_*Functions:*_
+&lt;&lt;static&gt;&gt; convertStringToActions(String actionString) : List&lt;Actions&gt;
+
++getInput() : List&lt;Action&gt;
++play(Grid grid, Algorithm algo) : GameStats
+
+bg=green
+style=wordwrap</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2250</x><y>400</y><w>410</w><h>430</h></coordinates><panel_attributes>*GridManager*
+--
+_*Attributes:*_
+-instances : Stack&lt;Grid&gt;
+-temp : Stack&lt;Grid&gt;
+--
+_*Functions:*_
++&lt;&lt;static&gt;&gt; hasMoved(List&lt;Grid&gt; frames) : boolean
+
++&lt;&lt;constructor&gt;&gt; GridManager(Grid grid)
++&lt;&lt;constructor&gt;&gt; GridManager(GridManager history)
+
++isHistoryEmpty() : boolean
++undo() : Grid
++redo() : Grid
++save(Grid instance) : void
++initial() : Grid
++reset() : Grid
++restart() : Grid
++show() : Grid
++process(Action action) : List&lt;Grid&gt;
++process(List&lt;Action&gt; actions) : List&lt;Grid&gt;
++slideUp(boolean generate) : List&lt;Grid&gt;
++slideRight(boolean generate) : List&lt;Grid&gt;
++slideDown(boolean generate) : List&lt;Grid&gt;
++slideLeft(boolean generate) : List&lt;Grid&gt;
++insertValue(ValueNode node) : Grid
+
+style=wordwrap
+
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>910</x><y>735</y><w>290</w><h>170</h></coordinates><panel_attributes>*StdoutView*
+--
+_*Attributes*_
+-scan : Scanner
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; StdoutView(InputStream stream)
+
+-clear() : String
+-display(Grid grid) : void
+
+
+
+style=wordwrap
+bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2770</x><y>1470</y><w>320</w><h>330</h></coordinates><panel_attributes>*Position [IMMUTABLE]*
+--
+_*Attributes:*_
+-x : int final
+-y : int final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; Position(int x, int y)
++&lt;&lt;constructor&gt;&gt; Position(Position pos)
+
++getX() : int
++getY() : int
+
++moveUp() : Position
++moveRight() : Position
++moveDown() : Position
++moveLeft() : Position
+
++toString() : String
++equals() : boolean
++hashCode() : int
+
+style=wordwrap
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2650</x><y>1100</y><w>100</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>2900</x><y>1400</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>2450</x><y>820</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>2150</x><y>700</y><w>120</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1920</x><y>860</y><w>30</w><h>410</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;390</additional_attributes></element><element><id>Relation</id><coordinates><x>1190</x><y>670</y><w>180</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>160;10;10;110</additional_attributes></element><element><id>UMLNote</id><coordinates><x>2120</x><y>900</y><w>140</w><h>30</h></coordinates><panel_attributes>Controller
+bg=blue
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>2120</x><y>940</y><w>140</w><h>30</h></coordinates><panel_attributes>Model
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>2120</x><y>980</y><w>140</w><h>30</h></coordinates><panel_attributes>View
+bg=green
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1560</x><y>920</y><w>320</w><h>300</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+*Action [IMMUTABLE]*
+--
+SWIPE_UP
+SWIPE_RIGHT
+SWIPE_DOWN
+SWIPE_LEFT
+UNDO
+REDO
+RESET
+NONE
+EXIT
+
+_*Functions:*_
++&lt;&lt;static&gt;&gt;  convertCharToAction(char c) : Action
++&lt;&lt;static&gt;&gt; convertActionToInt(Action action) : int
++&lt;&lt;static&gt;&gt; convertIntToAction(int val) : Action
++&lt;&lt;static&gt;&gt; getMoveActions() : ArrayList&lt;Action&gt;
++&lt;&lt;static&gt;&gt; nextSwipe(Action action) : Action
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1850</x><y>860</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLClass</id><coordinates><x>3140</x><y>900</y><w>350</w><h>130</h></coordinates><panel_attributes>*BrickNode [IMMUTABLE]*
+--
+_*Attributes:*_
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; BrickNode(Position pos)
++&lt;&lt;constructor&gt;&gt; BrickNode(BrickNode node)
+
+
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>3140</x><y>1070</y><w>360</w><h>120</h></coordinates><panel_attributes>*EmptyNode [IMMUTABLE]*
+--
+_*Attributes:*_
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; EmptyNode(Position pos)
++&lt;&lt;constructor&gt;&gt; EmptyNode(BrickNode node)
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>3140</x><y>1220</y><w>400</w><h>330</h></coordinates><panel_attributes>*ValueNode [IMMUTABLE]*
+--
+_*Attributes:*_
+-value : int final
+-oldValue : int final
+-mergeFlag : boolean final
+-moveFlag : boolean final
+-oldPos : Position final
+--
+_*Functions:*_
+-&lt;&lt;constructor&gt;&gt; ValueNode(Position pos, int value, boolean mergeFlag, int oldValue, Position oldPos, boolean moveFlag)
++&lt;&lt;constructor&gt;&gt; Node(ValueNode node)
++&lt;&lt;constructor&gt;&gt; Node(EmptyNode node, int value)
++&lt;&lt;constructor&gt;&gt; Node(Position pos, int value)
+
+-canMoveUp(Grid grid) : boolean
+-canMoveRight(Grid grid) : boolean
+-canMoveDown(Grid grid) : boolean
+-canMoveLeft(Grid grid) : boolean
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>3070</x><y>960</y><w>90</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;70;10</additional_attributes></element><element><id>Relation</id><coordinates><x>3070</x><y>1120</y><w>90</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;70;10</additional_attributes></element><element><id>Relation</id><coordinates><x>3070</x><y>1360</y><w>90</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;70;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>1840</y><w>240</w><h>110</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+*Heuristic [IMMUTABLE]*
+--
+EMPTY_NODES
+HIGHSCORE
+HIGHSCORE_ORDER
+
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1930</x><y>1640</y><w>280</w><h>250</h></coordinates><panel_attributes>*TreeGeneratorMDP*
+--
+_*Attributes:*_
+-instancesProcessed : long
+-depth : long
+-history : Stack&lt;TreeDFSNode&gt;
+-db : ModelStorage final
+-
+_*Functions:*_
+&lt;&lt;constructor&gt;&gt; TreeGeneratorMDP(Grid grid, ModelStorage db)
+
+-dive(GridManager manager) : void
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1470</x><y>2000</y><w>310</w><h>490</h></coordinates><panel_attributes>*TreeDFSNode [IMMUTABLE]*
+--
+_*Attributes:*_
+-action : Action final
+-bestReward : float final
+-bestAction : Action final
+-expSum : float final
+-posi : List&lt;ValueNode&gt; final
+-posiNum : int final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; TreeDFSNode()
++&lt;&lt;constructor&gt;&gt; TreeDFSNode(Grid grid)
++&lt;&lt;constructor&gt;&gt; TreeDFSNode(TreeDFSNode node, Action action)
++&lt;&lt;constructor&gt;&gt; TreeDFSNode(TreeDFSNode node, float reward, Action action)
++&lt;&lt;constructor&gt;&gt; TreeDFSNode(TreeDFSNode node, float prob, List&lt;ValueNode&gt; rest)
+
+-cloneNodes(List&lt;ValueNode&gt; nodes) : List&lt;ValueNode&gt;
+
++getBestAction() : Action
++getAction() : Action
++getBestReward() : float
++getPossibilities() : List&lt;ValueNode&gt;
++getNextPossibility() : ValueNode
++getRestPossibilities() : List&lt;ValueNode
++noMorePossibilities() : boolean
++getExpectedReward() : float
+
+
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2940</x><y>810</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1700</x><y>1770</y><w>30</w><h>250</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;230</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2050</x><y>1520</y><w>210</w><h>100</h></coordinates><panel_attributes>*UniformRandomPlay*
+--
+_*Attributes:*_
+-random : Random
+--
+_*Functions:*_
+
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1300</x><y>1010</y><w>210</w><h>140</h></coordinates><panel_attributes>*PlayerAlgo*
+--
+_*Attributes:*_
+-view : View
+--
+_*Functions:*_
+&lt;&lt;constructor&gt;&gt; PlayerAlgo(View view)
+
+style=wordwrap
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1400</x><y>1140</y><w>380</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>360;130;10;130;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1960</x><y>1370</y><w>30</w><h>290</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>10;10;10;270</additional_attributes></element><element><id>Relation</id><coordinates><x>2040</x><y>1330</y><w>130</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>10;20;110;20;110;190</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1410</x><y>250</y><w>290</w><h>250</h></coordinates><panel_attributes>*GameStats*
+--
+_*Attributes:*_
+lost: int
+won: int
+numberOfGames: int 
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; GameStats()
+
++merge(GameStat stats) : void
++lost() : void
++won() : void
++getLost() : int
++getWon() : int
++getNumGames() : int
+
+
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1510</x><y>490</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1950</x><y>1990</y><w>260</w><h>170</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+*ModelStorage*
+--
+_*Attributes:*_
+--
+_*Functions:*_
++insert(hash, Action action, float reward) : void
++fetch(int hash) : Pair&lt;Float, Action&gt;
++getElemCount() : int
++clear() : void
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2070</x><y>1880</y><w>30</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1860</x><y>2220</y><w>280</w><h>160</h></coordinates><panel_attributes>*MapStorage*
+--
+_*Attributes:*_
+-map : Map&lt;Integer, Pair&lt;Float, Action&gt;&gt;
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; MapStorage(Map&lt;Integer, Pair&lt;Float, Action&gt;&gt; map)
+
++save(String fileName) : void
+
+style=wordwrap
+
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2160</x><y>2220</y><w>300</w><h>260</h></coordinates><panel_attributes>*SQLStorage*
+--
+_*Attributes:*_
+-subBatch : int final
+-con : Connection
+-count : long
+-latestHash : int
+-latestAction : Action
+-latestReward : float
+-buffer : HashMap&lt;Integer, SolTableItem&gt;
+-bufferSize : int
+-insertStmt : PreparedStatement
+-selectSolInfoStmt : PreparedStatement
+--
+_*Functions:*_
+&lt;&lt;constructor&gt;&gt; SQLStorage(String location, int bufferSize)
+
+bg=red
+style=wordwrap</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2000</x><y>2150</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>2170</x><y>2150</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1800</x><y>380</y><w>210</w><h>130</h></coordinates><panel_attributes>&lt;&lt;Main&gt;&gt;
+*App*
+--
+_*Attributes:*_
+--
+_*Functions:*_
++&lt;&lt;static&gt;&gt; main(String[] args) : void
+
+bg=blue
+style=wordwrap</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1590</x><y>640</y><w>230</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>210;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1800</x><y>540</y><w>360</w><h>330</h></coordinates><panel_attributes>*GraphicsMain*
+--
+_*Attributes:*_
+-&lt;&lt;static&gt;&gt; winCondition : int
+-&lt;&lt;static&gt;&gt; map : String
+-&lt;&lt;static&gt;&gt; twoProb : float
+-&lt;&lt;static&gt;&gt; algoName : String
+-&lt;&lt;static&gt;&gt; guiFlag : boolean 
+-&lt;&lt;static&gt;&gt; generate : boolean 
+-&lt;&lt;static&gt;&gt; steps : int
+-&lt;&lt;static&gt;&gt; grid : Grid
+-&lt;&lt;static&gt;&gt; manager: GridManager
+-&lt;&lt;static&gt;&gt; view : View
+-&lt;&lt;static&gt;&gt; algo : Algorithm
+--
+_*Functions:*_
+-&lt;&lt;static&gt;&gt; processAlgo(String name) : void
+-&lt;&lt;static&gt;&gt; processArg(int i, String[] args) : int
+
++&lt;&lt;static&gt;&gt; main(String[] args) : void
++start(Stage stage) : void
+
+
+bg=blue
+style=wordwrap</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1890</x><y>500</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>750</x><y>0</y><w>450</w><h>630</h></coordinates><panel_attributes>*GraphicalView*
+--
+_*Attributes:*_
+-stage : Stage
+-group : Group
+-nodes : Group
+-scene : Scene
+-canvas : Canvas
+-gc : GraphicsContext
+-animationLength : Duration
+-paddingPercent : float
+-roundingPercent : float
+-textSizePercent : float
+-grid_cols : int final
+-grid_rows : int final
+-animate : boolean
+-input : ArrayList&lt;String&gt;
+-canPressFlag : boolean
+-actions_buffer : LinkedList&lt;Action&gt;
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; GraphicsView(Grid grid, Stage stage, float width, float height)
+
+-drawRect(GraphicsContext gc, float x, float y, float width, float height, Color color) : void
+-drawRoundRect(GraphicsContext gc, float x, float y, float width, float height, float arc_width, float arc_height, Color color) : void
+-node_canvas_x(int x, float node_width, float pad_width) : float
+-node_canvas_y(int y, float node_width, float pad_width) : float
+-createRect(float node_width, float node_height, float node_arc_width, float node_arc_height, Color color) : Rectangle
+-createText(int value, float node_width, float node_height, Color color) : Text
+-createTranslateAnimation(Rectangle rect, Text text, float fromX, float fromY, float toX, float toY, float node_width, float node_height) : ParallelTransition
+-display(Grid grid) : void
+-lock() : void
+-unlock() : void
+-display(Grid grid) : void
+
+
+style=wordwrap
+bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1190</x><y>380</y><w>180</w><h>260</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>160;240;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1630</x><y>1440</y><w>270</w><h>340</h></coordinates><panel_attributes>*Lookahead*
+--
+*_Attributes:_*
+-instancesProcessed : long
+-depth : long
+-depth_max : long final
+-heuristic: Heuristic
+-history : Stack&lt;TreeDFSNode&gt;
+-db : ModelStorage final
+--
+*_Functions_*
++&lt;&lt;constructor&gt;&gt; Lookahead(long depth_max, Heuristic heuristic)
++&lt;&lt;constructor&gt;&gt;  Lookahead(ModelStorage db, long depth_max, Heuristic heuristic)
+
+-rewardFunc(Grid grid, Heuristic heuristic) : float
+-dive(GridManager manager) : void
+
++getDepth() : long
++getInstancesProcessed() : long
+
+
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1810</x><y>1370</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>1830</x><y>1770</y><w>140</w><h>280</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;260;120;260</additional_attributes></element><element><id>Relation</id><coordinates><x>1740</x><y>1880</y><w>250</w><h>140</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>230;10;230;70;10;70;10;120</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2270</x><y>1910</y><w>260</w><h>220</h></coordinates><panel_attributes>*Pair&lt;A, B&gt; [IMMUTABLE]*
+--
+_*Attribtues:*_
+-item1 : A final
+-item2 : B final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; Pair(A item1, B item2)
++getFirst() : A
++getSecond() : B
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2550</x><y>1910</y><w>300</w><h>220</h></coordinates><panel_attributes>*Triplet&lt;A, B, C&gt; [IMMUTABLE]*
+--
+_*Attribtues:*_
+-item1 : A final
+-item2 : B final
+-item3 : C final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; Pair(A item1, B item2, C item3)
++getFirst() : A
++getSecond() : B
++getThird() : C
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>450</x><y>1450</y><w>490</w><h>480</h></coordinates><panel_attributes>*FFN*
+--
+_*Attributes:*_
+-layers : LinkedList&lt;Layer&gt;
+-layers_num : int
+-alpha : double
+-beta : double
+-lambda : double
+-inputSize : int
+-middleSize : int
+-outputSize : int
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; FFN(int inputSize, int middleSize, int outputSize, double alpha, double beta, double lambda, int layers_num)
+
+-middleFunc(SimpleMatrix input) : SimpleMatrix
+-middleFunc_derv(SimpleMatrix input) : SimpleMatrix
+-outputFunc(SimpleMatrix input) : SimpleMatrix
+-outputFunc_derv(SimpleMatrix input) : SimpleMatrix
+-repeatRowMatrix(int repeat, SimpleMatrix matrix) : SimpleMatrix
+-repeatColMatrix(int repeat, SimpleMatrix matrix) : SimpleMatrix
+
++cost(SimpleMatrix output, SimpleMatrix label) : SimpleMatrix
++cost_derv(SimpleMatrix output, SimpleMatrix label) : SimpleMatrix
++grad(SimpleMatrix output, SimpleMatrix label) : List&lt;LayerGrad&gt;
++backprop(List&lt;LayerGrad&gt; grads) : void
++prop(SimpleMatrix input) : SimpleMatrix
++saveCache() : List&lt;LayerCache&gt;
++loadCache(List&lt;LayerCache&gt; layers_cache) : void
++getLayers() : List&lt;Layer&gt;
++getLastLayer() : Layer
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>540</x><y>2050</y><w>490</w><h>500</h></coordinates><panel_attributes>*Layer [IMMUTABLE]*
+--
+_*Attributes:*_
+-weights : SimpleMatrix final
+-bias : SimpleMatrix final
+
+-x_cache : SimpleMatrix final
+-z_cache : SimpleMatrix final 
+-y_cache : SimpleMatrix final
+
+-weight_momentum : SimpleMatrix final
+-bias_momentum : SimpleMatrix final 
+
+-generate : Random final
+--
+_*Functions*_
++&lt;&lt;constructor&gt;&gt; Layer(SimpleMatrix weights)
++&lt;&lt;constructor&gt;&gt; Layer(SimpleMatrix weights, SimpleMatrix bias, SimpleMatrix weight_momentum, SimpleMatrix bias_momentums)
++&lt;&lt;constructor&gt;&gt; Layer(Layer layer, SimpleMatrix x_cache, SimpleMatrix z_cache, SimpleMatrix y_cache)
+
+-weightInit(SimpleMatrix weights) : SimpleMatrix
+
++getWeights() : SimpleMatrix
++getBias() : SimpleMatrix
++get_X() : SimpleMatrix
++get_Z() : SimpleMatrix
++get_Y() : SimpleMatrix
++gradientStep(SimpleMatrix error_wrt_weight, SimpleMatrix error_wrt_bias, double alpha, double beta, double lambda) : Layer
++saveCache() : LayerCache
++loadCache(LayerCache cache)  : Layer
+
+style=wordwrap
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>800</x><y>1920</y><w>30</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1080</x><y>2290</y><w>290</w><h>220</h></coordinates><panel_attributes>*LayerCache [IMMUTABLE]*
+--
+_*Attributes:*_
+-x : SimpleMatrix final
+-z : SimpleMatrix final
+-y : SimpleMatrix final
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; LayerCache(SimpleMatrix x, SimpleMatrix z, SimpleMatrix y)
+
++get_X() : SimpleMatrix
++get_Z() : SimpleMatrix
++get_Y() : SimpleMatrix
+
+
+
+style=wordwrap
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1020</x><y>2390</y><w>80</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>2050</y><w>520</w><h>220</h></coordinates><panel_attributes>*LayerGrad [IMMUTABLE]*
+--
+_*Attributes:*_
+-weightGrad : SimpleMatrix final
+-biasGrad : SimpleMatrix final
+--
+_*Functions:*_
++&lt;&lt;static&gt;&gt; avgRows(List&lt;List&lt;LayerGrad&gt;&gt; gradients) : List&lt;LayerGrad&gt;
+
++&lt;&lt;constructor&gt;&gt; LayerGrad(SimpleMatrix weightGrad, SimpleMatrix biasGrad)
+
++getWeightGrad() : SimpleMatrix
++getBiasGrad() : SimpleMatrix
++add(LayerGrad layer_grad) : LayerGrad
++div(double magnitude) : LayerGrad
+
+
+style=wordwrap
+bg=red
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>470</x><y>1920</y><w>30</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;130</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1140</x><y>2010</y><w>240</w><h>190</h></coordinates><panel_attributes>*MutableFloat*
+--
+_*Attributes:*_
+-value : float
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; MutableFloat()
++&lt;&lt;constructor&gt;&gt; MutableFloat(float value)
+
++get() : float
++set(value : float) : void
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>690</x><y>1080</y><w>440</w><h>330</h></coordinates><panel_attributes>*ReinLearn*
+--
+_*Attributes:*_
+-neural : FFN final
+-manager : GridManager final
+-generator : Random
+-explorer : UniformRandomPlay
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; ReinLearn(Grid instance, int middleLayerSize, double alpha, double beta, double lambda, int layers_num)
+
+-argmax(SimpleMatrix vector) : int
+-play(double epsilon) : List&lt;Triplet&lt;List&lt;LayerCache&gt;, Action, Double&gt;&gt;
+-createLabel(SimpleMatrix output, Action action, double reward) : SimpleMatrix
+-moveEpsilon(Grid instance, double epsilon) : List&lt;Action&gt;
+
++train(int games) : void
++move(Grid instance) : List&lt;Action&gt;
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1120</x><y>1290</y><w>660</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>640;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>770</x><y>1400</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1460</x><y>1340</y><w>320</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;.
+</panel_attributes><additional_attributes>300;20;10;20</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1100</x><y>1740</y><w>290</w><h>210</h></coordinates><panel_attributes>*LookaheadStrand*
+--
+_*Attributes:*_
+-grid : Grid
+-reward : MutableFloat
+-algo : Lookahead
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; LookaheadStrand(Grid grid, ModelStorage db, MutableFloat reward, long depth_max, Heuristic heuristic)
+
++run() : void
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1160</x><y>1340</y><w>310</w><h>270</h></coordinates><panel_attributes>*ThreadedLookahead*
+--
+_*Attributes:*_
+-depth_max : long final
+-jobs : List&lt;Callable&lt;Object&gt;&gt;
+-rewards : List&lt;List&lt;MutableFloat&gt;&gt;
+-pool : ExecutorService
+-db : ModelStorage
+-heuristic: Heuristic
+--
+_*Functions:*_
++&lt;&lt;constructor&gt;&gt; ThreadedLookahead(long depth_max, Heuristic heuristic)
+
+-processJobs : void
+-processRewards(float twoProb) : Action
+-fillUpJobs(GridManager manager) : void
+-addJobs(Grid grid) : void
+
+
+style=wordwrap
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1273</x><y>1600</y><w>30</w><h>160</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>1253</x><y>1940</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2910</x><y>710</y><w>240</w><h>110</h></coordinates><panel_attributes>&lt;&lt;enum&gt;&gt;
+*NodeType [IMMUTABLE]*
+--
+BRICK
+EMPTY
+VALUE
+
+bg=red</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1410</x><y>710</y><w>30</w><h>320</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;300;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1440</x><y>1600</y><w>30</w><h>260</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;240</additional_attributes></element><element><id>Relation</id><coordinates><x>1640</x><y>1770</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element></diagram>

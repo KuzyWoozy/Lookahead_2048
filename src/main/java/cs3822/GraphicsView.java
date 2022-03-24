@@ -312,6 +312,10 @@ public class GraphicsView implements View {
       
       transitions = new ParallelTransition(); 
       for (Node node : frame.getNodes()) {
+        if (node.getType() == NodeType.BRICK) {
+          continue;
+        }
+
         x = node_canvas_x(node.getPos().getX(), node_width, pad_width); 
         y = node_canvas_y(node.getPos().getY(), node_height, pad_height);
         
