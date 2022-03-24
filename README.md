@@ -42,13 +42,13 @@ All the programs in this project are ran via a single .jar file called *'2048.ja
 
 ### Video examples:
 
-#### Default, 2048, 2-step lookahead, GUI: https://youtu.be/HA_AGu2Lgzk 
+#### Default, 2048, 2-step lookahead, GUI: [https://youtu.be/HA_AGu2Lgzk](https://youtu.be/HA_AGu2Lgzk)
 
-#### Unorthodox 1, 2048, 2-step lookahead, GUI: https://youtu.be/898grpU1WEY
+#### Unorthodox 1, 2048, 2-step lookahead, GUI: [https://youtu.be/898grpU1WEY](https://youtu.be/898grpU1WEY)
 
-#### Unorthodox 2, 2048, 2-step lookahead, GUI: https://youtu.be/OqV71RUjaBM
+#### Unorthodox 2, 2048, 2-step lookahead, GUI: [https://youtu.be/OqV71RUjaBM](https://youtu.be/OqV71RUjaBM)
 
-#### Default, 2048, 2-step lookahead, 5 games, ASCII: https://youtu.be/eQnTdfLYIVQ
+#### Default, 2048, 2-step lookahead, 5 games, ASCII: [https://youtu.be/eQnTdfLYIVQ](https://youtu.be/eQnTdfLYIVQ)
 
 
 
