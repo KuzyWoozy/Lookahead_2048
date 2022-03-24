@@ -209,11 +209,11 @@ Because GUI is inteded to not be used during large scale experimentation, but as
 
 > Generated javadoc, use a webrowser to open index.html or simply navigate to the code to read the documentation.
     
-*Documents/*
+**Documents/**
 
 > Contains all .pdf files, such as the user manual and the report.
 
-*misc/*
+**misc/**
 
 > Contains UML image file, as well its corresponding UMLetino format.
 
