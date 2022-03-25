@@ -249,7 +249,7 @@ public class GraphicsMain extends Application {
     }
 
     public void start(Stage stage) {
-      GraphicsMain.view = new GraphicsView(grid, stage, 800, 800);
+      GraphicsMain.view = new GraphicsView(grid, stage, 600, 600);
       try {
         processAlgo(algoName);
       } catch(UnknownAlgorithmException e) {
