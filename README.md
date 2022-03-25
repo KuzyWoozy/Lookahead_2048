@@ -1,3 +1,4 @@
+![image](misc/banner.png)
 
 # Solving 2048
 ### by Daniil Kuznetsov
