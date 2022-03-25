@@ -245,6 +245,7 @@ public class GraphicsMain extends Application {
           System.out.println("Won: " + String.valueOf(stats.getWon()) + "\nLost: " + String.valueOf(stats.getLost()) + "\nPlayed: " + String.valueOf(stats.getNumGames()));
         }
       }
+      System.exit(0);
     }
 
     public void start(Stage stage) {
